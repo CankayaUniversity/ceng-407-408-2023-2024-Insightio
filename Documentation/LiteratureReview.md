@@ -18,6 +18,15 @@ Authors:
 
 ## 1. Introduction
 
+In today’s global landscape, grappling with the complexities of managing human presence has become increasingly challenging due to the ever-expanding population. Businesses, public spaces, and communities seeking to efficiently navigate and analyze crowded environments require robust tools for data acquisition and manipulation. The global market for people counting systems reached a valuation of 969.9 million USD in 2021, with a projected annual growth rate of 12.2% from 2022 to 2030 (People Counting System Market Size, Share & Trends Analysis Report by End-use (BFSI, Corporate), by Offering (Hardware, Software), by Mounting Platform (Ceiling, Wall), by Type, by Technology, and Segment Forecasts, 2022 - 2030, n.d.).
+
+Importantly, people counting methods are essential in many industries, retail being one of the best examples. The transition from manual counting to sophisticated computer solutions has been crucial for retail organizations seeking to modernize operations and improve consumer experiences. According to Chakraborty (2023), these systems provide real-time analysis, identify high-traffic areas, optimize staffing, examine consumer behavior, and facilitate forecasting.
+
+Real-time tracking also extends its reach to emergency evacuations, where human-centered sensing proves invaluable for monitoring crowd behavior in real-time, ultimately bolstering incident management strategies (Crowd Models for Emergency Evacuation: A Review Targeting Human-Centered Sensing, 2013).
+
+These statistics underscore the profound impact of people counting technology across diverse industries. Evidently, businesses and organizations are increasingly embracing this technology to enhance operational efficiency, elevate security measures, and foster data-informed decision-making processes.
+
+
 ## 2. Main Findings
 
 The literature review findings are bifurcated into two distinct parts. The first part scrutinizes the challenges entailed in accurately discerning individuals within crowded spaces. This encompasses considerations such as variations in lighting, weather, and image quality, in addition to complexities arising from overlapping individuals and occluded areas.
