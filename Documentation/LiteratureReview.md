@@ -14,7 +14,11 @@ Authors:
 
 ## Özet
 
+Bu araştırma, perakende sektöründen acil tahliye senaryolarına kadar farklı alanlarda, insan varlığını etkili bir şekilde kontrol etmek amacıyla kullanılan insan sayım sistemlerinin giderek artan önemini ele almaktadır. Bu makale, kalabalık alanlarda bireyleri doğru bir şekilde belirlemenin ve nicelendirmenin zorluklarına odaklanmakta ve bunun için aydınlatma, hava koşulları ve görüntü kalitesi gibi faktörleri dikkate almaktadır. Ayrıca, daha geleneksel yoğunluk regresyon tekniklerini yerine koyan daha sofistike bilgisayar görüsü tabanlı stratejilerin gelişimini göstermektedir. Farklı çalışma hedeflerinde homojen değerlendirmeler sağlamak için standartlaştırılmış değerlendirme yöntemlerinin önemini vurgulamaktadır. Bu analiz, kalabalık sayımın çağdaş operasyonel ve güvenlik önlemlerinde oynadığı hayati rolü vurgulayarak, bu alandaki başarıları ve zorlukları kapsamlı bir şekilde sunmaktadır.
+
 ## Abstract
+
+This study of research investigates the expanding importance of people counting systems in efficiently controlling human presence in a variety of contexts, from retail to emergency evacuation situations. The paper discusses the challenges of precisely identifying and quantifying individuals in crowded locations, taking into account elements like lighting, weather, and image quality. It also illustrates the development of computer vision-based strategies, showing how more sophisticated approaches replaced more conventional density regression techniques. In order to provide uniform assessments across various study objectives, the analysis underlines the need for standardized evaluation techniques. In summary, this analysis highlights the critical role that crowd counting plays in contemporary operational and safety measures by offering a comprehensive overview of the field's accomplishments and obstacles.
 
 ## 1. Introduction
 
