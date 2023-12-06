@@ -109,6 +109,8 @@ Use cases in Insightio represent essential functionalities that cater to the div
 
 ### 4.5. INS-UC-005: Camera Configuration
  
+ ![INS-UC-005: Camera Configuration Use Case](assets/INS-UC-005.png)
+
 Use Case Name: INS-UC-005
 
 Related Use Cases: -
@@ -142,32 +144,31 @@ Main Flow for INS-UC-005:
 
 Alternative Flow for INS-UC-005:
 
-      8.a.  If the server cannot confirm the provided device URL belongs to a valid camera device, server does not forward the settings to the tracking software and re-turns an error to the user interface which the interface then displays to the user.
+ 8.a.  If the server cannot confirm the provided device URL belongs to a valid camera device, server does not forward the settings to the tracking software and re-turns an error to the user interface which the interface then displays to the user.
  
 ## 5. DFDs Overview
 
-	The Data Flow Diagrams (DFDs) for Insightio offer a concise portrayal of the system's data interactions. At Level 0, key components of the ecosystem are highlighted. These entities form the foundational structure, showcasing the primary data flows between users, cameras, and the Insightio System. The DFDs collectively illustrate the initial data pathways and entities that shape the broader Insightio data ecosystem.
+The Data Flow Diagrams (DFDs) for Insightio offer a concise portrayal of the system's data interactions. At Level 0, key components of the ecosystem are highlighted. These entities form the foundational structure, showcasing the primary data flows between users, cameras, and the Insightio System. The DFDs collectively illustrate the initial data pathways and entities that shape the broader Insightio data ecosystem.
 
 ### 5.1. Level 0
-                                                                                                                  
-	In Level 0, the Data Flow Diagram (DFD) accentuates pivotal external factors and entities integral to the initial data exchanges. This delineation encapsulates the data transactions between the Insightio System and users, incorporating the camera devices they utilize. As illustrated in the diagram, Insightio assumes the role of an intermediary, managing and interpreting camera feeds to enhance user convenience.
 
- 
+In Level 0, the Data Flow Diagram (DFD) accentuates pivotal external factors and entities integral to the initial data exchanges. This delineation encapsulates the data transactions between the Insightio System and users, incorporating the camera devices they utilize. As illustrated in the diagram, Insightio assumes the role of an intermediary, managing and interpreting camera feeds to enhance user convenience.
+
+![Level 0 DFD](assets/INS-DFD-000.png)
 
 ### 5.2. Level 1
 
-	Transitioning to Level 1, a more comprehensive exploration unveils specific processes and data stores, offering a detailed insight into the operations performed by the Insightio System. The diagram categorizes these operations into four main components: User Login/Signup, encompassing processes related to user account management; Camera Configuration and Target Selection, involving procedures for establishing camera connections and specifying demographic data targets; Data Processing, representing all processes related to extracting target demographics from camera feed frames; and Demographics Visualizations, consolidating processes designed to present demographic data to users through charts and plots.
+Transitioning to Level 1, a more comprehensive exploration unveils specific processes and data stores, offering a detailed insight into the operations performed by the Insightio System. The diagram categorizes these operations into four main components: User Login/Signup, encompassing processes related to user account management; Camera Configuration and Target Selection, involving procedures for establishing camera connections and specifying demographic data targets; Data Processing, representing all processes related to extracting target demographics from camera feed frames; and Demographics Visualizations, consolidating processes designed to present demographic data to users through charts and plots.
 
-	This meticulous breakdown enriches understanding of the intricate data movements and processes within the Insightio platform, providing clarity from user interactions to data processing and visualization.
+![Level 1 DFD](assets/INS-DFD-001.png)
 
 ## 6. Conclusion
+In summary, Insightio is a platform designed to meet businesses' crowd and object counting and tracking needs. This Software Requirements Specification (SRS) document provides an objective overview of the system's purpose, scope, and functional details.
 
-	In summary, Insightio is a platform designed to meet businesses' crowd and object counting and tracking needs. This Software Requirements Specification (SRS) document provides an objective overview of the system's purpose, scope, and functional details.
+The platform streamlines critical operations such user account creation, commercial license acquisition, camera setting, and statistical data access. It caters to a variety of user roles, including business owners, operations managers, security personnel, data analysts, general users, and technical support staff, with features tailored to their specific needs and technical competence.
 
-	The platform streamlines critical operations such user account creation, commercial license acquisition, camera setting, and statistical data access. It caters to a variety of user roles, including business owners, operations managers, security personnel, data analysts, general users, and technical support staff, with features tailored to their specific needs and technical competence.
+The functional requirements emphasize clear and testable specifications and cover critical areas such as user authentication, license administration, camera setup, real-time tracking, and data processing. Security, performance, fault tolerance, maintainability, internationalization, server system capacity, connectivity, usability, documentation, and data accuracy are examples of non-functional requirements.
 
-	The functional requirements emphasize clear and testable specifications and cover critical areas such as user authentication, license administration, camera setup, real-time tracking, and data processing. Security, performance, fault tolerance, maintainability, internationalization, server system capacity, connectivity, usability, documentation, and data accuracy are examples of non-functional requirements.
+The use cases present practical situations exhibiting user interactions with the platform, hence assisting in a thorough knowledge of system functionality
 
-	The use cases present practical situations exhibiting user interactions with the platform, hence assisting in a thorough knowledge of system functionality
-
-	In conclusion, Insightio is a comprehensive solution, and the requirements mentioned serve as a guide for the development process, ensuring the delivery of a secure, stable, and user-friendly platform. 
+In conclusion, Insightio is a comprehensive solution, and the requirements mentioned serve as a guide for the development process, ensuring the delivery of a secure, stable, and user-friendly platform. 
