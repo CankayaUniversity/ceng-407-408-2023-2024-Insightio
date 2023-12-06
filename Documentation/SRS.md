@@ -6,11 +6,11 @@
  
 ## 3. Specific Requirements
 
-	Insightio is a comprehensive platform designed to address the counting and tracking needs of businesses, offering solutions for both crowd and object monitoring. This section outlines the specific requirements that govern the functionality and user interface of the Insightio platform. The following subsections detail the interface requirements and provide a comprehensive description of the functional and non-functional requirements, each formulated to be precise, testable, and directly aligned with the project's objectives.
+Insightio is a comprehensive platform designed to address the counting and tracking needs of businesses, offering solutions for both crowd and object monitoring. This section outlines the specific requirements that govern the functionality and user interface of the Insightio platform. The following subsections detail the interface requirements and provide a comprehensive description of the functional and non-functional requirements, each formulated to be precise, testable, and directly aligned with the project's objectives.
 
 ### 3.1. Interface Requirements
 
-	The interface of Insightio is designed to provide an intuitive and user-friendly experience for businesses seeking crowd and object counting solutions. The specifications for the user interface, such as account setup, camera configuration, and statistical data access, are described in this section.
+The interface of Insightio is designed to provide an intuitive and user-friendly experience for businesses seeking crowd and object counting solutions. The specifications for the user interface, such as account setup, camera configuration, and statistical data access, are described in this section.
 
 #### 3.1.1. Account Creation
 
@@ -38,7 +38,7 @@
 
 ### 3.2. Detailed Description of Functional Requirements
 
-	The particular functional requirements that specify how the Insightio platform behaves are described in this section. Each functional requirement listed here is designed with the ideas of precision and testability in mind.
+The particular functional requirements that specify how the Insightio platform behaves are described in this section. Each functional requirement listed here is designed with the ideas of precision and testability in mind.
 
 #### 3.2.1. User Authentication
 
@@ -97,7 +97,7 @@
 
 ## 4. UML - Use Cases
 
-	Use cases in Insightio represent essential functionalities that cater to the diverse needs of its users. Each use case encapsulates a specific interaction scenario within the platform, contributing to its overall functionality.
+Use cases in Insightio represent essential functionalities that cater to the diverse needs of its users. Each use case encapsulates a specific interaction scenario within the platform, contributing to its overall functionality.
 
 ### 4.1. INS-UC-001: Dashboard Integration
  
