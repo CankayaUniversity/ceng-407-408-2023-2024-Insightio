@@ -109,7 +109,9 @@ Use cases in Insightio represent essential functionalities that cater to the div
 
 ### 4.5. INS-UC-005: Camera Configuration
  
- ![INS-UC-005: Camera Configuration Use Case](assets/INS-UC-005-Git.png)
+<p align="center">
+<img src="assets/INS-UC-005-Git.png">
+</p>
 
 Use Case Name: INS-UC-005
 
@@ -154,13 +156,16 @@ The Data Flow Diagrams (DFDs) for Insightio offer a concise portrayal of the sys
 
 In Level 0, the Data Flow Diagram (DFD) accentuates pivotal external factors and entities integral to the initial data exchanges. This delineation encapsulates the data transactions between the Insightio System and users, incorporating the camera devices they utilize. As illustrated in the diagram, Insightio assumes the role of an intermediary, managing and interpreting camera feeds to enhance user convenience.
 
-![Level 0 DFD](assets/INS-DFD-000-Git.png)
-
+<p align="center">
+<img src="assets/INS-DFD-000-Git.png">
+</p>
 ### 5.2. Level 1
 
 Transitioning to Level 1, a more comprehensive exploration unveils specific processes and data stores, offering a detailed insight into the operations performed by the Insightio System. The diagram categorizes these operations into four main components: User Login/Signup, encompassing processes related to user account management; Camera Configuration and Target Selection, involving procedures for establishing camera connections and specifying demographic data targets; Data Processing, representing all processes related to extracting target demographics from camera feed frames; and Demographics Visualizations, consolidating processes designed to present demographic data to users through charts and plots.
 
-![Level 1 DFD](assets/INS-DFD-001-Git.png)
+<p align="center">
+<img src="assets/INS-DFD-001-Git.png">
+</p>
 
 ## 6. Conclusion
 In summary, Insightio is a platform designed to meet businesses' crowd and object counting and tracking needs. This Software Requirements Specification (SRS) document provides an objective overview of the system's purpose, scope, and functional details.
