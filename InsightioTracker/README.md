@@ -6,16 +6,19 @@
 
 ### Build Instructions
 
-1. Get yolov8x.pt from (here)[https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8x.pt] and place the file under both `InisightioTracker/` and `InsightioTracker/ByteTrack/`.
+1. Get `yolov8x.pt` from [here](https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8x.pt) and place the file under both `InisightioTracker/` and `InsightioTracker/ByteTrack/`.
 
-2. In the root (`InisghtioTracker/`) directory, run the following commands:
+2. In the root (`InisghtioTracker/`) directory, run the following commands with a `PowerShell` session:
 
-```shell
+```powershell
 # Create a virtual environment
 py -m venv venv
 
 # Activate virtual environment
 .\venv\Scripts\activate
+
+# Optional 1: If you have any troubles running a PowerShell script run the following
+Set-ExecutionPolicy RemoteSigned
 
 # Install specific pip version
 py -m pip install pip==21.1.1
@@ -29,16 +32,18 @@ cd ByteTrack
 # Install dependencies for byte tracker
 pip install -r requirements.txt
 
+# Navigate back to the root folder
 cd ..
 
-# Optional: If the build doesnt work reinstall opencv-python
+# Optional 2: If the build doesnt work uninstall opencv-python...
 pip uninstall opencv-python
 
+# ... then reinstall it
 pip install opencv-python
 
 # Run the script
 py .\main.altered.py
 
-# When you are done, you can deactivate the virtual environment
+# Optional 3: When you are done, you can deactivate the virtual environment
 .\venv\Scripts\deactivate.bat
 ```
