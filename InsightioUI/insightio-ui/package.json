@@ -1,0 +1,42 @@
+{
+  "name": "insightio-ui",
+  "version": "1.0.0",
+  "description": "An Electron application with Svelte",
+  "main": "./out/main/index.js",
+  "author": "Utku Özbek",
+  "homepage": "https://cankayauniversity.github.io/ceng-407-408-2023-2024-Insightio/#what-is-insightio",
+  "scripts": {
+    "format": "prettier --plugin prettier-plugin-svelte --write .",
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "start": "electron-vite preview",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "postinstall": "electron-builder install-app-deps",
+    "build:win": "npm run build && electron-builder --win --config",
+    "build:mac": "npm run build && electron-builder --mac --config",
+    "build:linux": "npm run build && electron-builder --linux --config"
+  },
+  "dependencies": {
+    "@electron-toolkit/preload": "^2.0.0",
+    "@electron-toolkit/utils": "^2.0.0",
+    "chart.js": "^4.4.1",
+    "electron-updater": "^6.1.1"
+  },
+  "devDependencies": {
+    "@electron-toolkit/eslint-config": "^1.0.1",
+    "@electron-toolkit/eslint-config-prettier": "^1.0.1",
+    "@sveltejs/vite-plugin-svelte": "^2.4.5",
+    "autoprefixer": "^10.4.16",
+    "electron": "^25.6.0",
+    "electron-builder": "^24.6.3",
+    "electron-vite": "^1.0.27",
+    "eslint": "^8.47.0",
+    "eslint-plugin-svelte": "^2.32.4",
+    "postcss": "^8.4.32",
+    "prettier": "^3.0.2",
+    "prettier-plugin-svelte": "^3.0.3",
+    "svelte": "^4.2.0",
+    "tailwindcss": "^3.3.7",
+    "vite": "^4.4.9"
+  }
+}
