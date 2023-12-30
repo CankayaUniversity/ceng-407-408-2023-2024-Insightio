@@ -20,6 +20,7 @@
     "@electron-toolkit/preload": "^2.0.0",
     "@electron-toolkit/utils": "^2.0.0",
     "chart.js": "^4.4.1",
+    "clsx": "^2.1.0",
     "electron-updater": "^6.1.1"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, ipcMain, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -9,6 +9,8 @@ function createWindow() {
     width: 1115,
     height: 730,
     show: false,
+    frame: false,
+    transparent: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -33,6 +35,15 @@ function createWindow() {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  // Expose the window control functions to the renderer process
+  ipcMain.on('minimize-window', () => {
+    mainWindow.minimize();
+  });
+
+  ipcMain.on('close-window', () => {
+    mainWindow.close();
+  });
 }
 
 // This method will be called when Electron has finished
