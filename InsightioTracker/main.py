@@ -15,35 +15,12 @@ import threading
 import torch
 import numpy as np
 import cv2
-import tkinter as tk
-from tkinter import *
 from ByteTrack.yolox.tracker.byte_tracker import BYTETracker, STrack
 from onemetric.cv.utils.iou import box_iou_batch
 from dataclasses import dataclass
 import supervision as sv
 from ultralytics import YOLO
 from typing import List
-import pymongo
-import datetime
-import requests
-from screeninfo import get_monitors
-from tkinter import font
-import PIL.Image
-import PIL.ImageTk
-
-
-# Connect to MongoDB
-mongo_url = config["mongo_url"]
-mongo_client = pymongo.MongoClient(mongo_url)
-mongo_db = mongo_client["smart_ankara"]
-mongo_collection_counter = mongo_db["bike_counter"]
-mongo_collection_hrecords = mongo_db["daily_record"]
-
-# Connect to API
-api_post_url = config["api_post_url"]
-api_token = "bee429fb-569f-46d1-bd5d-e999a6ff750c"
-sayac = config["sayac"]
-api_get_url = config["api_get_url"] + sayac
 
 @dataclass(frozen=True)
 class BYTETrackerArgs:
