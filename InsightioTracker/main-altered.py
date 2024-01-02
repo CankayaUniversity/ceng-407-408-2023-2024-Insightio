@@ -15,21 +15,12 @@ import threading
 import torch
 import numpy as np
 import cv2
-import tkinter as tk
-from tkinter import *
 from ByteTrack.yolox.tracker.byte_tracker import BYTETracker, STrack
 from onemetric.cv.utils.iou import box_iou_batch
 from dataclasses import dataclass
 import supervision as sv
 from ultralytics import YOLO
 from typing import List
-import pymongo
-import datetime
-import requests
-from screeninfo import get_monitors
-from tkinter import font
-import PIL.Image
-import PIL.ImageTk
 
 
 # Define the BoxZone Class
@@ -52,13 +43,6 @@ class BoxZone:
                 self.in_count += 1
             else:
                 self.out_count += 1
-
-
-# Connect to API
-api_post_url = config["api_post_url"]
-api_token = "bee429fb-569f-46d1-bd5d-e999a6ff750c"
-sayac = config["sayac"]
-api_get_url = config["api_get_url"] + sayac
 
 
 @dataclass(frozen=True)
@@ -121,8 +105,19 @@ else:
     print("cpu")
 model.to(device)
 
-# Dict mapping class_id to class_name
-CLASS_NAMES_DICT = model.model.names
+# # Dict mapping class_id to class_name
+# CLASS_NAMES_DICT = model.model.names
+
+CLASS_NAMES_DICT = [
+    "bicycle", "person", "car", "motorcycle", "airplane",
+    "bus", "train", "truck", "boat", "traffic light",
+    # ... more class names ...
+]
+
+# Print the list of class names, debugging purposes
+print("List of class names:")
+for i, class_name in enumerate(CLASS_NAMES_DICT):
+    print(f"Class ID {i}: {class_name}")
 
 # Class_ids of interest - bicycle, person
 CLASS_ID = [1]
@@ -138,7 +133,7 @@ box_annotator = sv.BoxAnnotator(color=sv.Color(0, 0, 255), thickness=2, text_thi
 
 # Box settings (replace these with actual coordinates from your config)
 BOX_TOP_LEFT = sv.Point(100, 100)
-BOX_BOTTOM_RIGHT = sv.Point(1150, 650)
+BOX_BOTTOM_RIGHT = sv.Point(600, 650)
 
 # Create BoxZone instance
 box_zone = BoxZone(BOX_TOP_LEFT, BOX_BOTTOM_RIGHT)
@@ -149,20 +144,17 @@ def video_processing_thread():
     camera_connected = False
 
     while True:
-        # If the camera is not connected, try to reconnect
         if not camera_connected:
             cap = cv2.VideoCapture(0)
             if cap.isOpened():
                 camera_connected = True
         else:
-            # Capture a frame from the webcam
             ret, frame = cap.read()
             if not ret:
                 print("Camera disconnected")
                 camera_connected = False
                 continue
 
-            # Model prediction and detection tracking
             results = model(frame)
             detections = sv.Detections(
                 xyxy=results[0].boxes.xyxy.cpu().numpy(),
@@ -178,20 +170,28 @@ def video_processing_thread():
             mask = np.array([tracker_id is not None for tracker_id in detections.tracker_id], dtype=bool)
             detections = detections[mask]
 
-            # Format custom labels
-            labels = [f"#{tracker_id} {CLASS_NAMES_DICT[class_id]} {confidence:0.2f}" for
-                      _, _, confidence, class_id, tracker_id in detections]
+            # Debugging: Print number of detections
+            print(f"Number of detections: {len(detections.xyxy)}")
 
-            # Update BoxZone counters
+            for det in detections.xyxy:
+                x1, y1, x2, y2, conf, class_id = det
+                cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
+                label = f"{CLASS_NAMES_DICT[int(class_id)]}: {conf:.2f}"
+                cv2.putText(frame, label, (int(x1), int(y1 - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+                # Debugging: Print each detection
+                print(f"Detection: {label}")
+
             box_zone.update_counters(detections)
 
-            # Draw the box on the frame
+            # Debugging: Print in and out counts
+            print(f"In count: {box_zone.in_count}, Out count: {box_zone.out_count}")
+
             cv2.rectangle(frame, (BOX_TOP_LEFT.x, BOX_TOP_LEFT.y), (BOX_BOTTOM_RIGHT.x, BOX_BOTTOM_RIGHT.y),
                           (0, 255, 0), 2)
             cv2.putText(frame, f"In: {box_zone.in_count}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             cv2.putText(frame, f"Out: {box_zone.out_count}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-            # Display the annotated frame
             cv2.imshow("yolov8", frame)
 
             if cv2.waitKey(1) == ord('q'):
@@ -200,11 +200,9 @@ def video_processing_thread():
     cap.release()
     cv2.destroyAllWindows()
 
-
+# Main program execution
 if __name__ == "__main__":
-    
     video_thread = threading.Thread(target=video_processing_thread)
-    video_thread.daemon = True  # The thread will terminate when the main program exits
+    video_thread.daemon = True
     video_thread.start()
-
     video_thread.join()
