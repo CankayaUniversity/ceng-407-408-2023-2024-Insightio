@@ -1,8 +1,8 @@
 rtsp_address: ""
-line_start_x: 0
-line_start_y: 240
-line_end_x: 640
-line_end_y: 240
+line_start_x: 200
+line_start_y: 140
+line_end_x: 440
+line_end_y: 340
 road_line_1_start_x: 300
 road_line_1_start_y: 0
 road_line_1_end_x: 300

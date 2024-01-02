@@ -67,6 +67,15 @@ def match_detections_with_tracks(
 
     return tracker_ids
 
+def find_rectangle_corners(point1: sv.Point, point2: sv.Point):
+    # The corners of the rectangle are the two given points and the two calculated points
+    corner1 = point1
+    corner2 = point2
+    corner3 = sv.Point(point1.x, point2.y)
+    corner4 = sv.Point(point2.x, point1.y)
+    
+    return corner1, corner2, corner3, corner4
+
 MODEL = "yolov8x.pt"
 model = YOLO(MODEL)
 model.fuse()
@@ -95,12 +104,18 @@ cap = cv2.VideoCapture(0)
 # Create BYTETracker instance
 byte_tracker = BYTETracker(BYTETrackerArgs())
 
+
+corner1, corner2, corner3, corner4 = find_rectangle_corners(LINE_START, LINE_END)
+
 # Create LineCounter instance
-line_counter = sv.LineZone(start=LINE_START, end=LINE_END)
+line_counter1 = sv.LineZone(start=corner1, end=corner3)
+line_counter2 = sv.LineZone(start=corner3, end=corner2)
+line_counter3 = sv.LineZone(start=corner2, end=corner4)
+line_counter4 = sv.LineZone(start=corner4, end=corner1)
 
 # Create instance of BoxAnnotator and LineCounterAnnotator
-box_annotator = sv.BoxAnnotator(color=sv.Color(255, 0, 0), thickness=2, text_thickness=2, text_scale=2)
-line_annotator = sv.LineZoneAnnotator(thickness=2, text_thickness=2, text_scale=2)
+box_annotator = sv.BoxAnnotator(color=sv.Color(255, 0, 0), thickness=1, text_thickness=1, text_scale=1)
+line_annotator = sv.LineZoneAnnotator(thickness=1, text_thickness=1, text_scale=1)
 
 # Video processing thread
 def video_processing_thread():
@@ -156,12 +171,17 @@ def video_processing_thread():
             ]
 
             # Updating line counter
-            in_count, out_count = line_counter.trigger(detections=detections)
+            in_count1, out_count1 = line_counter1.trigger(detections=detections)
+            in_count2, out_count2 = line_counter2.trigger(detections=detections)
+            in_count3, out_count3 = line_counter3.trigger(detections=detections)
+            in_count4, out_count4 = line_counter4.trigger(detections=detections)
 
             # Annotate and display frame
             box_annotated_frame = box_annotator.annotate(scene=frame.copy(), detections=detections, labels=labels)
-            all_annotated_frame = line_annotator.annotate(frame=box_annotated_frame, line_counter=line_counter)
-            total = in_count + out_count
+            all_annotated_frame = line_annotator.annotate(frame=box_annotated_frame, line_counter=line_counter1)
+            all_annotated_frame = line_annotator.annotate(frame=box_annotated_frame, line_counter=line_counter2)
+            all_annotated_frame = line_annotator.annotate(frame=box_annotated_frame, line_counter=line_counter3)
+            all_annotated_frame = line_annotator.annotate(frame=box_annotated_frame, line_counter=line_counter4)
 
             cv2.imshow("yolov8", all_annotated_frame)
 
