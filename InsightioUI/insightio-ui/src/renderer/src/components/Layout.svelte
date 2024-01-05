@@ -10,8 +10,6 @@
   let dispatch = createEventDispatcher()
   let logoutModalActive = false
 
-  console.log(window.api)
-
   function minimize() {
     window.api.send('minimize-window')
   }
