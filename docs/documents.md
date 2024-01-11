@@ -6,4 +6,5 @@
 * [Literature Review](https://github.com/CankayaUniversity/ceng-407-408-2023-2024-Insightio/files/13257022/ceng407LiteratureReview.pdf)
 * [SRS](https://github.com/CankayaUniversity/ceng-407-408-2023-2024-Insightio/wiki/SRS)
 * [SDD](https://github.com/CankayaUniversity/ceng-407-408-2023-2024-Insightio/wiki/SDD)
+* [Project Report](https://github.com/CankayaUniversity/ceng-407-408-2023-2024-Insightio/blob/main/Insightio-Project-Report-407.pdf)
 * [Github Repo](https://github.com/CankayaUniversity/ceng-407-408-2023-2024-Insightio)
