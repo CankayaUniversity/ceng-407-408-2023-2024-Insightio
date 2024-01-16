@@ -95,8 +95,8 @@ CLASS_NAMES_DICT = model.model.names
 CLASS_ID = [1]
 
 # Line settings
-LINE_START = sv.Point(config["line_start_x"], config["line_start_y"])
-LINE_END = sv.Point(config["line_end_x"], config["line_end_y"])
+RECT_START = sv.Point(config["rect_start_x"], config["rect_start_y"])
+RECT_END = sv.Point(config["rect_end_x"], config["rect_end_y"])
 
 # cap = cv2.VideoCapture(config["rtsp_address"], cv2.CAP_FFMPEG)
 cap = cv2.VideoCapture(0)
@@ -105,13 +105,13 @@ cap = cv2.VideoCapture(0)
 byte_tracker = BYTETracker(BYTETrackerArgs())
 
 
-corner1, corner2, corner3, corner4 = find_rectangle_corners(LINE_START, LINE_END)
+corner1, corner2, corner3, corner4 = find_rectangle_corners(RECT_START, RECT_END)
 
 # Create LineCounter instance
-line_counter1 = sv.LineZone(start=corner1, end=corner3)
-line_counter2 = sv.LineZone(start=corner3, end=corner2)
-line_counter3 = sv.LineZone(start=corner2, end=corner4)
-line_counter4 = sv.LineZone(start=corner4, end=corner1)
+line_counter1 = sv.LineZone(start=corner1, end=corner3, count_condition="center_point_crossed")
+line_counter2 = sv.LineZone(start=corner3, end=corner2, count_condition="center_point_crossed")
+line_counter3 = sv.LineZone(start=corner2, end=corner4, count_condition="center_point_crossed")
+line_counter4 = sv.LineZone(start=corner4, end=corner1, count_condition="center_point_crossed")
 
 # Create instance of BoxAnnotator and LineCounterAnnotator
 box_annotator = sv.BoxAnnotator(color=sv.Color(255, 0, 0), thickness=1, text_thickness=1, text_scale=1)
