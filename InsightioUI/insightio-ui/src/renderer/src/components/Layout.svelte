@@ -56,10 +56,10 @@
     <!-- Title Bar -->
     <div class="title-bar gap-1 mr-2">
       <Button on:click={minimize}>
-        <Icon icon="minimize" class="w-5 h-5" />
+        <Icon icon="minimize" highlightOnHover class="w-5 h-5" />
       </Button>
       <Button on:click={close}>
-        <Icon icon="close" class="w-5 h-5" />
+        <Icon icon="close" highlightOnHover class="w-5 h-5" />
       </Button>
     </div>
 

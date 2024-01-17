@@ -4,56 +4,54 @@
 
   export let currentChartData
   export let chartType = 'bar' // Default chart type
-  export let onToggleVisibility
+  export let visibilityCallback
+  export let targets
+
+  const colors = [
+    `rgba(255, 99, 132, opacity)`, // Red
+    `rgba(54, 162, 235, opacity)`, // Blue
+    `rgba(255, 206, 86, opacity)`, // Yellow
+    `rgba(75, 192, 192, opacity)`, // Green
+    `rgba(153, 102, 255, opacity)` // Purple
+    // Add more colors if needed
+  ]
 
   let chartInstance
   let canvas
+  let targetColors
+  let prevChartType = chartType
 
-  onMount(() => {
-    chartInstance = new Chart(canvas.getContext('2d'), getChartConfig())
-  })
+  function getColor(target, opacity = 1.0) {
+    if (Object.keys(targetColors).includes(target)) {
+      return targetColors[target].replace('opacity', opacity)
+    }
+    return 'rgba(0, 0, 0, 0.1)'
+  }
 
-  function getColor(index, opacity = 1) {
-    const colors = [
-      `rgba(255, 99, 132, ${opacity})`, // Red
-      `rgba(54, 162, 235, ${opacity})`, // Blue
-      `rgba(255, 206, 86, ${opacity})`, // Yellow
-      `rgba(75, 192, 192, ${opacity})`, // Green
-      `rgba(153, 102, 255, ${opacity})` // Purple
-      // Add more colors if needed
-    ]
-    return colors[index % colors.length]
+  function createChartData() {
+    return {
+      labels: currentChartData[0].labels,
+      datasets: currentChartData.map((countData) => ({
+        type: chartType,
+        label: countData.target,
+        data: countData.data,
+        hidden: countData.hidden,
+        backgroundColor: getColor(countData.target, 0.5),
+        borderColor: getColor(countData.target, 1.0),
+        borderWidth: 1
+      }))
+    }
   }
 
   function getChartConfig() {
+    let data = createChartData()
+
     return {
       type: chartType,
-      data: {
-        labels: currentChartData.labels,
-        datasets: currentChartData.datasets.map((dataset, index) => ({
-          label: dataset.target,
-          data: dataset.data,
-          backgroundColor: getColor(index, 0.5), // Adjust opacity as needed
-          borderColor: getColor(index, 1),
-          borderWidth: 1
-        }))
-      },
+      data: data,
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        legend: {
-          onClick: (e, legendItem) => {
-            const index = legendItem.datasetIndex
-            const ci = chartInstance
-            const meta = ci.getDatasetMeta(index)
-
-            // Toggle visibility
-            meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null
-
-            // Update chart
-            ci.update()
-          }
-        },
         scales: {
           y: {
             beginAtZero: true,
@@ -69,8 +67,29 @@
               color: 'white' // Legend labels color
             },
             onClick: (event, legendItem) => {
-              const target = legendItem.text
-              onToggleVisibility(target) // Call the passed-in function to toggle visibility
+              const index = legendItem.datasetIndex
+              const ci = chartInstance
+              const meta = ci.getDatasetMeta(index)
+              // Toggle visibility
+              if (ci.data.datasets[index]) {
+                meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null
+              } else {
+                let dataIndex = currentChartData[0].labels.indexOf(legendItem.text)
+                let isVisible = visibilityCallback(legendItem.text)
+                if (isVisible) {
+                  ci.data.datasets.forEach((d, i) => {
+                    ci.hide(i, dataIndex)
+                  })
+                  legendItem.hidden = true
+                } else {
+                  ci.data.datasets.forEach((d, i) => {
+                    ci.show(i, dataIndex)
+                  })
+                  legendItem.hidden = false
+                }
+              }
+
+              ci.update()
             }
           },
           tooltip: {
@@ -86,27 +105,32 @@
     // Ensure chartInstance and currentChartData are correctly referenced
     if (!chartInstance || !currentChartData) return
 
-    // Update labels
-    chartInstance.data.labels = currentChartData.labels
-
-    // Update datasets
-    chartInstance.data.datasets = currentChartData.datasets.map((dataset, index) => ({
-      ...dataset, // Spread existing dataset properties
-      label: dataset.target, // Assign label from the dataset's target
-      data: dataset.data, // Assign data
-      backgroundColor: getColor(index, 0.5), // Set background color
-      borderColor: getColor(index, 1), // Set border color
-      type: chartType // Set the chart type
-    }))
-
-    chartInstance.update()
+    if (prevChartType != chartType) {
+      chartInstance.destroy()
+      chartInstance = new Chart(canvas.getContext('2d'), getChartConfig())
+      prevChartType = chartType
+    } else {
+      chartInstance.data = createChartData()
+      chartInstance.update()
+    }
   }
+
+  onMount(() => {
+    targetColors = (() => {
+      let a = {}
+      colors.forEach((c, i) => {
+        a[targets[i]] = colors[i]
+      })
+      return a
+    })()
+    chartInstance = new Chart(canvas.getContext('2d'), getChartConfig())
+  })
 
   $: if (chartInstance && currentChartData && chartType) {
     updateChart()
   }
 </script>
 
-<div class="w-full h-96">
+<div class="w-full" style="height: 410px; width: 450px;">
   <canvas bind:this={canvas}></canvas>
 </div>

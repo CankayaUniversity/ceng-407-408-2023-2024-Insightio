@@ -46,6 +46,7 @@
     bind:selectedItem={target}
     placeholder="Select target"
     class="mt-5 w-full"
+    showSearch={true}
   />
   <div class="text-white mt-4 text-sm">
     Current count for Target {target.text}: {currentCount}

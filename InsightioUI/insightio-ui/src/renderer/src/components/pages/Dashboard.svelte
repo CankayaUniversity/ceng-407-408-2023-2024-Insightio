@@ -2,131 +2,95 @@
   import Chart from '../utility/Chart.svelte'
   import CameraView from '../utility/CameraView.svelte'
   import Dropdown from '../utility/Dropdown.svelte'
+  import Icon from '../utility/Icon.svelte'
+  import clsx from 'clsx'
+  import Button from '../utility/Button.svelte'
+  import CountHelper from '../../functions/countData'
 
   // TODO: Replace with actual data
-  const mockData = {
-    day: {
-      labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
-      datasets: [
-        {
-          target: 'Human',
-          data: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Cat',
-          data: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Car',
-          data: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Dog',
-          data: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Bicycle',
-          data: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100))
-        }
+  const mockData = [
+    {
+      target: 'Human',
+      counts: [
+        // Hours
+        Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
+        // Days
+        Array.from({ length: 7 }, () => Math.floor(Math.random() * 100)),
+        // Weeks
+        Array.from({ length: 4 }, () => Math.floor(Math.random() * 100)),
+        // Months
+        Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
       ]
     },
-    week: {
-      labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-      datasets: [
-        {
-          target: 'Human',
-          data: Array.from({ length: 7 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Cat',
-          data: Array.from({ length: 7 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Car',
-          data: Array.from({ length: 7 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Dog',
-          data: Array.from({ length: 7 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Bicycle',
-          data: Array.from({ length: 7 }, () => Math.floor(Math.random() * 100))
-        }
+    {
+      target: 'Car',
+      counts: [
+        // Hours
+        Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
+        // Days
+        Array.from({ length: 7 }, () => Math.floor(Math.random() * 100)),
+        // Weeks
+        Array.from({ length: 4 }, () => Math.floor(Math.random() * 100)),
+        // Months
+        Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
       ]
     },
-    month: {
-      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-      datasets: [
-        {
-          target: 'Human',
-          data: Array.from({ length: 4 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Cat',
-          data: Array.from({ length: 4 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Car',
-          data: Array.from({ length: 4 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Dog',
-          data: Array.from({ length: 4 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Bicycle',
-          data: Array.from({ length: 4 }, () => Math.floor(Math.random() * 100))
-        }
+    {
+      target: 'Cat',
+      counts: [
+        // Hours
+        Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
+        // Days
+        Array.from({ length: 7 }, () => Math.floor(Math.random() * 100)),
+        // Weeks
+        Array.from({ length: 4 }, () => Math.floor(Math.random() * 100)),
+        // Months
+        Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
       ]
     },
-    year: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-      datasets: [
-        {
-          target: 'Human',
-          data: Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Cat',
-          data: Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Car',
-          data: Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Dog',
-          data: Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
-        },
-        {
-          target: 'Bicycle',
-          data: Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
-        }
+    {
+      target: 'Dog',
+      counts: [
+        // Hours
+        Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
+        // Days
+        Array.from({ length: 7 }, () => Math.floor(Math.random() * 100)),
+        // Weeks
+        Array.from({ length: 4 }, () => Math.floor(Math.random() * 100)),
+        // Months
+        Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
+      ]
+    },
+    {
+      target: 'Bicycle',
+      counts: [
+        // Hours
+        Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
+        // Days
+        Array.from({ length: 7 }, () => Math.floor(Math.random() * 100)),
+        // Weeks
+        Array.from({ length: 4 }, () => Math.floor(Math.random() * 100)),
+        // Months
+        Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
       ]
     }
-  }
-
-  const validTimeFrames = [
-    { text: 'Day', value: 'day' },
-    { text: 'Week', value: 'week' },
-    { text: 'Month', value: 'month' },
-    { text: 'Year', value: 'year' }
   ]
 
-  let currentTimeFrame = 'day'
-  const targets = ['Human', 'Bicycle', 'Dog', 'Cat', 'Car']
-  let targetVisibility = Object.fromEntries(targets.map((target) => [target, true]))
-  let currentChartData = mockData[currentTimeFrame]
-  const chartTypes = ['bar', 'line', 'pie', 'doughnut', 'radar', 'polarArea', 'bubble']
-  let currentChartTypeIndex = 0
-  let currentChartType = chartTypes[currentChartTypeIndex]
-  let currentCameraIndex = 0
+  const targets = mockData.map((o) => o.target)
+  const chartTypes = ['bar', 'line', 'pie', 'doughnut', 'radar']
   const maxCameraIndex = 4
+
+  let currentTimeFrame = 'day'
+  let currentCameraIndex = 0
+  let currentChartTypeIndex = 0
+  let timeVisibility = CountHelper.initTimeVisibilityArray(currentTimeFrame)
+  let currentChartData = CountHelper.getFramedCountData(mockData, currentTimeFrame)
+  let currentChartType = chartTypes[currentChartTypeIndex]
 
   function updateTimeFrame(timeframe) {
     currentTimeFrame = timeframe
-    currentChartData = mockData[timeframe]
+    timeVisibility = CountHelper.initTimeVisibilityArray(currentTimeFrame)
+    currentChartData = CountHelper.getFramedCountData(mockData, currentTimeFrame)
   }
 
   function navigateCamera(direction) {
@@ -143,16 +107,13 @@
     currentChartType = chartTypes[currentChartTypeIndex]
   }
 
-  function toggleTargetVisibility(target) {
-    targetVisibility[target] = !targetVisibility[target]
-  }
+  function filterLegendChosenTime(text) {
+    let isVisible = timeVisibility[text]
 
-  $: currentChartData = {
-    labels: mockData.day.labels, // Use appropriate labels
-    datasets: mockData.day.datasets.map((dataset) => ({
-      ...dataset,
-      hidden: !targetVisibility[dataset.target] // Control visibility
-    }))
+    timeVisibility[text] = !timeVisibility[text]
+
+    console.log(isVisible)
+    return isVisible
   }
 </script>
 
@@ -165,32 +126,45 @@
 
   <!-- Camera Navigation centered below Dashboard title -->
   <div class="flex justify-center py-2">
-    <button class="mx-2" on:click={() => navigateCamera('prev')}>{'<'}</button>
+    <Button on:click={() => navigateCamera('prev')}>
+      <Icon icon="arrowLeft" highlightOnHover class="h-5 w-5" />
+    </Button>
     <div class="flex items-center justify-center">
       <!-- eslint-disable-next-line no-unused-vars -->
       {#each Array(maxCameraIndex + 1) as _, i (i)}
-        <span
-          class={`inline-block mx-1 ${currentCameraIndex === i ? 'text-white' : 'text-gray-400'}`}
-          >●</span
-        >
+        <span class="inline-block mx-1">
+          <Icon
+            icon="circleFull"
+            highlightOnHover
+            class="h-4 w-4"
+            style={clsx(currentCameraIndex === i && 'opacity: 1.0 !important;')}
+          />
+        </span>
       {/each}
     </div>
-    <button class="mx-2" on:click={() => navigateCamera('next')}>{'>'}</button>
+    <Button on:click={() => navigateCamera('next')}>
+      <Icon icon="arrowRight" highlightOnHover class="h-5 w-5" />
+    </Button>
   </div>
 
   <!-- Dashboard Content -->
   <div class="flex flex-grow">
     <!-- Chart Section -->
     <div class="flex flex-col w-1/2 p-4">
-      <h2 class="text-3xl pl-3 font-bold">Charts</h2>
+      <div class="flex flex-row pl-3">
+        <Icon icon="chart" class="w-10 h-10" />
+        <h2 class="text-3xl pl-3 font-bold">Charts</h2>
+      </div>
       <div class="mt-6 flex items-center justify-between">
-        <button class="p-2" on:click={() => navigateChart('prev')}>{'<'}</button>
+        <Button on:click={() => navigateChart('prev')}>
+          <Icon icon="arrowLeft" highlightOnHover class="h-7 w-7" />
+        </Button>
         <div class="flex-grow">
           <div class="flex flex-row">
-            <p class="text-base mr-3">Time Frame:</p>
+            <p class="text-base mt-1 mr-3">Time Frame:</p>
             <Dropdown
-              items={validTimeFrames}
-              selectedItem={validTimeFrames[0]}
+              items={CountHelper.validTimeFrames}
+              selectedItem={CountHelper.validTimeFrames[0]}
               on:change={(e) => updateTimeFrame(e.detail.value)}
             />
           </div>
@@ -198,17 +172,23 @@
           <Chart
             bind:currentChartData
             bind:chartType={currentChartType}
-            onToggleVisibility={toggleTargetVisibility}
+            visibilityCallback={filterLegendChosenTime}
+            {targets}
           />
         </div>
-        <button class="p-2" on:click={() => navigateChart('next')}>{'>'}</button>
+        <Button on:click={() => navigateChart('next')}>
+          <Icon icon="arrowRight" highlightOnHover class="h-7 w-7" />
+        </Button>
       </div>
     </div>
 
     <!-- Camera View Section with fixed size -->
     <div class="w-1/2 flex justify-center p-4">
       <div class="w-full max-w-lg">
-        <h2 class="text-3xl mb-6 font-bold">Camera View</h2>
+        <div class="flex flex-row gap-3">
+          <Icon icon="camera" class="w-10 h-10" />
+          <h2 class="text-3xl mb-6 font-bold">Camera View</h2>
+        </div>
 
         <CameraView {currentCameraIndex} />
         <!-- Include other camera related content here -->

@@ -9,7 +9,7 @@
 </script>
 
 {#if !iconButton}
-  <button on:click on:hover class={$$props.class} on:click>
+  <button on:click on:hover on:keyup class={$$props.class}>
     <slot />
   </button>
 {:else}
