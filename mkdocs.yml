@@ -1,6 +1,7 @@
 site_name: Insightio
 theme:
   name: material
+  favicon: 'assets/favicon.ico'
 
   features:
     - navigation.instant
