@@ -5,7 +5,7 @@
 Insightio is a platform that provides crowd/object counting and tracking solutions for businesses. Users have the capability to establish an account, acquire a commercial license, set up cameras, and define the classes of tracked objects.
 
 <div style="text-align: center;">
-    <img src="../assets/indexPage/tracking.gif" alt="Tracking gif" width="600" height="400">
+    <img src="assets/tracking.gif" alt="Tracking gif" width="600" height="400">
 </div>
 
 ## Vision
@@ -15,7 +15,7 @@ To lead the way in providing businesses looking for unmatched insights through o
 With the flexible platform Insightio, which provides state-of-the-art solutions for object and crowd tracking, you can empower businesses. Our goal is to continuously innovate in order to provide useful insights, promote growth, and make the world a more intelligent and connected place.
 
 <div style="text-align: center;">
-    <img src="../assets/indexPage/avm.png" alt="Mall tracking image" width="600" height="400">
+    <img src="assets/avm.png" alt="Mall tracking image" width="600" height="400">
 </div>
 
 ## Feautures
