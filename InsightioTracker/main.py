@@ -108,10 +108,10 @@ byte_tracker = BYTETracker(BYTETrackerArgs())
 corner1, corner2, corner3, corner4 = find_rectangle_corners(RECT_START, RECT_END)
 
 # Create LineCounter instance
-line_counter1 = sv.LineZone(start=corner1, end=corner3, count_condition="center_point_crossed")
-line_counter2 = sv.LineZone(start=corner3, end=corner2, count_condition="center_point_crossed")
-line_counter3 = sv.LineZone(start=corner2, end=corner4, count_condition="center_point_crossed")
-line_counter4 = sv.LineZone(start=corner4, end=corner1, count_condition="center_point_crossed")
+line_counter1 = sv.LineZone(start=corner1, end=corner3, triggering_anchors=[sv.Position.CENTER])
+line_counter2 = sv.LineZone(start=corner3, end=corner2, triggering_anchors=[sv.Position.CENTER])
+line_counter3 = sv.LineZone(start=corner2, end=corner4, triggering_anchors=[sv.Position.CENTER])
+line_counter4 = sv.LineZone(start=corner4, end=corner1, triggering_anchors=[sv.Position.CENTER])
 
 # Create instance of BoxAnnotator and LineCounterAnnotator
 box_annotator = sv.BoxAnnotator(color=sv.Color(255, 0, 0), thickness=1, text_thickness=1, text_scale=1)
