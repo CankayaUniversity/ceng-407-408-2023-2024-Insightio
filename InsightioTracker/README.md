@@ -3,8 +3,8 @@
 1. The following build is tested on a Windows 11 machine and is designed to work on Windows 10 and 11 machines alone.
 
 2. Python 3.11 (tested on Python 3.11.7) is needed to build the project. You can download the tested
-version of from [here](https://www.python.org/downloads/release/python-3117/). You can use versions
-3.11 and above to run the script but 3.11 is necessary for building.
+version of Python from [here](https://www.python.org/downloads/release/python-3117/). You can use 
+versions 3.11 and above to run the script but 3.11 is necessary for building.
 
 ### Build Instructions
 
