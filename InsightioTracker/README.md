@@ -8,7 +8,7 @@ versions 3.11 and above to run the script but 3.11 is necessary for building.
 
 ### Build Instructions
 
-1. Get `yolov8x.pt` from [here](https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8x.pt) and place the file under both `InisightioTracker/`.
+1. Get `yolov8x.pt` from [here](https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8x.pt) and place the file under `InisightioTracker/`.
 
 2. In the root (`InisghtioTracker/`) directory, run the following commands with a `PowerShell` session:
 
