@@ -8,7 +8,7 @@ versions 3.11 and above to run the script but 3.11 is necessary for building.
 
 ### Build Instructions
 
-1. Get `yolov8x.pt` from [here](https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8x.pt) and place the file under `InisightioTracker/`.
+1. Get `yolov8x.pt` from [here](https://github.com/ultralytics/assets/releases/download/v8.1.0/yolov8x-oiv7.pt) and place the file under `InisightioTracker/`.
 
 2. In the root (`InisghtioTracker/`) directory, run the following commands with a `PowerShell` session:
 
@@ -16,8 +16,14 @@ versions 3.11 and above to run the script but 3.11 is necessary for building.
 # Create a virtual environment
 py -3.11 -m venv venv
 
+# Activate virtual environment
+.\venv\Scripts\activate
+
 # Install dependencies
 pip install -r requirements.txt
+
+# Optional: Deactivate the virtual environment if you won't be running the script
+.\venv\Scripts\deactivate.bat
 ```
 
 ### Running The Script

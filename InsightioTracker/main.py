@@ -46,8 +46,8 @@ CLASS_NAMES_DICT = model.model.names
 def video_processing_thread(camera_name):
     camera_connected = False
     
-    # Class_ids of interest - bicycle, person
-    CLASS_ID = [1]
+    # Class_ids of interest - bicycle
+    CLASS_ID = [42]
 
     # Line settings
     RECT_START = sv.Point(config["rect_start_x"], config["rect_start_y"])
