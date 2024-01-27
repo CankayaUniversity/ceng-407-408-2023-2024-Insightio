@@ -1,6 +1,6 @@
-
 from ultralytics import YOLO
 import supervision as sv
+import streaming_server
 import numpy as np
 import threading
 import torch
@@ -42,37 +42,43 @@ model.to(device)
 # Dict maping class_id to class_name
 CLASS_NAMES_DICT = model.model.names
 
-# Class_ids of interest - bicycle, person
-CLASS_ID = [1]
-
-# Line settings
-RECT_START = sv.Point(config["rect_start_x"], config["rect_start_y"])
-RECT_END = sv.Point(config["rect_end_x"], config["rect_end_y"])
-
-# cap = cv2.VideoCapture(config["rtsp_address"], cv2.CAP_FFMPEG)
-cap = cv2.VideoCapture(0)
-
-# Create BYTETracker instance
-tracker = sv.ByteTrack()
-
-corner1, corner2, corner3, corner4 = find_rectangle_corners(RECT_START, RECT_END)
-
-# Create LineCounter instance
-line_counter1 = sv.LineZone(start=corner1, end=corner3, triggering_anchors=[sv.Position.CENTER])
-line_counter2 = sv.LineZone(start=corner3, end=corner2, triggering_anchors=[sv.Position.CENTER])
-line_counter3 = sv.LineZone(start=corner2, end=corner4, triggering_anchors=[sv.Position.CENTER])
-line_counter4 = sv.LineZone(start=corner4, end=corner1, triggering_anchors=[sv.Position.CENTER])
-
-# Create instance of annotators
-label_annotator = sv.LabelAnnotator()
-box_annotator = sv.BoundingBoxAnnotator()
-line_annotator = sv.LineZoneAnnotator(thickness=1, text_thickness=1, text_scale=1)
-
 # Video processing thread
-def video_processing_thread():
+def video_processing_thread(camera_name):
     camera_connected = False
     
+    # Class_ids of interest - bicycle, person
+    CLASS_ID = [1]
+
+    # Line settings
+    RECT_START = sv.Point(config["rect_start_x"], config["rect_start_y"])
+    RECT_END = sv.Point(config["rect_end_x"], config["rect_end_y"])
+
+    # cap = cv2.VideoCapture(config["rtsp_address"], cv2.CAP_FFMPEG)
+    cap = cv2.VideoCapture(0)
+
+    # Create BYTETracker instance
+    tracker = sv.ByteTrack()
+
+    corner1, corner2, corner3, corner4 = find_rectangle_corners(RECT_START, RECT_END)
+
+    # Create LineCounter instance
+    line_counter1 = sv.LineZone(start=corner3, end=corner1, triggering_anchors=[sv.Position.CENTER])
+    line_counter2 = sv.LineZone(start=corner2, end=corner3, triggering_anchors=[sv.Position.CENTER])
+    line_counter3 = sv.LineZone(start=corner4, end=corner2, triggering_anchors=[sv.Position.CENTER])
+    line_counter4 = sv.LineZone(start=corner1, end=corner4, triggering_anchors=[sv.Position.CENTER])
+
+    line_counters = [line_counter1, line_counter2, line_counter3, line_counter4]
+
+    # Create instance of annotators
+    label_annotator = sv.LabelAnnotator()
+    box_annotator = sv.BoundingBoxAnnotator()
+    line_annotator = sv.LineZoneAnnotator(thickness=1, text_thickness=1, text_scale=1)
+
     while True:
+        # Initialize running total counts and current counts
+        total_counts = {CLASS_NAMES_DICT[class_id]: 0 for class_id in CLASS_ID}
+        current_counts = {CLASS_NAMES_DICT[class_id]: 0 for class_id in CLASS_ID}
+
         # If the camera is not connected, try to reconnect
         if not camera_connected:
             # cap = cv2.VideoCapture(config["rtsp_address"], cv2.CAP_FFMPEG)
@@ -108,11 +114,21 @@ def video_processing_thread():
                 in detections
             ]
 
-            # Updating line counter
-            in_count1, out_count1 = line_counter1.trigger(detections=detections)
-            in_count2, out_count2 = line_counter2.trigger(detections=detections)
-            in_count3, out_count3 = line_counter3.trigger(detections=detections)
-            in_count4, out_count4 = line_counter4.trigger(detections=detections)
+            # Updating line counters
+            for counter in line_counters:
+                in_count, out_count = counter.trigger(detections=detections)
+
+            # Get in/out counts
+            in_count_sum = 0
+            out_count_sum = 0
+            for counter in line_counters:
+                in_count, out_count = counter.in_count, counter.out_count
+                
+                in_count_sum += in_count
+                out_count_sum += out_count
+            
+            current_counts[CLASS_NAMES_DICT[CLASS_ID[0]]] = in_count_sum - out_count_sum
+            total_counts[CLASS_NAMES_DICT[CLASS_ID[0]]] = out_count_sum
 
             # Annotate detection boxes and labels
             annotated_frame = box_annotator.annotate(scene=frame.copy(), detections=detections)
@@ -126,6 +142,19 @@ def video_processing_thread():
 
             cv2.imshow("yolov8", annotated_frame)
 
+            # Update the frames and current counts
+            streaming_server.update_stream(f"raw_frame_{camera_name}", frame, is_raw=True)
+
+            for class_id in CLASS_ID:
+                class_name = CLASS_NAMES_DICT[class_id]
+                annotated_stream_id = f"frame_{camera_name}_{class_name}"
+                current_count_stream_id = f"current_count_{camera_name}_{class_name}"
+                total_count_stream_id = f"total_count_{camera_name}_{class_name}"
+
+                streaming_server.update_stream(annotated_stream_id, annotated_frame)
+                streaming_server.update_stream(current_count_stream_id, current_count=current_counts[class_name])
+                streaming_server.update_stream(total_count_stream_id, total_count=total_counts[class_name])
+
             if cv2.waitKey(1) == ord('q'):
                 break
 
@@ -133,8 +162,10 @@ def video_processing_thread():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    
-    video_thread = threading.Thread(target=video_processing_thread)
+    streaming_server.run_server()
+
+    camera_name = "Camera1"  # Replace with actual camera_name
+    video_thread = threading.Thread(target=video_processing_thread, args=(camera_name,))
     video_thread.daemon = True  # The thread will terminate when the main program exits
     video_thread.start()
 
