@@ -10,5 +10,6 @@ ENV/
 env.bak/
 venv.bak/
 
-# Model
+# Models
 yolov8x.pt
+yolov8x-oiv7.pt

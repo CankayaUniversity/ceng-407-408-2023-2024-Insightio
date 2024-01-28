@@ -1,13 +1,15 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from lib import config
 import socketserver
-import cv2
 import threading
 import time
-
-# Centralized streams array
-streams = {}
+import cv2
 
 class StreamingHandler(BaseHTTPRequestHandler):
+    def __init__(self, streams, *args, **kwargs):
+        self.streams = streams
+        super().__init__(*args, **kwargs)
+
     def do_GET(self):
         # Extract stream ID from the URL
         stream_id = self.path.strip("/")
@@ -30,7 +32,7 @@ class StreamingHandler(BaseHTTPRequestHandler):
 
         frame_key = 'raw_frame' if is_raw else 'frame'
         while True:
-            frame = streams.get(stream_id, {}).get(frame_key)
+            frame = self.streams.get(stream_id, {}).get(frame_key)
             if frame is not None:
                 ret, jpeg = cv2.imencode('.jpg', frame)
                 if not ret:
@@ -48,29 +50,46 @@ class StreamingHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/plain')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
-        data = streams.get(stream_id, {}).get(data_key, '0')
+        data = self.streams.get(stream_id, {}).get(data_key, '0')
         self.wfile.write(data.encode())
 
 class ThreadedHTTPServer(socketserver.ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
 
-def start_streaming_server(port=65444):
-    server_address = ('', port)
-    httpd = ThreadedHTTPServer(server_address, StreamingHandler)
-    httpd.serve_forever()
+def handler_factory(streams):
+    def create_handler(*args, **kwargs):
+        return StreamingHandler(streams, *args, **kwargs)
+    return create_handler
 
-def run_server():
-    server_thread = threading.Thread(target=start_streaming_server)
-    server_thread.daemon = True
-    server_thread.start()
+class StreamServer:
+    def __init__(self):
+        self.streams = {}
+        self.port = config["tracker_server_port"]
+        self.server_thread = None
 
-def update_stream(stream_id, frame=None, current_count=None, total_count=None, is_raw=False):
-    if stream_id not in streams:
-        streams[stream_id] = {}
-    if frame is not None:
-        frame_key = 'raw_frame' if is_raw else 'frame'
-        streams[stream_id][frame_key] = frame
-    if current_count is not None:
-        streams[stream_id]['current_counts'] = str(current_count)
-    if total_count is not None:
-        streams[stream_id]['total_counts'] = str(total_count)
+    def run_server(self):
+        def server_thread():
+            server_address = ('', self.port)
+            httpd = ThreadedHTTPServer(server_address, handler_factory(self.streams))
+            try:
+                httpd.serve_forever()
+            except KeyboardInterrupt:
+                pass
+            finally:
+                httpd.server_close()
+
+        # Create and start the server thread
+        self.server_thread = threading.Thread(target=server_thread)
+        self.server_thread.daemon = True
+        self.server_thread.start()
+
+    def update_stream(self, stream_id, frame=None, current_count=None, total_count=None, is_raw=False):
+        if stream_id not in self.streams:
+            self.streams[stream_id] = {}
+        if frame is not None:
+            frame_key = 'raw_frame' if is_raw else 'frame'
+            self.streams[stream_id][frame_key] = frame
+        if current_count is not None:
+            self.streams[stream_id]['current_counts'] = str(current_count)
+        if total_count is not None:
+            self.streams[stream_id]['total_counts'] = str(total_count)
