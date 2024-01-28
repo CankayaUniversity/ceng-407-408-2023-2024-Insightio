@@ -5,3 +5,7 @@ server:
   http2:
     enabled: true
   shutdown: graceful
+
+springdoc:
+  api-docs:
+    path: /api-docs
