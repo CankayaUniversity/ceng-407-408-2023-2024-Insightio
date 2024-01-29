@@ -1,7 +1,6 @@
 import { app, shell, ipcMain, BrowserWindow } from 'electron'
-import { join } from 'path'
+import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/logo.png?asset'
 
 function createWindow() {
   // Create the browser window.
@@ -13,7 +12,8 @@ function createWindow() {
     transparent: false,
     resizable: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    //...(process.platform === 'linux' ? { icon } : {}), //linux kontrolünü kaldırdım sıkıntı olur mu?
+    icon: path.join(__dirname, '../../build/logo.ico'), // path of the icon
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
