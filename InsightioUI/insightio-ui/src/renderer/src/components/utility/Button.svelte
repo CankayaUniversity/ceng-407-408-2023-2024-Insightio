@@ -5,11 +5,22 @@
   // For icon button
   export let iconButton = false
   export let backgroundHover = false
+  export let controlButton = false
   export let icon = ''
 </script>
 
 {#if !iconButton}
-  <button on:click on:hover on:keyup class={$$props.class}>
+  <button
+    type="button"
+    on:click
+    on:hover
+    on:keyup
+    class={clsx(
+      controlButton &&
+        'bg-blue-500 hover:bg-blue-700 text-white font-bold rounded focus:outline-none focus:shadow-outline',
+      $$props.class
+    )}
+  >
     <slot />
   </button>
 {:else}
