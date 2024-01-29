@@ -2,7 +2,7 @@
   import Icon from './utility/Icon.svelte'
   import pageStore from '../stores/pageStore'
   import { createEventDispatcher } from 'svelte'
-  import appIcon from '../assets/icon.png?asset'
+  import appIcon from '../assets/logo.png?asset'
   import Button from './utility/Button.svelte'
 
   export let activePage
