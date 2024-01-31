@@ -12,8 +12,7 @@ function createWindow() {
     transparent: false,
     resizable: false,
     autoHideMenuBar: true,
-    //...(process.platform === 'linux' ? { icon } : {}), //linux kontrolünü kaldırdım sıkıntı olur mu?
-    icon: path.join(__dirname, '../../build/logo.ico'), // path of the icon
+    icon: path.join(__dirname, '../../build/logo.ico'),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
