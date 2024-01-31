@@ -7,6 +7,7 @@
   export let backgroundHover = false
   export let controlButton = false
   export let icon = ''
+  export let tabindex = 0
 </script>
 
 {#if !iconButton}
@@ -20,6 +21,7 @@
         'bg-blue-500 hover:bg-blue-700 text-white font-bold rounded focus:outline-none focus:shadow-outline',
       $$props.class
     )}
+    {tabindex}
   >
     <slot />
   </button>

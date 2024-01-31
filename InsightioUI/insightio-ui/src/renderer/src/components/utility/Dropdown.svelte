@@ -8,6 +8,7 @@
   export let value = undefined
   export let placeholder = 'Select...'
   export let showSearch = false
+  export let maxHeight = undefined
 
   let dispatch = createEventDispatcher()
 
@@ -72,7 +73,10 @@
           bind:value={searchTerm}
         />
       {/if}
-      <ul class="max-h-60 overflow-auto text-white bg-gray-700 rounded-b">
+      <ul
+        class="custom-scroll max-h-60 overflow-auto text-white bg-gray-700 rounded-b"
+        style={clsx(maxHeight != undefined && `max-height: ${maxHeight}rem;`)}
+      >
         {#each filteredItems as item, index}
           <button
             on:click={() => selectItem(index)}

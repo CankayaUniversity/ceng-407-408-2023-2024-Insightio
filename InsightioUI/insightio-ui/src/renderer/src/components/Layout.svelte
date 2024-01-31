@@ -4,19 +4,12 @@
   import { createEventDispatcher } from 'svelte'
   import appIcon from '../assets/logo.png?asset'
   import Button from './utility/Button.svelte'
+  import { close, minimize } from '../api/ipc'
 
   export let activePage
 
   let dispatch = createEventDispatcher()
   let logoutModalActive = false
-
-  function minimize() {
-    window.api.send('minimize-window')
-  }
-
-  function close() {
-    window.api.send('close-window')
-  }
 </script>
 
 <div class="flex h-screen text-white bg-gray-800">
@@ -56,10 +49,10 @@
     <!-- Title Bar -->
     <div class="title-bar gap-1 mr-2">
       <Button on:click={minimize}>
-        <Icon icon="minimize" highlightOnHover class="w-5 h-5" />
+        <Icon icon="minimize" highlightOnHover class="w-5 h-5" tabindex={-1} />
       </Button>
       <Button on:click={close}>
-        <Icon icon="close" highlightOnHover class="w-5 h-5" />
+        <Icon icon="close" highlightOnHover class="w-5 h-5" tabindex={-1} />
       </Button>
     </div>
 

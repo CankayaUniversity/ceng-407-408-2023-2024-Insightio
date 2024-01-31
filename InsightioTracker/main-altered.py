@@ -155,11 +155,11 @@ def video_processing_thread(camera_settings):
                     out_count_sum += out_count
 
                 if len(counter_set["counters"]) == 1:
-                    current_counts[CLASS_NAMES_DICT[counter_set["target"]]] = 0
-                    total_counts[CLASS_NAMES_DICT[counter_set["target"]]] = in_count_sum + out_count_sum
+                    current_counts[counter_set["target"]] = 0
+                    total_counts[counter_set["target"]] = in_count_sum + out_count_sum
                 else:
-                    current_counts[CLASS_NAMES_DICT[counter_set["target"]]] = in_count_sum - out_count_sum
-                    total_counts[CLASS_NAMES_DICT[counter_set["target"]]] = out_count_sum
+                    current_counts[counter_set["target"]] = in_count_sum - out_count_sum
+                    total_counts[counter_set["target"]] = out_count_sum
 
                 # Annotate detection boxes and labels
                 target_frame = box_annotator.annotate(scene=frame.copy(), detections=target_detections)
@@ -169,14 +169,14 @@ def video_processing_thread(camera_settings):
                 for counter in counter_set["counters"]:
                     target_frame = line_annotator.annotate(frame=target_frame, line_counter=counter)
 
-                class_name = CLASS_NAMES_DICT[counter_set["target"]]
-                annotated_stream_id = f"frame_{camera_settings['id']}_{class_name}"
-                current_count_stream_id = f"current_count_{camera_settings['id']}_{class_name}"
-                total_count_stream_id = f"total_count_{camera_settings['id']}_{class_name}"
+                class_id = counter_set["target"]
+                annotated_stream_id = f"frame_{camera_settings['id']}_{class_id}"
+                current_count_stream_id = f"current_count_{camera_settings['id']}_{class_id}"
+                total_count_stream_id = f"total_count_{camera_settings['id']}_{class_id}"
 
                 server.update_stream(annotated_stream_id, target_frame)
-                server.update_stream(current_count_stream_id, current_count=current_counts[class_name])
-                server.update_stream(total_count_stream_id, total_count=total_counts[class_name])
+                server.update_stream(current_count_stream_id, current_count=current_counts[class_id])
+                server.update_stream(total_count_stream_id, total_count=total_counts[class_id])
             
             if cv2.waitKey(1) == ord('q'):
                 break

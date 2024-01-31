@@ -190,7 +190,7 @@
           <h2 class="text-3xl mb-6 font-bold">Camera View</h2>
         </div>
 
-        <CameraView {currentCameraIndex} />
+        <CameraView />
         <!-- Include other camera related content here -->
       </div>
     </div>

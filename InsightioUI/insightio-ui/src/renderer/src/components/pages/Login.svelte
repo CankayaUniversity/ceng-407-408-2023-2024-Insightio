@@ -3,6 +3,7 @@
   import Button from '../utility/Button.svelte'
   import Input from '../utility/Input.svelte'
   import Icon from '../utility/Icon.svelte'
+  import { minimize, close } from '../../api/ipc'
 
   const dispatch = createEventDispatcher()
 
@@ -20,24 +21,16 @@
       submit()
     }
   }
-
-  function minimize() {
-    window.api.send('minimize-window')
-  }
-
-  function close() {
-    window.api.send('close-window')
-  }
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
 
 <div class="flex items-center justify-center h-screen bg-gray-800">
   <div class="title-bar w-full fixed top-0 left-0 gap-1 mr-2">
-    <Button on:click={minimize}>
+    <Button on:click={minimize} tabindex={-1}>
       <Icon icon="minimize" highlightOnHover class="w-5 h-5" />
     </Button>
-    <Button on:click={close}>
+    <Button on:click={close} tabindex={-1}>
       <Icon icon="close" highlightOnHover class="w-5 h-5" />
     </Button>
   </div>
