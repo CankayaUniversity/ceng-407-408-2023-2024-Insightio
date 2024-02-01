@@ -67,7 +67,7 @@
         Forgot Password?
       </a>
     </div>
-    <p class="mt-8 text-right text-white text-xs">© 2023 Insightio. All rights reserved.</p>
+    <p class="absolute bottom-5 right-5 mt-8 text-right text-white text-xs">© 2023 Insightio. All rights reserved.</p>
   </div>
 </div>
 
