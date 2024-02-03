@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 
 
-
+// mongodb user connection
 @Document(collection = "users")
 data class User(
     @Id

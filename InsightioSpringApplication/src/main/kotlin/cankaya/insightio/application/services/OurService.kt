@@ -12,7 +12,7 @@ class OurService {
 }
 
 
-
+//Login için service
 @Service
 class UserService(private val userRepository: AccountRepositoryImpl.UserRepository) {
     fun validateUser(login: String, password: String): Boolean {
