@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.info.Info
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 
 @OpenAPIDefinition(
         info = Info(
@@ -20,6 +21,8 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
         )
 )
 @SpringBootApplication
+@EnableMongoRepositories(basePackages = ["cankaya.insightio.infrastructure"])
+
 class InsightioApplication : SpringBootServletInitializer()
 
 // en dışarıdadır

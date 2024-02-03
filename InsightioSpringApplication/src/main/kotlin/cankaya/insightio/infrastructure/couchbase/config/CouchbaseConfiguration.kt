@@ -6,17 +6,17 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
 
-//@Configuration
-//class CouchbaseConfiguration {
-//
-//    // object mapper falan eklenecek
-//    // bean oluşturulacak cluster ve bucket için
-//}
+@Configuration
+class CouchbaseConfiguration {
+
+    // object mapper falan eklenecek
+    // bean oluşturulacak cluster ve bucket için
+}
 
 
 
 // mongodb user connection
-@Document(collection = "users")
+@Document(collection = "user-insightio")
 data class User(
     @Id
     val id: String? = null,
