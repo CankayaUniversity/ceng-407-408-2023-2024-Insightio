@@ -126,6 +126,10 @@ def video_processing_thread(camera_settings):
             mask = np.array([tracker_id is not None for tracker_id in detections.tracker_id], dtype=bool)
             detections = detections[mask]
             
+            # Serve raw frame
+            server.update_stream(f"raw_frame_{camera_settings['id']}", frame, frame_key="raw_frame")
+
+            # Init fully annotated frame
             all_annotated_frame = frame.copy()
 
             for counter_set in counter_sets:

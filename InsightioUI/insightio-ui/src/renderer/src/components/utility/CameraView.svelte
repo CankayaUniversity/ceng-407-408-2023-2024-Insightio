@@ -10,7 +10,6 @@
   export let deviceIndex = 0
 
   let videoElement
-  let noTargetSelected = false
 
   let targets = [
     {
@@ -37,7 +36,7 @@
   async function fetchData() {
     if (target.value != '' && target.value != 'all_annotated_frame') {
       currentCount = await getTargetCurrentCount(cameraId, target.value)
-      console.log(currentCount);
+      console.log(currentCount)
       totalCount = await getTargetTotalCount(cameraId, target.value)
     }
   }
@@ -50,20 +49,17 @@
 
   // Update video source when cameraId or targetClass changes
   $: if (!previewMode && cameraId && videoElement) {
-    if (target.value == 'all_annotated_frame'){
+    if (target.value == 'all_annotated_frame') {
       videoElement.src = `${baseURL}/all_annotated_frame_${cameraId}`
-    }
-    else if (target.value != '') {
-      noTargetSelected = false
+    } else if (target.value != '') {
       let targetClassStr = `_${target.value}`
       videoElement.src = `${baseURL}/frame_${cameraId + targetClassStr}`
-    } 
-    else {
-      noTargetSelected = true
+    } else {
+      videoElement.src = `${baseURL}/raw_frame_${cameraId}`
     }
   }
 
-  $: if (previewMode || noTargetSelected) {
+  $: if (previewMode) {
     if (deviceIp) {
       // If an IP is provided, use it as the video source URL
       videoElement.src = deviceIp
@@ -91,7 +87,7 @@
 </script>
 
 <div class="camera-view w-full max-w-md mx-auto">
-  {#if !previewMode && !noTargetSelected}
+  {#if !previewMode}
     <img bind:this={videoElement} class="w-full h-auto bg-black" alt="Camera Stream" />
 
     <Dropdown
@@ -112,17 +108,6 @@
     {/if}
   {:else}
     <video bind:this={videoElement} class="w-full h-auto bg-black" autoplay muted></video>
-
-    {#if !previewMode && noTargetSelected}
-      <Dropdown
-        items={targets}
-        bind:selectedItem={target}
-        placeholder="Select target"
-        class="mt-5 w-full"
-        maxHeight="5"
-        showSearch={true}
-      />
-    {/if}
   {/if}
 </div>
 
