@@ -8,4 +8,9 @@ server:
 
 springdoc:
   api-docs:
-    path: /api-docs
+    path: /insightio
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost/user-insightio
+

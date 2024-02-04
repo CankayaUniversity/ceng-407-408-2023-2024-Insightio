@@ -75,6 +75,7 @@
       ]
     }
   ]
+  let selectedCameraId = 'e7a1174c-42b8-48d1-a359-99ed6f95848b'
 
   const targets = mockData.map((o) => o.target)
   const chartTypes = ['bar', 'line', 'pie', 'doughnut', 'radar']
@@ -190,8 +191,7 @@
           <h2 class="text-3xl mb-6 font-bold">Camera View</h2>
         </div>
 
-        <CameraView />
-        <!-- Include other camera related content here -->
+        <CameraView bind:cameraId={selectedCameraId} />
       </div>
     </div>
   </div>
