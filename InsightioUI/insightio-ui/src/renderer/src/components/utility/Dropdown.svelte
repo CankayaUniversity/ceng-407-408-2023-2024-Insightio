@@ -81,7 +81,7 @@
           <button
             on:click={() => selectItem(index)}
             class={clsx(
-              'w-full text-left px-4 py-2 hover:bg-gray-600 cursor-pointer focus:outline-none',
+              'w-full text-left px-4 py-2 hover:bg-blue-400 cursor-pointer focus:outline-none',
               selectedItem && selectedItem == item && 'bg-blue-400'
             )}
           >
