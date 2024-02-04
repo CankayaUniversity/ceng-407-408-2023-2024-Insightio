@@ -24,6 +24,10 @@
     {
       text: 'Bicycle',
       value: 42
+    },
+    {
+      text: 'Fully Annotated',
+      value: 'all_annotated_frame'
     }
   ]
   let target = targets[0]
@@ -31,8 +35,9 @@
   let totalCount = 0
 
   async function fetchData() {
-    if (target.value != '') {
+    if (target.value != '' && target.value != 'all_annotated_frame') {
       currentCount = await getTargetCurrentCount(cameraId, target.value)
+      console.log(currentCount);
       totalCount = await getTargetTotalCount(cameraId, target.value)
     }
   }
@@ -45,11 +50,15 @@
 
   // Update video source when cameraId or targetClass changes
   $: if (!previewMode && cameraId && videoElement) {
-    if (target.value != '') {
+    if (target.value == 'all_annotated_frame'){
+      videoElement.src = `${baseURL}/all_annotated_frame_${cameraId}`
+    }
+    else if (target.value != '') {
       noTargetSelected = false
       let targetClassStr = `_${target.value}`
       videoElement.src = `${baseURL}/frame_${cameraId + targetClassStr}`
-    } else {
+    } 
+    else {
       noTargetSelected = true
     }
   }
@@ -93,12 +102,14 @@
       maxHeight="5"
       showSearch={true}
     />
-    <div class="text-white mt-4 text-sm">
-      Current count for Target {target.text}: {currentCount}
-    </div>
-    <div class="text-white mt-2 text-sm">
-      Total count for Target {target.text}: {totalCount}
-    </div>
+    {#if target.value != 'all_annotated_frame'}
+      <div class="text-white mt-4 text-sm">
+        Current count for Target {target.text}: {currentCount}
+      </div>
+      <div class="text-white mt-2 text-sm">
+        Total count for Target {target.text}: {totalCount}
+      </div>
+    {/if}
   {:else}
     <video bind:this={videoElement} class="w-full h-auto bg-black" autoplay muted></video>
 
