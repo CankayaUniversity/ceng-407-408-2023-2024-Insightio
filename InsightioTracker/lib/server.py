@@ -16,8 +16,8 @@ class StreamingHandler(BaseHTTPRequestHandler):
 
         if stream_id.startswith("frame_"):
             self.stream_frame(stream_id, False)  # Stream annotated frame
-        elif stream_id.startswith("raw_frame_"):
-            self.stream_frame(stream_id, True)  # Stream raw frame
+        elif stream_id.startswith("all_annotated_frame_"):
+            self.stream_frame(stream_id, True)  # Stream all annotated frame
         elif stream_id.startswith("current_count_"):
             self.send_data(stream_id, "current_counts")  # Stream current count
         elif stream_id.startswith("total_count_"):
@@ -25,12 +25,12 @@ class StreamingHandler(BaseHTTPRequestHandler):
         else:
             self.send_error(404, "Not Found")
 
-    def stream_frame(self, stream_id, is_raw):
+    def stream_frame(self, stream_id, is_all_annotated_frame):
         self.send_response(200)
         self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=frame')
         self.end_headers()
 
-        frame_key = 'raw_frame' if is_raw else 'frame'
+        frame_key = 'all_annotated_frame' if is_all_annotated_frame else 'frame'
         while True:
             frame = self.streams.get(stream_id, {}).get(frame_key)
             if frame is not None:
@@ -83,11 +83,10 @@ class StreamServer:
         self.server_thread.daemon = True
         self.server_thread.start()
 
-    def update_stream(self, stream_id, frame=None, current_count=None, total_count=None, is_raw=False):
+    def update_stream(self, stream_id, frame=None, current_count=None, total_count=None, frame_key="frame"):
         if stream_id not in self.streams:
             self.streams[stream_id] = {}
         if frame is not None:
-            frame_key = 'raw_frame' if is_raw else 'frame'
             self.streams[stream_id][frame_key] = frame
         if current_count is not None:
             self.streams[stream_id]['current_counts'] = str(current_count)

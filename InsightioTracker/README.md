@@ -79,7 +79,7 @@ Set-ExecutionPolicy RemoteSigned
 py .\main.py
 
 # Or run the unstable version (for experimenting and development)
-py .\main.altered.py
+py .\main-altered.py
 
 # When you are done, don't forget to deactivate the virtual environment
 .\venv\Scripts\deactivate.bat

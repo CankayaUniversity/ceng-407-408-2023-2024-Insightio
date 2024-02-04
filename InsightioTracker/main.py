@@ -126,8 +126,7 @@ def video_processing_thread(camera_settings):
             mask = np.array([tracker_id is not None for tracker_id in detections.tracker_id], dtype=bool)
             detections = detections[mask]
             
-            # Update the raw frame stream
-            server.update_stream(f"raw_frame_{camera_settings['id']}", frame, is_raw=True)
+            all_annotated_frame = frame.copy()
 
             for counter_set in counter_sets:
                 # Filtering out detections with unwanted classes
@@ -165,9 +164,13 @@ def video_processing_thread(camera_settings):
                 target_frame = box_annotator.annotate(scene=frame.copy(), detections=target_detections)
                 target_frame = label_annotator.annotate(scene=target_frame, detections=target_detections, labels=labels)
                 
+                all_annotated_frame = box_annotator.annotate(scene=all_annotated_frame, detections=target_detections)
+                all_annotated_frame = label_annotator.annotate(scene=all_annotated_frame, detections=target_detections, labels=labels)
+
                 # Annotate line counters
                 for counter in counter_set["counters"]:
                     target_frame = line_annotator.annotate(frame=target_frame, line_counter=counter)
+                    all_annotated_frame = line_annotator.annotate(frame=all_annotated_frame, line_counter=counter)
 
                 class_id = counter_set["target"]
                 annotated_stream_id = f"frame_{camera_settings['id']}_{class_id}"
@@ -177,6 +180,8 @@ def video_processing_thread(camera_settings):
                 server.update_stream(annotated_stream_id, target_frame)
                 server.update_stream(current_count_stream_id, current_count=current_counts[class_id])
                 server.update_stream(total_count_stream_id, total_count=total_counts[class_id])
+
+            server.update_stream(f"all_annotated_frame_{camera_settings['id']}", all_annotated_frame, frame_key="all_annotated_frame")
             
             if cv2.waitKey(1) == ord('q'):
                 break
