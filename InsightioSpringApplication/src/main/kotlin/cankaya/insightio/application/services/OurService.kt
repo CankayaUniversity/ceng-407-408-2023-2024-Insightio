@@ -1,10 +1,11 @@
 package cankaya.insightio.application.services
-import cankaya.insightio.infrastructure.couchbase.config.Camera
-import cankaya.insightio.infrastructure.couchbase.config.CameraStatus
-import cankaya.insightio.infrastructure.couchbase.config.CameraType
-import cankaya.insightio.infrastructure.couchbase.impls.CameraRepository
-import cankaya.insightio.infrastructure.couchbase.impls.UserRepository
+
+
+import cankaya.insightio.infrastructure.mongodb.impls.*
+import jakarta.xml.bind.DatatypeConverter
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import java.security.MessageDigest
 
 // burası application -> services
 // servislerimiz burada olucak, sende kendininkini account servis gibi yazabilirsin
@@ -18,13 +19,26 @@ class OurService {
 
 //Login için service
 
+//typelara dikkat et database ve burdan gönderilenler için
 @Service
 class UserService(private val userRepository: UserRepository) {
-    fun validateUser(login: String, password: String): Boolean {
+
+    fun validateUser(login: String, inputPassword: String): Boolean {
         val user = userRepository.findByUsername(login) ?: userRepository.findByEmail(login)
-        return user?.password == password
+        if (user != null) {
+            val hashedInputPassword = hashPassword(inputPassword)
+            return hashedInputPassword.equals(user.password)
+        }
+        return false
+    }
+
+    private fun hashPassword(password: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hash = digest.digest(password.toByteArray(Charsets.UTF_8))
+        return DatatypeConverter.printHexBinary(hash).uppercase()
     }
 }
+
 
 
 
@@ -40,6 +54,3 @@ class CameraService(private val cameraRepository: CameraRepository) {
     fun findByStatus(status: CameraStatus): List<Camera> = cameraRepository.findByStatus(status)
     fun findByName(name: String): Camera? = cameraRepository.findByName(name)
 }
-
-
-

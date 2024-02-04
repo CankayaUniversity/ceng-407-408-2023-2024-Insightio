@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/username")
 class UserController(private val userService: UserService) {
 
-    @GetMapping("/{usernanme}")
+    @GetMapping("/{username}")
     fun getUserByLogin(@PathVariable username: String, @RequestParam password: String): ResponseEntity<String> {
+
         return if (userService.validateUser(username, password)) {
             ResponseEntity.ok("Login successful")
         } else {

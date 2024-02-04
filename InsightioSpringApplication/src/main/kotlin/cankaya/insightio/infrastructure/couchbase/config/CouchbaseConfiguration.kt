@@ -1,10 +1,9 @@
-package cankaya.insightio.infrastructure.couchbase.config
+package cankaya.insightio.infrastructure.mongodb.impls
 
 import jakarta.validation.constraints.NotBlank
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
-import java.util.Date
 import java.util.Objects
 
 
@@ -34,25 +33,30 @@ data class User(
 )
 
 //Mongodb Camera Conf Connection
-@Document(collection = "CameraConf")
+@Document(collection = "user-insightio")
 data class Camera(
     @Id
-    val id: String?,
+    val id: String?=null,
+    @NotBlank
     val name: String,
     val type: CameraType,
+    @NotBlank
     val ipAddress: String,
     val status: CameraStatus,
     val zones: List<Zone>,
     val targets: List<Int>,
+    @NotBlank
     val resolution: String,
-    val createdDate: Date,
+    @NotBlank
+    val createdDate: String,
+    @NotBlank
     val createdBy: String,
     val metadata: List<Metadata>
 )
 
 data class Metadata(
     val categoryId: String,
-    val value: Objects
+    val value: String
 )
 
 data class Zone(
@@ -73,4 +77,3 @@ enum class CameraType {
 enum class CameraStatus {
     Disconnected, Connected
 }
-

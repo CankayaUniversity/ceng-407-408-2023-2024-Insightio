@@ -1,9 +1,6 @@
-package cankaya.insightio.infrastructure.couchbase.impls
-import cankaya.insightio.infrastructure.couchbase.config.Camera
-import cankaya.insightio.infrastructure.couchbase.config.CameraStatus
-import cankaya.insightio.infrastructure.couchbase.config.CameraType
+package cankaya.insightio.infrastructure.mongodb.impls
+
 import org.springframework.data.mongodb.repository.MongoRepository
-import cankaya.insightio.infrastructure.couchbase.config.User
 import org.springframework.stereotype.Repository
 
 
@@ -31,8 +28,3 @@ interface CameraRepository : MongoRepository<Camera, String> {
 
     fun findByName(name: String): Camera?
 }
-
-
-
-
-

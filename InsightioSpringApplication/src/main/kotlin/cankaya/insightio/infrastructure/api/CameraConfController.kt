@@ -1,9 +1,10 @@
 package cankaya.insightio.infrastructure.api
 
 import cankaya.insightio.application.services.CameraService
-import cankaya.insightio.infrastructure.couchbase.config.Camera
-import cankaya.insightio.infrastructure.couchbase.config.CameraStatus
-import cankaya.insightio.infrastructure.couchbase.config.CameraType
+
+import cankaya.insightio.infrastructure.mongodb.impls.Camera
+import cankaya.insightio.infrastructure.mongodb.impls.CameraStatus
+import cankaya.insightio.infrastructure.mongodb.impls.CameraType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
