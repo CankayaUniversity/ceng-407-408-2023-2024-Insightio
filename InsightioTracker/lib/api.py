@@ -62,6 +62,45 @@ class TrackerAPI:
                         }
                     ]
                 }
+                # {
+                #     "id": "674fed6a-e866-422b-b143-050ef4e9dbb7",
+                #     "Name": "FailCam",
+                #     "Type": "ConnectedCamera",
+                #     "IpAddress": "127.0.0.1",
+                #     "DeviceIndex": 1,
+                #     "Status": "Active",
+                #     "Zones": [
+                #         {
+                #             "Target": 41,
+                #             "ZoneType": 1,
+                #             "StartPoint": {
+                #                 "x": 200,
+                #                 "y": 140
+                #             },
+                #             "EndPoint": {
+                #                 "x": 440,
+                #                 "y": 340
+                #             }
+                #         },
+                #         {
+                #             "Target": 20,
+                #             "ZoneType": 0,
+                #             "StartPoint": {
+                #                 "x": 100,
+                #                 "y": 360
+                #             },
+                #             "EndPoint": {
+                #                 "x": 220,
+                #                 "y": 360
+                #             }
+                #         }
+                #     ],
+                #     "Targets": [41, 20],
+                #     "Resolution": "480x640",
+                #     "CreateDate": "2024-02-05T21:58:40.945Z",
+                #     "CreatedBy": "1e2f50c5-7dea-46ef-9a86-f4910d5d989f",
+                #     "Metadata": []
+                # }
             ]
             return camera_settings
         else:
