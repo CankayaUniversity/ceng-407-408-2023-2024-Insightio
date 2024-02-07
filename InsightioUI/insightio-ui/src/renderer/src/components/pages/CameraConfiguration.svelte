@@ -8,6 +8,7 @@
   import targets from '../../data/trackerTargets'
   import { onMount } from 'svelte'
   import Button from '../utility/Button.svelte'
+  import SwitchButton from '../utility/SwitchButton.svelte'
 
   let typeOptions = [
     { text: 'Built-in', value: 'built-in' },
@@ -21,6 +22,7 @@
   let cameraName = ''
   let deviceIndex = 0
   let deviceIp = ''
+  let currentMode = 'add'
 
   function updateCameraOptions() {
     navigator.mediaDevices.enumerateDevices().then((devices) => {
@@ -58,8 +60,18 @@
     <div></div>
   </div>
 
-  <div class="p-4 mt-8">
-    <div class="flex flex-grow border-2 border-gray-700 p-6">
+  <div class="flex justify-end px-6">
+    <SwitchButton
+      labelOff="Add"
+      labelOn="Edit"
+      colorOff="bg-green-500"
+      colorOn="bg-blue-500"
+      on:change={(e) => (currentMode = e.detail ? 'edit' : 'add')}
+    />
+  </div>
+
+  <div class="p-4 mt-2">
+    <div class="flex flex-grow border-2 border-gray-700 p-3">
       <!-- Camera preview section -->
       <div class="flex flex-col w-1/2">
         <div class="flex flex-row pl-3">
@@ -81,7 +93,7 @@
           <div class="flex flex-col ml-3 mt-3">
             <div class="mb-2">
               <Input
-                class="w-full py-2 px-3"
+                class="w-full py-1 px-3"
                 showLabel
                 label="Name:"
                 type="text"
@@ -107,6 +119,16 @@
                   bind:selectedItem={selectedCamera}
                   items={cameraOptions}
                   placeholder="Select camera"
+                />
+              {:else}
+                <Input
+                  class="w-full py-1 px-2"
+                  showLabel
+                  label="Camera IP:"
+                  type="text"
+                  id="camip"
+                  placeholder="127.0.0.1"
+                  bind:value={deviceIp}
                 />
               {/if}
             </div>

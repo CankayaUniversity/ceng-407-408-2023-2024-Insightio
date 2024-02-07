@@ -66,20 +66,37 @@
     tagify.on('add', onTagAddedOrRemoved)
     tagify.on('remove', onTagAddedOrRemoved)
   })
+  /* eslint-disable */
 </script>
 
 <div class={clsx('flex justify-start', $$props.class)}>
   <div class="w-full">
     <!-- svelte-ignore a11y-label-has-associated-control -->
-    <label class="block mt-2 mb-2 text-sm font-bold">{title}</label>
-    <input
-      bind:this={tagInput}
-      type="text"
-      class="tagify w-full text-sm border border-gray-800 rounded outline-none"
-      on:change={addTag}
-    />
-    <div class="float-left mt-2 text-sm text-white">
+    <label class="block mt-2 mb-2 text-sm font-bold text-white">{title}</label>
+    <input bind:this={tagInput} type="text" class="tagify w-full" on:change={addTag} />
+    <div class="float-left mt-2 text-xs text-white">
       <p>{helpText}</p>
     </div>
   </div>
 </div>
+
+<style>
+  .tagify {
+    --tags-border-color: #2d3748;
+    --tags-background: #2d3748;
+    --tag-bg: #4a5568;
+    --tag-hover: #3182ce;
+    --tag-text-color: #ffffff;
+    --tag-pad: 6px 8px;
+    --tag-text-color--edit: #ffffff;
+    --tag-text-size: 0.875rem;
+    --tag-remove-bg: #991b1b;
+    --tag-remove-btn-color: #ffffff;
+    --tag-remove-btn-bg: #374151;
+    --input-color: #ffffff;
+    --placeholder-color: #a0aec0;
+    --tag-inset-shadow-size: 1.35em;
+
+    min-width: 0;
+  }
+</style>

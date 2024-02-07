@@ -125,7 +125,7 @@
     <div></div>
   </div>
 
-  <!-- Camera Navigation centered below Dashboard title -->
+  <!-- Camera Navigation -->
   <div class="flex justify-center py-2">
     <Button on:click={() => navigateCamera('prev')}>
       <Icon icon="arrowLeft" highlightOnHover class="h-5 w-5" />
