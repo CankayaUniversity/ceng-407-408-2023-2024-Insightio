@@ -1,13 +1,15 @@
 <script>
     import Input from '../utility/Input.svelte';
     import Button from '../utility/Button.svelte';
-    import { onMount } from 'svelte'
+    import { onMount } from 'svelte';
   
     let accountPicture = ''; //'"C:/Users/zeynep/Pictures/profile1.jpg"'
     let name = '';
     let surname = '';
     let email = '';
     let password = '';
+    let selectedFile;
+    let previewUrl;
   
     function saveAccountSettings() {
       console.log('Account settings saved');
@@ -18,18 +20,36 @@
       console.log('Account settings canceled');
       // İptal işlemi için gerekli adımlar burada gerçekleştirilebilir.
     }
-    // Dosya seçildiğinde tetiklenecek fonksiyon
-    /*function handleFileChange(event) {
-        const file = event.target.files[0];
-        console.log(file.name); // Dosya adını konsola yazdırır
-        // Burada dosyayı işleyebilirsiniz, örneğin bir önizleme gösterebilirsiniz on:change={handleFileChange}
-    }*/
+
+    function handleFileChange(event) {
+      const file = event.target.files[0];
+      if (file) {
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previewUrl = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function uploadFile() {
+      // Burada dosya yükleme işlemini gerçekleştirebilirsiniz.
+      console.log('Dosya yükleniyor:', selectedFile);
+    }
+
 </script>
   
 <div class="flex h-full w-full bg-gray-800 text-white">
     <div class="w-1/3 flex flex-col items-center p-4">
-      <img src={accountPicture} alt="User Account Pic" class="w-32 h-32 rounded-full object-cover mb-4"/>
-      <Input type="file" class="w-full py-2 px-3" />
+      <div class="file-upload">
+        {#if previewUrl}
+          <img src={previewUrl} alt="Profil resmi önizlemesi" class="preview" />
+        {/if}
+        <input type="file" accept="image/*" on:change={handleFileChange} />
+        <button on:click={uploadFile}>Yükle</button>
+      </div>
+      
     </div>
     <div class="w-2/3 flex flex-col justify-center p-4">
       <h2 class="text-3xl font-bold mb-4">Info</h2>
@@ -43,4 +63,12 @@
       </div>
     </div>
 </div>
+
+<style>
+  .preview {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+  }
+</style>
   
