@@ -5,8 +5,8 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1115,
-    height: 730,
+    width: 1315,
+    height: 800,
     show: false,
     frame: false,
     transparent: false,

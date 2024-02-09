@@ -131,6 +131,6 @@
   }
 </script>
 
-<div class="w-full" style="height: 410px; width: 450px;">
+<div class="w-full" style="height: 480px; width: 535px;">
   <canvas bind:this={canvas}></canvas>
 </div>
