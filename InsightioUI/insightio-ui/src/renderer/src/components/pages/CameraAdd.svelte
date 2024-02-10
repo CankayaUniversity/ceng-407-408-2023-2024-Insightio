@@ -9,6 +9,7 @@
   import { onMount } from 'svelte'
   import Button from '../utility/Button.svelte'
   import ZoneDraw from '../modals/ZoneDraw.svelte'
+  import { warn } from '../../functions/toastifyWrapper'
 
   let typeOptions = [
     { text: 'Built-in', value: 'built-in' },
@@ -36,6 +37,14 @@
     })
   }
 
+  function handleOpenZoneDraw() {
+    if (selectedTags.length == 0) {
+      warn('Please select targets first.')
+      return
+    }
+    openZoneDraw = true
+  }
+
   function saveSettings() {
     console.log('pressed')
   }
@@ -61,7 +70,11 @@
   })
 </script>
 
-<ZoneDraw bind:isOpen={openZoneDraw} bind:targets={selectedTargets} />
+<ZoneDraw
+  bind:isOpen={openZoneDraw}
+  bind:targets={selectedTargets}
+  on:save={(e) => console.log(e.detail)}
+/>
 
 <!-- Camera preview section -->
 <div class="flex flex-col w-1/2 ml-10">
@@ -72,7 +85,7 @@
   <div class="mt-6 flex flex-col items-center justify-between">
     <div class="translate-x-36 -translate-y-6">
       <!-- Open zone draw modal button -->
-      <Button on:click={() => (openZoneDraw = true)}>
+      <Button on:click={handleOpenZoneDraw}>
         <span
           class="text-white text-base transition-opacity duration-300 opacity-50 hover:opacity-100 flex"
         >

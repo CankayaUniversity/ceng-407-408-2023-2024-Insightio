@@ -2,12 +2,16 @@
   import Overlay from '../utility/Overlay.svelte'
   import Dropdown from '../utility//Dropdown.svelte'
   import SwitchButton from '../utility/SwitchButton.svelte'
+  import Button from '../utility/Button.svelte'
+  import Icon from '../utility/Icon.svelte'
+  import { createEventDispatcher } from 'svelte'
 
-  // Dummy targets for demonstration
   export let isOpen
   export let targets
 
-  let cameraFeedElement, drawingCanvas, ctx
+  let ctx
+  let cameraFeedElement
+  let drawingCanvas
   let drawing = false
   let drawType = 'line'
   let startPoint = null
@@ -17,6 +21,45 @@
   let canvasLoaded = false
   let deviceIndex = 0
   let disableInputs = false
+  let targetZones = {}
+  let history = [{}] // Stack for undo
+  let redoStack = [] // Stack for redo
+  let dispatch = createEventDispatcher()
+
+  function undo() {
+    if (history.length > 0) {
+      const currentState = JSON.parse(JSON.stringify(drawings))
+      redoStack.push(currentState) // Save current state for redo
+      const lastState = history.pop()
+      drawings = lastState // Revert to previous state
+      redrawCanvas()
+    }
+  }
+
+  function redo() {
+    if (redoStack.length > 0) {
+      const nextState = redoStack.pop()
+      history.push(JSON.parse(JSON.stringify(drawings))) // Save current state for undo
+      drawings = nextState
+      redrawCanvas()
+    }
+  }
+
+  function deleteShape(targetId, index) {
+    history.push(JSON.parse(JSON.stringify(drawings))) // Save current state for undo
+    drawings[targetId].splice(index, 1)
+    drawings = { ...drawings } // Trigger reactivity
+    redrawCanvas()
+    redoStack = [] // Clear redo stack on new action
+  }
+
+  function highlightShape(targetId, index, highlight) {
+    const shape = drawings[targetId][index]
+    if (shape) {
+      shape.highlight = highlight
+      redrawCanvas()
+    }
+  }
 
   function startDrawing(event) {
     if (event.button !== 0) return // Only start on left click
@@ -48,25 +91,35 @@
     if (!drawings[targetId]) {
       drawings[targetId] = []
     }
-    drawings[targetId].push({ type: drawType, start, end })
+    const shapeType = drawType.charAt(0).toUpperCase() + drawType.slice(1) // "Line" or "Rectangle"
+    const nextNumber = drawings[targetId].filter((d) => d.type === drawType).length + 1
+    const shapeName = `${shapeType} ${nextNumber}` // "Line 1", "Rectangle 2", etc.
+
+    drawings[targetId].push({ type: drawType, start, end, name: shapeName, editable: false })
     drawings = { ...drawings } // Reassign to trigger reactivity
-    redrawCanvas() // Explicitly call to redraw after saving
+    redrawCanvas()
+    history.push(JSON.parse(JSON.stringify(drawings))) // Save new state for undo
+    redoStack = [] // Clear redo stack on new action
   }
 
-  function drawLine(start, end) {
+  function drawLine(start, end, highlight = false) {
+    ctx.strokeStyle = highlight ? 'purple' : 'black'
     ctx.beginPath()
     ctx.moveTo(start.x, start.y)
     ctx.lineTo(end.x, end.y)
     ctx.stroke()
   }
 
-  function drawRectangle(start, end) {
+  function drawRectangle(start, end, highlight = false) {
+    ctx.strokeStyle = highlight ? 'purple' : 'black'
     ctx.beginPath()
     ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y)
     ctx.stroke()
   }
 
-  function cancelDrawing(event) {
+  function handleKeydown(event) {
+    if (event.ctrlKey && event.key === 'z') undo()
+    if (event.ctrlKey && event.key === 'y') redo()
     if (event.type === 'contextmenu' || (event.type === 'keydown' && event.key === 'Escape')) {
       event.preventDefault()
       drawing = false
@@ -75,20 +128,35 @@
     }
   }
 
+  function mapDrawingsToTargetZones() {
+    if (disableInputs) return
+    targetZones = {}
+    targets.forEach((target) => {
+      const targetId = target.value
+      if (drawings[targetId]) {
+        targetZones[targetId] = drawings[targetId].map((drawing) => ({
+          ZoneName: drawing.name,
+          ZoneType: drawing.type === 'line' ? 0 : 1,
+          StartPoint: drawing.start,
+          EndPoint: drawing.end
+        }))
+      }
+    })
+  }
+
   function clearCanvas() {
     if (!drawingCanvas) return
     ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height)
   }
 
   function redrawCanvas() {
-    clearCanvas() // Clears the canvas before redrawing
+    clearCanvas()
     const targetDrawings = drawings[selectedTarget.value] || []
     targetDrawings.forEach((drawing) => {
-      if (drawing.type === 'line') {
-        drawLine(drawing.start, drawing.end)
-      } else if (drawing.type === 'rectangle') {
-        drawRectangle(drawing.start, drawing.end)
-      }
+      const drawFunc = drawing.type === 'line' ? drawLine : drawRectangle
+      drawFunc(drawing.start, drawing.end, drawing.highlight)
+      ctx.fillStyle = drawing.highlight ? 'purple' : 'black'
+      ctx.fillText(drawing.name, drawing.end.x + 5, drawing.end.y + 5)
     })
   }
 
@@ -101,6 +169,11 @@
     ctx.lineWidth = 2
     redrawCanvas()
     canvasLoaded = true
+  }
+
+  function saveZones() {
+    dispatch('save', targetZones)
+    isOpen = false // Close the modal
   }
 
   $: {
@@ -155,27 +228,75 @@
     redrawCanvas()
   }
 
-  $: console.log(selectedTarget)
+  $: if (targets && drawings) {
+    mapDrawingsToTargetZones()
+  }
+
+  $: console.log(targetZones)
 </script>
 
-<svelte:window on:keydown={cancelDrawing} />
+<svelte:window on:keydown={handleKeydown} />
 
-<Overlay bind:showModal={isOpen} on:close={() => (isOpen = false)}>
-  <div class="relative w-full h-full">
-    <!-- svelte-ignore a11y-media-has-caption -->
-    <video bind:this={cameraFeedElement} class="w-full h-full" autoplay on:resize={initCanvas}
-    ></video>
-    <canvas
-      bind:this={drawingCanvas}
-      class="absolute top-0 left-0 w-full h-full"
-      on:mousedown={startDrawing}
-      on:mousemove={draw}
-      on:mouseup={endDrawing}
-      on:contextmenu={cancelDrawing}
-    ></canvas>
+<Overlay bind:showModal={isOpen} title="Draw Zones" on:close={() => (isOpen = false)}>
+  <div class="flex w-full h-full">
+    <!-- Video and Canvas Container -->
+    <div class="relative flex-grow">
+      <!-- svelte-ignore a11y-media-has-caption -->
+      <video bind:this={cameraFeedElement} class="w-full h-full" autoplay on:resize={initCanvas}
+      ></video>
+      <canvas
+        bind:this={drawingCanvas}
+        class="absolute top-0 left-0 w-full h-full cursor-crosshair"
+        on:mousedown={startDrawing}
+        on:mousemove={draw}
+        on:mouseup={endDrawing}
+        on:contextmenu={handleKeydown}
+      ></canvas>
+    </div>
+
+    <!-- Shapes List -->
+    <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+    <div
+      class="sticky top-0 ml-6 w-56 bg-gray-700 text-white overflow-auto rounded-md"
+      style="max-height: 555px; height: 555px;"
+    >
+      <h1 class="text-xl font-bold border-b-2 border-gray-600 p-4">Zone List</h1>
+      {#each drawings[selectedTarget.value] || [] as drawing, index}
+        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div
+          class="group flex flex-col p-2 border-b border-gray-600"
+          on:mouseover={() => highlightShape(selectedTarget.value, index, true)}
+          on:mouseout={() => highlightShape(selectedTarget.value, index, false)}
+        >
+          <div class="relative flex flex-row">
+            <input
+              type="text"
+              bind:value={drawing.name}
+              class="text-white bg-gray-700 p-1 mb-1 w-full rounded-md group-hover:bg-gray-600 focus:bg-gray-600"
+            />
+            <Button
+              class="absolute bg-red-500 bottom-2 right-2 rounded-md opacity-50 hover:opacity-100 transition-opacity duration-300"
+              on:click={() => deleteShape(selectedTarget.value, index)}
+            >
+              <Icon icon="close" highlightOnHover class="w-5 h-5" tabindex={-1} />
+            </Button>
+          </div>
+        </div>
+      {/each}
+    </div>
   </div>
   <div class="flex items-center justify-between space-x-4 p-4 bg-gray-800 text-white">
     <div class="flex items-center space-x-4">
+      <div class="-translate-y-2">
+        <SwitchButton
+          labelOff="Line"
+          labelOn="Zone"
+          colorOn="bg-blue-500"
+          colorOff="bg-green-500"
+          on:change={(e) => (drawType = e.detail ? 'rectangle' : 'line')}
+        />
+      </div>
       <Dropdown
         bind:disabled={disableInputs}
         bind:selectedItem={selectedTarget}
@@ -184,20 +305,13 @@
         on:change={() => redrawCanvas()}
       />
     </div>
-    <div class="flex items-center space-x-4 -translate-y-2">
-      <SwitchButton
-        labelOff="Line"
-        labelOn="Zone"
-        colorOn="bg-blue-500"
-        colorOff="bg-green-500"
-        on:change={(e) => (drawType = e.detail ? 'rectangle' : 'line')}
-      />
-    </div>
+    <Button class="py-2 px-4" on:click={saveZones} controlButton>Save</Button>
   </div>
 </Overlay>
 
 <style>
-  canvas {
-    cursor: crosshair;
+  video {
+    width: 730;
+    height: 620;
   }
 </style>

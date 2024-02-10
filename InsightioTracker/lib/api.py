@@ -23,35 +23,30 @@ class TrackerAPI:
                     "IpAddress": "127.0.0.1",
                     "DeviceIndex": 0,
                     "Status": "Active",
-                    "Zones": [
-                        {
-                            # Bicycle
-                            "Target": 42,
-                            "ZoneType": 1,
-                            "StartPoint": {
-                                "x": 200,
-                                "y": 140
+                    "Targets": {
+                        42: [  # Bicycle target
+                            {
+                                "ZoneName": "A",
+                                "ZoneType": 1,
+                                "StartPoint": {"x": 200, "y": 140},
+                                "EndPoint": {"x": 440, "y": 340}
                             },
-                            "EndPoint": {
-                                "x": 440,
-                                "y": 340
+                            {
+                                "ZoneName": "B",
+                                "ZoneType": 0,
+                                "StartPoint": {"x": 100, "y": 100},
+                                "EndPoint": {"x": 150, "y": 150}
                             }
-                        },
-                        {
-                            # Banana
-                            "Target": 21,
-                            "ZoneType": 0,
-                            "StartPoint": {
-                                "x": 120,
-                                "y": 350
-                            },
-                            "EndPoint": {
-                                "x": 280,
-                                "y": 350
+                        ],
+                        21: [  # Banana target
+                            {
+                                "ZoneName": "C",
+                                "ZoneType": 0,
+                                "StartPoint": {"x": 120, "y": 350},
+                                "EndPoint": {"x": 280, "y": 350}
                             }
-                        }
-                    ],
-                    "Targets": [42, 21],
+                        ]
+                    },
                     "Resolution": "480x640",
                     "CreateDate": "2024-01-28T10:05:40.945Z",
                     "CreatedBy": "1e2f50c5-7dea-46ef-9a86-f4910d5d989f",
