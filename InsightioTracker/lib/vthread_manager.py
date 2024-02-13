@@ -1,7 +1,9 @@
+from datetime import datetime, timedelta
 from lib.api import TrackerAPI
 import supervision as sv
 import numpy as np
 import threading
+import time
 import cv2
 
 class VideoThreadManager:
@@ -45,6 +47,47 @@ class VideoThreadManager:
     def update_thread(self, camera_id, new_settings):
         self.stop_thread(camera_id)
         self.start_thread(new_settings)
+
+    def start_count_reporter(self):
+        self.reporting_thread = threading.Thread(target=self.report_counts)
+        self.reporting_thread.daemon = True
+        self.reporting_thread.start()
+
+    def report_counts(self):
+        while True:
+            # Calculate the time remaining until the start of the next hour
+            current_time = datetime.now()
+            next_hour = (current_time + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+            sleep_duration = (next_hour - current_time).total_seconds()
+
+            time.sleep(10)
+
+            # Report at the start of the hour
+            report_time = datetime.now().isoformat()
+            count_reports = []  # Initialize a list to accumulate reports
+
+            for camera_id, targets in self.zone_counts.items():
+                for target_id, zones in targets.items():
+                    total_counts = {zone_name: zone_data['total'] for zone_name, zone_data in zones.items()}
+                    overall_total = sum(zone_data['total'] for zone_data in zones.values())
+
+                    count_report = {
+                        "cameraId": camera_id,
+                        "targetId": target_id,
+                        "timestamp": report_time,
+                        "totalCounts": total_counts,
+                        "overallTotal": overall_total
+                    }
+                    count_reports.append(count_report)
+
+            # POST the list of reports
+            if count_reports:
+                print("Sending batch of count reports")
+                print(count_reports)
+                self.api.post_count_reports(count_reports)
+
+            # Reset zone counts for the next hour
+            self.zone_counts = {}
 
     def get_capture_device(self, camera_settings):
         cap = {}
@@ -147,8 +190,6 @@ class VideoThreadManager:
             total_counts = {self.CLASS_NAMES_DICT[class_id]: 0 for class_id in CLASS_IDS}
             current_counts = {self.CLASS_NAMES_DICT[class_id]: 0 for class_id in CLASS_IDS}
 
-            print(self.zone_counts.items())
-
             if self.stop_signals[camera_id]:
                 print(f"Stopping thread for camera {camera_id}")
                 break
@@ -197,23 +238,30 @@ class VideoThreadManager:
                         in target_detections
                     ]
 
+                    # Initialize target entry if not present
+                    if camera_id not in self.zone_counts:
+                        self.zone_counts[camera_id] = {}
+                    if target_id not in self.zone_counts[camera_id]:
+                        self.zone_counts[camera_id][target_id] = {}
+
                     target_current = 0
                     target_total = 0
                     for zone in counter_set['zones']:
                         zone_name = zone['name']
                         zone_type = zone['type']
-                        zone_key = f"{camera_id}_{target_id}_{zone_name}"
-                        
-                        if not self.zone_counts.get(zone_key, None):
-                            self.zone_counts[zone_key] = {'current': 0, 'total': 0}
+
+                        # Initialize zone entry if not present
+                        if zone_name not in self.zone_counts[camera_id][target_id]:
+                            self.zone_counts[camera_id][target_id][zone_name] = {'current': 0, 'total': 0}
 
                         for counter in zone['counters']:
-                            in_count, out_count = counter.trigger(detections=target_detections)
+                            counter.trigger(detections=target_detections)
 
                         current, total = self.calculate_zone_counts(zone_type, zone['counters'])
 
-                        self.zone_counts[zone_key]['current'] = current
-                        self.zone_counts[zone_key]['total'] = total
+                        # Update zone counts
+                        self.zone_counts[camera_id][target_id][zone_name]['current'] = current
+                        self.zone_counts[camera_id][target_id][zone_name]['total'] = total
 
                         target_current += current
                         target_total += total

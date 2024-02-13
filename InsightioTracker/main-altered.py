@@ -32,9 +32,10 @@ if __name__ == "__main__":
     server = StreamServer()
     server.run_server()
 
-    video_thread_manager = VideoThreadManager(model, CLASS_NAMES_DICT, server)
+    vtm = VideoThreadManager(model, CLASS_NAMES_DICT, server)
+    vtm.start_count_reporter()
 
     while True:
-        video_thread_manager.fetch_and_update_threads()
+        vtm.fetch_and_update_threads()
         time.sleep(5)
         
