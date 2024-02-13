@@ -60,7 +60,7 @@ class VideoThreadManager:
             next_hour = (current_time + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
             sleep_duration = (next_hour - current_time).total_seconds()
 
-            time.sleep(10)
+            time.sleep(sleep_duration)
 
             # Report at the start of the hour
             report_time = datetime.now().isoformat()
