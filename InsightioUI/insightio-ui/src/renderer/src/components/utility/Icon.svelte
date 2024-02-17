@@ -6,9 +6,10 @@
   export let icon
   export let backgroundHover = false
   export let highlightOnHover = false
+  export let size = undefined
+  export let xy = undefined
+  export let fill = 'none'
 
-  let size
-  let xy
   let ready = false
 
   // Icons that require different viewport settings
@@ -48,7 +49,9 @@
   }
 
   onMount(() => {
-    getIconViewBox(icon)
+    if (!size || !xy) {
+      getIconViewBox(icon)
+    }
     ready = true
   })
 </script>
@@ -58,7 +61,7 @@
     width="30px"
     height="30px"
     viewBox={`${xy} ${xy} ${size} ${size}`}
-    fill="none"
+    {fill}
     xmlns="http://www.w3.org/2000/svg"
     transform="rotate(0)"
     class={clsx(highlightOnHover && 'highlight', $$props.class)}
