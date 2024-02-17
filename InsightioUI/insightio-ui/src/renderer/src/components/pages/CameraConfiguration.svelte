@@ -23,7 +23,7 @@
   </div>
 
   <div class="p-4 mt-4">
-    <div class="flex flex-grow border-2 border-gray-700">
+    <div class="flex flex-grow border-2 border-gray-700 rounded-lg">
       {#if currentMode == 'add'}
         <CameraAdd />
       {:else}
