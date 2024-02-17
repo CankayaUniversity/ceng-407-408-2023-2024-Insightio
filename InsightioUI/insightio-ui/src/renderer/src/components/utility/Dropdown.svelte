@@ -9,6 +9,7 @@
   export let placeholder = 'Select...'
   export let showSearch = false
   export let maxHeight = undefined
+  export let disabled = false
 
   let dispatch = createEventDispatcher()
 
@@ -25,19 +26,29 @@
   }
 
   function toggleDropdown() {
+    if (disabled) return
     isOpen = !isOpen
   }
 
   $: filteredItems = items.filter((item) =>
     item.text.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  $: console.log(disabled)
 </script>
 
-<div class="relative max-w-xs">
+<div
+  class={clsx(
+    'relative max-w-xs',
+    disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'
+  )}
+>
   <button
     on:click={toggleDropdown}
+    {disabled}
     class={clsx(
       'bg-gray-700 text-white py-2 px-4 rounded leading-tight focus:outline-none focus:ring focus:border-blue-300',
+      disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600',
       $$props.class
     )}
   >

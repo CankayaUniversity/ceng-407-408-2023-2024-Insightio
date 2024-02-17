@@ -1,7 +1,9 @@
+from datetime import datetime, timedelta
 from lib.api import TrackerAPI
 import supervision as sv
 import numpy as np
 import threading
+import time
 import cv2
 
 class VideoThreadManager:
@@ -12,6 +14,7 @@ class VideoThreadManager:
         self.video_threads = {}
         self.api = TrackerAPI()
         self.stop_signals = {}
+        self.zone_counts = {}
 
     def fetch_and_update_threads(self):
         new_settings_list = self.api.get_camera_settings()
@@ -45,6 +48,47 @@ class VideoThreadManager:
         self.stop_thread(camera_id)
         self.start_thread(new_settings)
 
+    def start_count_reporter(self):
+        self.reporting_thread = threading.Thread(target=self.report_counts)
+        self.reporting_thread.daemon = True
+        self.reporting_thread.start()
+
+    def report_counts(self):
+        while True:
+            # Calculate the time remaining until the start of the next hour
+            current_time = datetime.now()
+            next_hour = (current_time + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+            sleep_duration = (next_hour - current_time).total_seconds()
+
+            time.sleep(sleep_duration)
+
+            # Report at the start of the hour
+            report_time = datetime.now().isoformat()
+            count_reports = []  # Initialize a list to accumulate reports
+
+            for camera_id, targets in self.zone_counts.items():
+                for target_id, zones in targets.items():
+                    total_counts = {zone_name: zone_data['total'] for zone_name, zone_data in zones.items()}
+                    overall_total = sum(zone_data['total'] for zone_data in zones.values())
+
+                    count_report = {
+                        "cameraId": camera_id,
+                        "targetId": target_id,
+                        "timestamp": report_time,
+                        "totalCounts": total_counts,
+                        "overallTotal": overall_total
+                    }
+                    count_reports.append(count_report)
+
+            # POST the list of reports
+            if count_reports:
+                print("Sending batch of count reports")
+                print(count_reports)
+                self.api.post_count_reports(count_reports)
+
+            # Reset zone counts for the next hour
+            self.zone_counts = {}
+
     def get_capture_device(self, camera_settings):
         cap = {}
 
@@ -65,6 +109,21 @@ class VideoThreadManager:
         corner4 = sv.Point(point2.x, point1.y)
         
         return corner1, corner2, corner3, corner4
+    
+    def calculate_zone_counts(self, zone_type, counters):
+        in_count_sum = 0
+        out_count_sum = 0
+        for counter in counters:
+            in_count, out_count = counter.in_count, counter.out_count
+            
+            in_count_sum += in_count
+            out_count_sum += out_count
+
+        if zone_type == 0:
+            return 0, in_count_sum + out_count_sum
+        
+        else:
+            return in_count_sum - out_count_sum, out_count_sum
 
     def video_processing_thread(self, camera_settings):
         camera_id = camera_settings['id']
@@ -75,37 +134,46 @@ class VideoThreadManager:
         camera_connected = False
         
         # Class_ids of interest - bicycle
-        CLASS_IDS = camera_settings["Targets"]
+        CLASS_IDS = list(camera_settings['Targets'].keys())
 
         counter_sets = []
 
-        for zone in camera_settings["Zones"]:
-            zone_start_point = sv.Point(zone["StartPoint"]["x"], zone["StartPoint"]["y"])
-            zone_end_point = sv.Point(zone["EndPoint"]["x"], zone["EndPoint"]["y"])
-
+        for target, target_zones in camera_settings['Targets'].items():
             counter_set = {
-                "target": zone["Target"],
-                "counters": []
+                'target': target,
+                'zones': []
             }
+            for zone in target_zones:
+                zone_start_point = sv.Point(zone['StartPoint']['x'], zone['StartPoint']['y'])
+                zone_end_point = sv.Point(zone['EndPoint']['x'], zone['EndPoint']['y'])
 
-            if zone["ZoneType"] == 0:
-                # Create LineCounter instance to draw a line
-                line_counter = sv.LineZone(start=zone_start_point, end=zone_end_point, triggering_anchors=[sv.Position.CENTER])
 
-                counter_set["counters"] = [line_counter]
-            
-            elif zone["ZoneType"] == 1:
-                corner1, corner2, corner3, corner4 = self.find_rectangle_corners(zone_start_point, zone_end_point)
+                if zone['ZoneType'] == 0:
+                    # Create LineCounter instance to draw a line
+                    line_counter = sv.LineZone(start=zone_start_point, end=zone_end_point, triggering_anchors=[sv.Position.CENTER])
 
-                # Create LineCounter instances to draw a rectangle
-                line_counter1 = sv.LineZone(start=corner3, end=corner1, triggering_anchors=[sv.Position.CENTER])
-                line_counter2 = sv.LineZone(start=corner2, end=corner3, triggering_anchors=[sv.Position.CENTER])
-                line_counter3 = sv.LineZone(start=corner4, end=corner2, triggering_anchors=[sv.Position.CENTER])
-                line_counter4 = sv.LineZone(start=corner1, end=corner4, triggering_anchors=[sv.Position.CENTER])
+                    counter_set['zones'].append({
+                        'name': zone['ZoneName'],
+                        'type': 0,
+                        'counters': [line_counter]
+                    })
+                
+                elif zone['ZoneType'] == 1:
+                    corner1, corner2, corner3, corner4 = self.find_rectangle_corners(zone_start_point, zone_end_point)
 
-                counter_set["counters"] = [line_counter1, line_counter2, line_counter3, line_counter4]
-            
-            counter_sets.append(counter_set)
+                    # Create LineCounter instances to draw a rectangle
+                    line_counter1 = sv.LineZone(start=corner3, end=corner1, triggering_anchors=[sv.Position.CENTER])
+                    line_counter2 = sv.LineZone(start=corner2, end=corner3, triggering_anchors=[sv.Position.CENTER])
+                    line_counter3 = sv.LineZone(start=corner4, end=corner2, triggering_anchors=[sv.Position.CENTER])
+                    line_counter4 = sv.LineZone(start=corner1, end=corner4, triggering_anchors=[sv.Position.CENTER])
+
+                    counter_set['zones'].append({
+                        'name': zone['ZoneName'],
+                        'type': 1,
+                        'counters': [line_counter1, line_counter2, line_counter3, line_counter4]
+                    })
+                
+                counter_sets.append(counter_set)
 
         cap = self.get_capture_device(camera_settings)
 
@@ -157,8 +225,10 @@ class VideoThreadManager:
                 all_annotated_frame = frame.copy()
 
                 for counter_set in counter_sets:
+                    target_id = counter_set['target']
+
                     # Filtering out detections with unwanted classes
-                    mask = np.array([class_id == counter_set["target"] for class_id in detections.class_id], dtype=bool)
+                    mask = np.array([class_id == counter_set['target'] for class_id in detections.class_id], dtype=bool)
                     target_detections = detections[mask]
 
                     # Format custom labels
@@ -168,25 +238,36 @@ class VideoThreadManager:
                         in target_detections
                     ]
 
-                    # Updating line counters
-                    for counter in counter_set["counters"]:
-                        in_count, out_count = counter.trigger(detections=target_detections)
+                    # Initialize target entry if not present
+                    if camera_id not in self.zone_counts:
+                        self.zone_counts[camera_id] = {}
+                    if target_id not in self.zone_counts[camera_id]:
+                        self.zone_counts[camera_id][target_id] = {}
 
-                    # Get in/out counts
-                    in_count_sum = 0
-                    out_count_sum = 0
-                    for counter in counter_set["counters"]:
-                        in_count, out_count = counter.in_count, counter.out_count
-                        
-                        in_count_sum += in_count
-                        out_count_sum += out_count
+                    target_current = 0
+                    target_total = 0
+                    for zone in counter_set['zones']:
+                        zone_name = zone['name']
+                        zone_type = zone['type']
 
-                    if len(counter_set["counters"]) == 1:
-                        current_counts[counter_set["target"]] = 0
-                        total_counts[counter_set["target"]] = in_count_sum + out_count_sum
-                    else:
-                        current_counts[counter_set["target"]] = in_count_sum - out_count_sum
-                        total_counts[counter_set["target"]] = out_count_sum
+                        # Initialize zone entry if not present
+                        if zone_name not in self.zone_counts[camera_id][target_id]:
+                            self.zone_counts[camera_id][target_id][zone_name] = {'current': 0, 'total': 0}
+
+                        for counter in zone['counters']:
+                            counter.trigger(detections=target_detections)
+
+                        current, total = self.calculate_zone_counts(zone_type, zone['counters'])
+
+                        # Update zone counts
+                        self.zone_counts[camera_id][target_id][zone_name]['current'] = current
+                        self.zone_counts[camera_id][target_id][zone_name]['total'] = total
+
+                        target_current += current
+                        target_total += total
+
+                    current_counts[counter_set["target"]] = target_current
+                    total_counts[counter_set["target"]] = target_total
 
                     # Annotate detection boxes and labels
                     target_frame = box_annotator.annotate(scene=frame.copy(), detections=target_detections)
@@ -196,11 +277,12 @@ class VideoThreadManager:
                     all_annotated_frame = label_annotator.annotate(scene=all_annotated_frame, detections=target_detections, labels=labels)
 
                     # Annotate line counters
-                    for counter in counter_set["counters"]:
-                        target_frame = line_annotator.annotate(frame=target_frame, line_counter=counter)
-                        all_annotated_frame = line_annotator.annotate(frame=all_annotated_frame, line_counter=counter)
+                    for zone in counter_set['zones']:
+                        for counter in zone['counters']:
+                            target_frame = line_annotator.annotate(frame=target_frame, line_counter=counter)
+                            all_annotated_frame = line_annotator.annotate(frame=all_annotated_frame, line_counter=counter)
 
-                    class_id = counter_set["target"]
+                    class_id = counter_set['target']
                     annotated_stream_id = f"frame_{camera_settings['id']}_{class_id}"
                     current_count_stream_id = f"current_count_{camera_settings['id']}_{class_id}"
                     total_count_stream_id = f"total_count_{camera_settings['id']}_{class_id}"

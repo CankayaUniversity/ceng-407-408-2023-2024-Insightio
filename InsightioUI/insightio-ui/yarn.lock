@@ -3605,6 +3605,11 @@ to-regex-range@^5.0.1:
   dependencies:
     is-number "^7.0.0"
 
+toastify-js@^1.12.0:
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/toastify-js/-/toastify-js-1.12.0.tgz#cc1c4f5c7e7380e854e20bedceb51980ea29f64d"
+  integrity sha512-HeMHCO9yLPvP9k0apGSdPUWrUbLnxUKNFzgUoZp1PHCLploIX/4DSQ7V8H25ef+h4iO9n0he7ImfcndnN6nDrQ==
+
 trim-repeated@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/trim-repeated/-/trim-repeated-1.0.0.tgz#e3646a2ea4e891312bf7eace6cfb05380bc01c21"

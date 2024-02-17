@@ -151,7 +151,7 @@
   <!-- Dashboard Content -->
   <div class="flex flex-grow">
     <!-- Chart Section -->
-    <div class="flex flex-col w-1/2 p-4">
+    <div class="flex flex-col w-1/2 p-4 ml-8">
       <div class="flex flex-row pl-3">
         <Icon icon="chart" class="w-10 h-10" />
         <h2 class="text-3xl pl-3 font-bold">Charts</h2>
@@ -184,7 +184,7 @@
     </div>
 
     <!-- Camera View Section with fixed size -->
-    <div class="w-1/2 flex justify-center p-4">
+    <div class="w-1/2 flex justify-center p-4 mr-8">
       <div class="w-full max-w-lg">
         <div class="flex flex-row gap-3">
           <Icon icon="camera" class="w-10 h-10" />

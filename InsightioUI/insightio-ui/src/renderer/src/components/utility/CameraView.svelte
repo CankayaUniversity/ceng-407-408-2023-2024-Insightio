@@ -88,7 +88,7 @@
 
 <div class="camera-view w-full max-w-md mx-auto">
   {#if !previewMode}
-    <img bind:this={videoElement} class="w-full h-auto bg-black" alt="Camera Stream" />
+    <img bind:this={videoElement} class="w-full bg-black" alt="Camera Stream" />
 
     <Dropdown
       items={targets}
@@ -107,13 +107,14 @@
       </div>
     {/if}
   {:else}
-    <video bind:this={videoElement} class="w-full h-auto bg-black" autoplay muted></video>
+    <video bind:this={videoElement} class="w-full bg-black" autoplay muted></video>
   {/if}
 </div>
 
 <style>
-  img {
+  img,
+  video {
     /* Fixed size */
-    height: 330px;
+    height: 405px;
   }
 </style>
