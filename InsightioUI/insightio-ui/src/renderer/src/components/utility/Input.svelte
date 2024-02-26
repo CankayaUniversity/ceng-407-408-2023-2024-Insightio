@@ -27,4 +27,5 @@
   {placeholder}
   {value}
   on:input={handleInput}
+  on:focusout
 />

@@ -23,8 +23,9 @@
   let selectedCamera
   let cameraName = ''
   let deviceIndex = 0
-  let deviceIp = ''
+  let deviceUrl = ''
   let openZoneDraw = false
+  let isIpCam = false
 
   function updateCameraOptions() {
     navigator.mediaDevices.enumerateDevices().then((devices) => {
@@ -43,6 +44,10 @@
       return
     }
     openZoneDraw = true
+  }
+
+  function handleCamType() {
+    isIpCam = cameraType == 'ip-camera' ? true : false
   }
 
   function saveSettings() {
@@ -95,7 +100,7 @@
       </Button>
     </div>
     <div class="-translate-y-6 -translate-x-6 border-2 rounded border-gray-700">
-      <CameraView previewMode bind:deviceIp bind:deviceIndex />
+      <CameraView previewMode bind:isIpCam bind:deviceUrl bind:deviceIndex />
     </div>
   </div>
 </div>
@@ -120,7 +125,12 @@
         />
       </div>
       <div class="mb-4">
-        <RadioGroup label="Camera Type:" bind:selectedValue={cameraType} options={typeOptions} />
+        <RadioGroup
+          label="Camera Type:"
+          bind:selectedValue={cameraType}
+          options={typeOptions}
+          on:change={handleCamType}
+        />
       </div>
       <div class="mb-2">
         {#if cameraType == 'built-in'}
@@ -137,11 +147,11 @@
           <Input
             class="w-full py-1 px-2"
             showLabel
-            label="Camera IP:"
+            label="Camera URL:"
             type="text"
             id="camip"
-            placeholder="127.0.0.1"
-            bind:value={deviceIp}
+            placeholder="https://path/to/cam.mjpg"
+            bind:value={deviceUrl}
           />
         {/if}
       </div>

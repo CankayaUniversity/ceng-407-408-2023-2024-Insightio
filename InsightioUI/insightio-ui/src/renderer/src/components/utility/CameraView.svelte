@@ -1,15 +1,19 @@
 <script>
-  import { onMount } from 'svelte'
+  import { onMount, tick } from 'svelte'
   import Dropdown from './Dropdown.svelte'
   import { baseURL } from '../../api/tracker'
   import { getTargetCurrentCount, getTargetTotalCount } from '../../api/target'
+  import { ffServerURL, startRtspStream } from '../../api/ipc'
 
   export let cameraId = ''
   export let previewMode = false
-  export let deviceIp = ''
+  export let isIpCam = true
+  export let deviceUrl = ''
   export let deviceIndex = 0
 
   let videoElement
+  let ready = false
+  let previousIpCamUrl = ''
 
   let targets = [
     {
@@ -41,10 +45,8 @@
     }
   }
 
-  onMount(() => {
-    if (!previewMode) {
-      setInterval(fetchData, 850)
-    }
+  window.api.receive('rtsp-feed-started', () => {
+    ready = true
   })
 
   // Update video source when cameraId or targetClass changes
@@ -60,9 +62,15 @@
   }
 
   $: if (previewMode) {
-    if (deviceIp) {
-      // If an IP is provided, use it as the video source URL
-      videoElement.src = deviceIp
+    ;(async () => {
+      await tick()
+    })()
+    if (isIpCam && deviceUrl) {
+      if (previousIpCamUrl != deviceUrl) {
+        ready = false
+        startRtspStream(deviceUrl)
+        previousIpCamUrl = deviceUrl
+      }
     } else {
       // Otherwise, access the camera by device index
       try {
@@ -84,6 +92,12 @@
       }
     }
   }
+
+  onMount(() => {
+    if (!previewMode) {
+      setInterval(fetchData, 850)
+    }
+  })
 </script>
 
 <div class="camera-view w-full max-w-md mx-auto">
@@ -106,6 +120,8 @@
         Total count for Target {target.text}: {totalCount}
       </div>
     {/if}
+  {:else if isIpCam && ready}
+    <img src={ffServerURL} class="w-full bg-black" alt="RTSP" />
   {:else}
     <video bind:this={videoElement} class="w-full bg-black" autoplay muted></video>
   {/if}
@@ -116,5 +132,6 @@
   video {
     /* Fixed size */
     height: 405px;
+    width: 620px;
   }
 </style>

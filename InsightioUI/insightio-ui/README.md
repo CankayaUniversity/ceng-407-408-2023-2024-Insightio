@@ -32,3 +32,7 @@ $ yarn build:mac
 # For Linux
 $ yarn build:linux
 ```
+
+### Notes
+
+* You will need to install FFMPEG to get IP camera feed. Download FFMPEG from [here](https://www.gyan.dev/ffmpeg/builds/) and place `ffmpeg.exe` under `bin`. Note that this feature currently only works for Windows.
