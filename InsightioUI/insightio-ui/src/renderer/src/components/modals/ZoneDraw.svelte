@@ -22,6 +22,10 @@
   let deviceIndex = 0
   let disableInputs = false
   let targetZones = {}
+  let actualVideoWidth
+  let actualVideoHeight
+  let scaleX
+  let scaleY
   let history = [{}] // Stack for undo
   let redoStack = [] // Stack for redo
   let dispatch = createEventDispatcher()
@@ -130,16 +134,28 @@
 
   function mapDrawingsToTargetZones() {
     if (disableInputs) return
+
     targetZones = {}
     targets.forEach((target) => {
       const targetId = target.value
       if (drawings[targetId]) {
-        targetZones[targetId] = drawings[targetId].map((drawing) => ({
-          ZoneName: drawing.name,
-          ZoneType: drawing.type === 'line' ? 0 : 1,
-          StartPoint: drawing.start,
-          EndPoint: drawing.end
-        }))
+        targetZones[targetId] = drawings[targetId].map((drawing) => {
+          const adjustedStart = {
+            x: drawing.start.x * scaleX,
+            y: drawing.start.y * scaleY
+          }
+
+          const adjustedEnd = {
+            x: drawing.end.x * scaleX,
+            y: drawing.end.y * scaleY
+          }
+          return {
+            ZoneName: drawing.name,
+            ZoneType: drawing.type === 'line' ? 0 : 1,
+            StartPoint: adjustedStart,
+            EndPoint: adjustedEnd
+          }
+        })
       }
     })
   }
@@ -169,6 +185,15 @@
     ctx.lineWidth = 2
     redrawCanvas()
     canvasLoaded = true
+  }
+
+  function onVideoMetadataLoaded() {
+    actualVideoWidth = cameraFeedElement.videoWidth
+    actualVideoHeight = cameraFeedElement.videoHeight
+
+    // Calculate scale factors based on the video element's fixed size
+    scaleX = actualVideoWidth / 730 // Since the video element width is fixed at 730px
+    scaleY = actualVideoHeight / 620 // Since the video element height is fixed at 620px
   }
 
   function saveZones() {
@@ -231,8 +256,6 @@
   $: if (targets && drawings) {
     mapDrawingsToTargetZones()
   }
-
-  $: console.log(targetZones)
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
@@ -242,7 +265,12 @@
     <!-- Video and Canvas Container -->
     <div class="relative flex-grow">
       <!-- svelte-ignore a11y-media-has-caption -->
-      <video bind:this={cameraFeedElement} class="w-full h-full" autoplay on:resize={initCanvas}
+      <video
+        bind:this={cameraFeedElement}
+        class="w-full h-full"
+        autoplay
+        on:resize={initCanvas}
+        on:loadedmetadata={onVideoMetadataLoaded}
       ></video>
       <canvas
         bind:this={drawingCanvas}
