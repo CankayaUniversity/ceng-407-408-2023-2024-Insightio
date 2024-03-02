@@ -1,8 +1,10 @@
 <script>
   import SwitchButton from '../utility/SwitchButton.svelte'
-  import CameraAdd from './CameraAdd.svelte'
+  import ConfigurationView from './ConfigurationView.svelte'
 
   let currentMode = 'add'
+
+  $: isEditMode = currentMode == 'edit' ? true : false
 </script>
 
 <div class="flex flex-col h-full w-full bg-gray-800 text-white">
@@ -24,11 +26,7 @@
 
   <div class="p-4 mt-4">
     <div class="flex flex-grow border-2 border-gray-700 rounded-lg">
-      {#if currentMode == 'add'}
-        <CameraAdd />
-      {:else}
-        <p>Not implemented</p>
-      {/if}
+      <ConfigurationView bind:isEditMode />
     </div>
   </div>
 </div>

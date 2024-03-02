@@ -11,10 +11,14 @@
   import ZoneDraw from '../modals/ZoneDraw.svelte'
   import { warn } from '../../functions/toastifyWrapper'
 
+  export let isEditMode = false
+
   let typeOptions = [
     { text: 'Built-in', value: 'built-in' },
     { text: 'IP Camera', value: 'ip-camera' }
   ]
+  let cameraConfigurations = []
+  let selectedConfiguration
   let cameraType = typeOptions[0].value
   let tagOptions = Object.values(targets.labels).map((label) => ({ value: label }))
   let selectedTags = []
@@ -73,6 +77,17 @@
       value: Object.keys(targets.labels).find((key) => targets.labels[key] === l)
     }
   })
+
+  $: isSettingsDisabled = !selectedConfiguration
+
+  $: if (isEditMode) {
+    // Perform any additional logic needed when edit mode is active
+    cameraName = selectedConfiguration?.name || ''
+    deviceUrl = selectedConfiguration?.url || ''
+    // Other code...
+  }
+
+  $: tagifyDisabled = isEditMode && isSettingsDisabled
 </script>
 
 <ZoneDraw
@@ -113,61 +128,79 @@
       <h2 class="text-3xl mr-1 mb-4 font-bold">Settings</h2>
     </div>
     <div class="flex flex-col ml-3 mt-3">
-      <div class="mb-2">
-        <Input
-          class="w-full py-1 px-3"
-          showLabel
-          label="Name:"
-          type="text"
-          id="cameraName"
-          placeholder="Camera Name"
-          bind:value={cameraName}
-        />
-      </div>
-      <div class="mb-4">
-        <RadioGroup
-          label="Camera Type:"
-          bind:selectedValue={cameraType}
-          options={typeOptions}
-          on:change={handleCamType}
-        />
-      </div>
-      <div class="mb-2">
-        {#if cameraType == 'built-in'}
-          <!-- svelte-ignore a11y-label-has-associated-control -->
-          <label class="block text-white text-sm font-bold mb-2">Select A Camera</label>
-
+      {#if isEditMode}
+        <div class="mt-4 mb-5">
           <Dropdown
-            class="w-56"
-            bind:selectedItem={selectedCamera}
-            items={cameraOptions}
-            placeholder="Select camera"
+            class="w-full py-1 px-3"
+            bind:selectedItem={selectedConfiguration}
+            items={cameraConfigurations}
+            placeholder="Select Camera Configuration"
+            on:change={() => {
+              /* handle selection change */
+            }}
           />
-        {:else}
+        </div>
+      {/if}
+      <fieldset disabled={isEditMode && isSettingsDisabled}>
+        <div class="mb-2">
           <Input
-            class="w-full py-1 px-2"
+            class="w-full py-1 px-3"
             showLabel
-            label="Camera URL:"
+            label="Name:"
             type="text"
-            id="camip"
-            placeholder="https://path/to/cam.mjpg"
-            bind:value={deviceUrl}
+            id="cameraName"
+            placeholder="Camera Name"
+            bind:value={cameraName}
           />
+        </div>
+        {#if !isEditMode}
+          <div class="mb-4">
+            <RadioGroup
+              label="Camera Type:"
+              bind:selectedValue={cameraType}
+              options={typeOptions}
+              on:change={handleCamType}
+            />
+          </div>
+          <div class="mb-2">
+            {#if cameraType == 'built-in'}
+              <!-- svelte-ignore a11y-label-has-associated-control -->
+              <label class="block text-white text-sm font-bold mb-2">Select A Camera</label>
+
+              <Dropdown
+                class="w-56"
+                bind:selectedItem={selectedCamera}
+                items={cameraOptions}
+                placeholder="Select camera"
+              />
+            {:else}
+              <Input
+                class="w-full py-1 px-2"
+                showLabel
+                label="Camera URL:"
+                type="text"
+                id="camip"
+                placeholder="https://path/to/cam.mjpg"
+                bind:value={deviceUrl}
+              />
+            {/if}
+          </div>
         {/if}
-      </div>
-      <div>
-        <TagInput
-          {tagOptions}
-          title="Select Targets"
-          helpText="Minimum 1, Maximum 5. Please draw target zones after targets are selected."
-          bind:tags={selectedTags}
-          minTags={1}
-          maxTags={5}
-        />
-      </div>
-      <div class="flex justify-end mt-10">
-        <Button class="py-2 px-4" on:click={saveSettings} controlButton>Save</Button>
-      </div>
+        <div>
+          <TagInput
+            {tagOptions}
+            title="Select Targets"
+            helpText="Minimum 1, Maximum 5. Please draw target zones after targets are selected."
+            bind:tags={selectedTags}
+            minTags={1}
+            maxTags={5}
+            bind:disabled={tagifyDisabled}
+          />
+        </div>
+        <div class="flex justify-end mt-10">
+          <Button class="py-2 px-4" on:click={saveSettings} controlButton>Save</Button>
+        </div>
+      </fieldset>
     </div>
   </div>
 </div>

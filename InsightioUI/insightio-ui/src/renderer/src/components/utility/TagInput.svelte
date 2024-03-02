@@ -12,6 +12,7 @@
   export let maxTags = 5
   export let maxSuggestions = 10
   export let helpText = ''
+  export let disabled = false
 
   let id = v4()
   let tagify
@@ -45,6 +46,7 @@
       whitelist: tagOptions,
       minTags: minTags,
       maxTags: maxTags,
+      userInput: !disabled,
       enforceWhitelist: true,
       editTags: {
         keepInvalid: false
@@ -66,6 +68,8 @@
     tagify.on('add', onTagAddedOrRemoved)
     tagify.on('remove', onTagAddedOrRemoved)
   })
+
+  $: tagify && tagify.setDisabled(disabled)
   /* eslint-disable */
 </script>
 
