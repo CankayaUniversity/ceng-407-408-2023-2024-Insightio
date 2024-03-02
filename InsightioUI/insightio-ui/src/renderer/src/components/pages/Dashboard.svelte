@@ -75,7 +75,7 @@
       ]
     }
   ]
-  let selectedCameraId = 'e7a1174c-42b8-48d1-a359-99ed6f95848b'
+  let selectedCameraId = '65e362908a09bd593f34a256'
 
   const targets = mockData.map((o) => o.target)
   const chartTypes = ['bar', 'line', 'pie', 'doughnut', 'radar']

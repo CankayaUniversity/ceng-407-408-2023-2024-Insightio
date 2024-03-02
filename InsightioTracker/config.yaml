@@ -1,2 +1,2 @@
-api_url_base: "https://jsonplaceholder.typicode.com"
+api_url_base: "http://localhost:8090"
 tracker_server_port: 65444

@@ -37,12 +37,7 @@
   $: console.log(disabled)
 </script>
 
-<div
-  class={clsx(
-    'relative max-w-xs',
-    disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'
-  )}
->
+<div class="relative max-w-xs">
   <button
     on:click={toggleDropdown}
     {disabled}

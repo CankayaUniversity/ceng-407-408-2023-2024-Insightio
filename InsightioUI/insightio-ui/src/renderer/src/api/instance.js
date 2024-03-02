@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // todo: change base url
-export const baseURL = "https://example.org";
+export const baseURL = "http://localhost:8090";
 
 const instance = axios.create({
     baseURL: baseURL,

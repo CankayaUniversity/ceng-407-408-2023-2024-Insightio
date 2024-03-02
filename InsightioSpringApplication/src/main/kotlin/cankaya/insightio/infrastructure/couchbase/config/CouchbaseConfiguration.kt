@@ -17,23 +17,20 @@ class CouchbaseConfiguration {
 
 
 // mongodb user connection
-@Document(collection = "user-insightio")
+@Document(collection = "Users")
 data class User(
     @Id
     val id: String? = null,
-
     @NotBlank
     val username: String,
-
     @NotBlank
     val email: String,
-
     @NotBlank
     val password: String
 )
 
 //Mongodb Camera Conf Connection
-@Document(collection = "user-insightio")
+@Document(collection = "CameraSettings")
 data class Camera(
     @Id
     val id: String?=null,
@@ -42,9 +39,9 @@ data class Camera(
     val type: CameraType,
     @NotBlank
     val ipAddress: String,
+    val deviceIndex: Int,
     val status: CameraStatus,
-    val zones: List<Zone>,
-    val targets: List<Int>,
+    val targets: Map<Int, List<Zone>>,
     @NotBlank
     val resolution: String,
     @NotBlank
@@ -60,18 +57,23 @@ data class Metadata(
 )
 
 data class Zone(
-    val cameraId: String,
     val zoneName: String,
-    val target: Int,
-    val vertices: List<Point>
+    val zoneType: ZoneType,
+    val startPoint: Point,
+    val endPoint: Point
 )
 
 data class Point(
     val x: Float,
     val y: Float
 )
+
 enum class CameraType {
     ConnectedCamera, IPCamera
+}
+
+enum class ZoneType {
+    Line, Rectangle
 }
 
 enum class CameraStatus {

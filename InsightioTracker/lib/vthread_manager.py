@@ -18,18 +18,31 @@ class VideoThreadManager:
 
     def fetch_and_update_threads(self):
         new_settings_list = self.api.get_camera_settings()
-        new_settings_dict = {setting['id']: setting for setting in new_settings_list}
-        
-        # Start or update threads
-        for camera_id, new_settings in new_settings_dict.items():
+
+        # Filter out settings with duplicate device indices or IP addresses
+        filtered_settings = {}
+        for setting in new_settings_list:
+            key = setting['deviceIndex'] if setting['type'] == 'ConnectedCamera' else setting['ipAddress']
+            if key not in filtered_settings:
+                filtered_settings[key] = setting
+            else:
+                # Update the setting if it's more recent
+                existing_setting = filtered_settings[key]
+                if setting['createdDate'] > existing_setting['createdDate']:
+                    filtered_settings[key] = setting
+
+        for _, new_setting in filtered_settings.items():
+            camera_id = new_setting['id']
+
             if camera_id not in self.video_threads:
-                self.start_thread(new_settings)
-            elif self.video_threads[camera_id]['settings'] != new_settings:
-                self.update_thread(camera_id, new_settings)
+                self.start_thread(new_setting)
+            elif self.video_threads[camera_id]['settings'] != new_setting:
+                self.update_thread(camera_id, new_setting)
 
         # Stop threads for removed cameras
+        current_ids = [setting['id'] for setting in filtered_settings.values()]
         for camera_id in list(self.video_threads.keys()):
-            if camera_id not in new_settings_dict:
+            if camera_id not in current_ids:
                 self.stop_thread(camera_id)
 
     def start_thread(self, camera_settings):
@@ -92,10 +105,11 @@ class VideoThreadManager:
     def get_capture_device(self, camera_settings):
         cap = {}
 
-        if camera_settings["Type"] == "ConnectedCamera":
-            cap = cv2.VideoCapture(camera_settings["DeviceIndex"])
-        elif camera_settings["Type"] == "IPCamera":
-            cap = cv2.VideoCapture(camera_settings["IpAddress"], cv2.CAP_FFMPEG)
+        if camera_settings["type"] == "ConnectedCamera":
+            deviceIndex = camera_settings["deviceIndex"]
+            cap = cv2.VideoCapture(deviceIndex)
+        elif camera_settings["type"] == "IPCamera":
+            cap = cv2.VideoCapture(camera_settings["ipAddress"], cv2.CAP_FFMPEG)
         else:
             raise ValueError("Invalid Camera Type.")
 
@@ -133,32 +147,32 @@ class VideoThreadManager:
 
         camera_connected = False
         
-        # Class_ids of interest - bicycle
-        CLASS_IDS = list(camera_settings['Targets'].keys())
+        # Class IDs of interest
+        CLASS_IDS = [int(key) for key in camera_settings['targets'].keys()]
 
         counter_sets = []
 
-        for target, target_zones in camera_settings['Targets'].items():
+        for target, target_zones in camera_settings['targets'].items():
             counter_set = {
-                'target': target,
+                'target': int(target),
                 'zones': []
             }
             for zone in target_zones:
-                zone_start_point = sv.Point(zone['StartPoint']['x'], zone['StartPoint']['y'])
-                zone_end_point = sv.Point(zone['EndPoint']['x'], zone['EndPoint']['y'])
+                zone_start_point = sv.Point(zone['startPoint']['x'], zone['startPoint']['y'])
+                zone_end_point = sv.Point(zone['endPoint']['x'], zone['endPoint']['y'])
 
 
-                if zone['ZoneType'] == 0:
+                if zone['zoneType'] == 'Line':
                     # Create LineCounter instance to draw a line
                     line_counter = sv.LineZone(start=zone_start_point, end=zone_end_point, triggering_anchors=[sv.Position.CENTER])
 
                     counter_set['zones'].append({
-                        'name': zone['ZoneName'],
+                        'name': zone['zoneName'],
                         'type': 0,
                         'counters': [line_counter]
                     })
                 
-                elif zone['ZoneType'] == 1:
+                elif zone['zoneType'] == 'Rectangle':
                     corner1, corner2, corner3, corner4 = self.find_rectangle_corners(zone_start_point, zone_end_point)
 
                     # Create LineCounter instances to draw a rectangle
@@ -168,7 +182,7 @@ class VideoThreadManager:
                     line_counter4 = sv.LineZone(start=corner1, end=corner4, triggering_anchors=[sv.Position.CENTER])
 
                     counter_set['zones'].append({
-                        'name': zone['ZoneName'],
+                        'name': zone['zoneName'],
                         'type': 1,
                         'counters': [line_counter1, line_counter2, line_counter3, line_counter4]
                     })
@@ -228,7 +242,7 @@ class VideoThreadManager:
                     target_id = counter_set['target']
 
                     # Filtering out detections with unwanted classes
-                    mask = np.array([class_id == counter_set['target'] for class_id in detections.class_id], dtype=bool)
+                    mask = np.array([class_id == target_id for class_id in detections.class_id], dtype=bool)
                     target_detections = detections[mask]
 
                     # Format custom labels
