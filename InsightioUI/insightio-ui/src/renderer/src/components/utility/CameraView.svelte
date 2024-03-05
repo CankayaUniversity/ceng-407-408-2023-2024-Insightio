@@ -1,5 +1,5 @@
 <script>
-  import { onMount, tick } from 'svelte'
+  import { createEventDispatcher, onMount, tick } from 'svelte'
   import Dropdown from './Dropdown.svelte'
   import { baseURL } from '../../api/tracker'
   import { getTargetCurrentCount, getTargetTotalCount } from '../../api/target'
@@ -10,32 +10,35 @@
   export let isIpCam = true
   export let deviceUrl = ''
   export let deviceIndex = 0
+  export let targetOptions = []
 
+  let rtspImgElement
+  let builtInCamImgElement
   let videoElement
   let ready = false
   let previousIpCamUrl = ''
+  let dispatch = createEventDispatcher()
 
-  let targets = [
-    {
-      text: 'No Target',
-      value: ''
-    },
-    {
-      text: 'Banana',
-      value: 21
-    },
-    {
-      text: 'Bicycle',
-      value: 42
-    },
-    {
-      text: 'Fully Annotated',
-      value: 'all_annotated_frame'
-    }
-  ]
-  let target = targets[0]
+  let targets
+  let target
   let currentCount = 0
   let totalCount = 0
+
+  function handleLoad(e) {
+    if (e.target == builtInCamImgElement) {
+      dispatch('feedloaded', {
+        width: builtInCamImgElement.naturalWidth,
+        height: builtInCamImgElement.naturalHeight
+      })
+    } else if (e.target == rtspImgElement) {
+      dispatch('feedloaded', {
+        width: rtspImgElement.naturalWidth,
+        height: rtspImgElement.naturalHeight
+      })
+    } else {
+      dispatch('feedloaded', { width: videoElement.videoWidth, height: videoElement.videoHeight })
+    }
+  }
 
   async function fetchData() {
     if (target.value != '' && target.value != 'all_annotated_frame') {
@@ -50,14 +53,14 @@
   })
 
   // Update video source when cameraId or targetClass changes
-  $: if (!previewMode && cameraId && videoElement) {
+  $: if (!previewMode && cameraId && builtInCamImgElement) {
     if (target.value == 'all_annotated_frame') {
-      videoElement.src = `${baseURL}/all_annotated_frame_${cameraId}`
+      builtInCamImgElement.src = `${baseURL}/all_annotated_frame_${cameraId}`
     } else if (target.value != '') {
       let targetClassStr = `_${target.value}`
-      videoElement.src = `${baseURL}/frame_${cameraId + targetClassStr}`
+      builtInCamImgElement.src = `${baseURL}/frame_${cameraId + targetClassStr}`
     } else {
-      videoElement.src = `${baseURL}/raw_frame_${cameraId}`
+      builtInCamImgElement.src = `${baseURL}/raw_frame_${cameraId}`
     }
   }
 
@@ -85,12 +88,43 @@
             videoElement.srcObject = stream
           } else {
             console.error('Device index out of range')
+            dispatch('error', 'Media device not found')
           }
         })()
       } catch (error) {
         console.error('Error accessing media devices:', error)
+        dispatch('error', 'Error accessing media device')
       }
     }
+  }
+
+  $: {
+    if (targetOptions.length > 0) {
+      targets = [
+        {
+          text: 'No Target',
+          value: ''
+        },
+        ...targetOptions,
+        {
+          text: 'Fully Annotated',
+          value: 'all_annotated_frame'
+        }
+      ]
+    } else {
+      targets = [
+        {
+          text: 'No Target',
+          value: ''
+        },
+        {
+          text: 'Fully Annotated',
+          value: 'all_annotated_frame'
+        }
+      ]
+    }
+
+    target = targets[0]
   }
 
   onMount(() => {
@@ -102,7 +136,12 @@
 
 <div class="camera-view w-full max-w-md mx-auto">
   {#if !previewMode}
-    <img bind:this={videoElement} class="w-full bg-black" alt="Camera Stream" />
+    <img
+      bind:this={builtInCamImgElement}
+      class="w-full bg-black"
+      alt="Camera Stream"
+      on:load={handleLoad}
+    />
 
     <Dropdown
       items={targets}
@@ -121,9 +160,21 @@
       </div>
     {/if}
   {:else if isIpCam && ready}
-    <img src={ffServerURL} class="w-full bg-black" alt="RTSP" />
+    <img
+      bind:this={rtspImgElement}
+      src={ffServerURL}
+      class="w-full bg-black"
+      alt="RTSP"
+      on:load={handleLoad}
+    />
   {:else}
-    <video bind:this={videoElement} class="w-full bg-black" autoplay muted></video>
+    <video
+      bind:this={videoElement}
+      class="w-full bg-black"
+      autoplay
+      muted
+      on:loadedmetadata={handleLoad}
+    />
   {/if}
 </div>
 

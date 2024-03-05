@@ -150,10 +150,10 @@
             y: drawing.end.y * scaleY
           }
           return {
-            ZoneName: drawing.name,
-            ZoneType: drawing.type === 'line' ? 0 : 1,
-            StartPoint: adjustedStart,
-            EndPoint: adjustedEnd
+            zoneName: drawing.name,
+            zoneType: drawing.type === 'line' ? 0 : 1,
+            startPoint: adjustedStart,
+            endPoint: adjustedEnd
           }
         })
       }

@@ -122,18 +122,19 @@
 
     timeVisibility[text] = !timeVisibility[text]
 
-    console.log(isVisible)
     return isVisible
   }
 
   async function fetchSettings() {
     showLoading = true
-    cameraSettings = await getAllCameraSettings()
-    let camerasExist = cameraSettings.length > 0 ? true : false
-    console.log(cameraSettings)
-    maxCameraIndex = camerasExist ? cameraSettings.length - 1 : 0
-    selectedCameraSetting = camerasExist ? cameraSettings[0] : null
-    showLoading = false
+    const res = await getAllCameraSettings()
+    if (res.data) {
+      cameraSettings = res.data
+      let camerasExist = cameraSettings.length > 0 ? true : false
+      maxCameraIndex = camerasExist ? cameraSettings.length - 1 : 0
+      selectedCameraSetting = camerasExist ? cameraSettings[0] : null
+      showLoading = false
+    }
   }
 
   $: $pageStore.activePage === 'dashboard' && fetchSettings()

@@ -33,8 +33,6 @@
   $: filteredItems = items.filter((item) =>
     item.text.toLowerCase().includes(searchTerm.toLowerCase())
   )
-
-  $: console.log(disabled)
 </script>
 
 <div class="relative max-w-xs">
