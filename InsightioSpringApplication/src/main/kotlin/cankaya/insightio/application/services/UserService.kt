@@ -3,19 +3,8 @@ package cankaya.insightio.application.services
 
 import cankaya.insightio.infrastructure.mongodb.impls.*
 import jakarta.xml.bind.DatatypeConverter
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
-
-// burası application -> services
-// servislerimiz burada olucak, sende kendininkini account servis gibi yazabilirsin
-
-class OurService {
-    fun ornekFunc() {
-        val x = 1
-    }
-}
-
 
 //Login için service
 
@@ -42,7 +31,7 @@ class UserService(private val userRepository: UserRepository) {
 
 
 
-//Camera Conf Service
+//Camera Conf Service -> TODO bunu CameraService gibi ayrı dosyaya çıkartır mısın
 @Service
 class CameraService(private val cameraRepository: CameraRepository) {
     fun findAllCameras(): List<Camera> = cameraRepository.findAll()

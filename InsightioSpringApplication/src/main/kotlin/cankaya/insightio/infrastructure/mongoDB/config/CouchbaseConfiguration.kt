@@ -6,17 +6,9 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.util.Objects
 
-
-@Configuration
-class CouchbaseConfiguration {
-
-    // object mapper falan eklenecek
-    // bean oluşturulacak cluster ve bucket için
-}
-
-
-
 // mongodb user connection
+// TODO bunlar config değil, bu paketin içinde olmamalılar, DTO objeleri bunlar
+// DTO = data transfer object, db deki objeyi temsil eder, domain objeleri de değilerdir, bunu mongoDb  models altına geçirebilir misin?
 @Document(collection = "Users")
 data class User(
     @Id
@@ -55,6 +47,8 @@ data class Metadata(
     val categoryId: String,
     val value: String
 )
+
+// TODO bunlar domain objeleri lütfen domain paketinin altında hepsi ayrı dosya olacak şekilde taşıyabilir misiniz?
 
 data class Zone(
     val zoneName: String,
