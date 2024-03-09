@@ -9,23 +9,23 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 
 @OpenAPIDefinition(
-        info = Info(
-                title = "Insightio Swagger",
-                description = "Insightio's spring boot application",
-                contact = Contact(
-                        name = "Team 6",
-                        url = "https://cankayauniversity.github.io/ceng-407-408-2023-2024-Insightio/",
-                        email = "c2011030@student.cankaya.edu.tr",
+    info =
+        Info(
+            title = "Insightio Swagger",
+            description = "Insightio's spring boot application",
+            contact =
+                Contact(
+                    name = "Team 6",
+                    url = "https://cankayauniversity.github.io/ceng-407-408-2023-2024-Insightio/",
+                    email = "c2011030@student.cankaya.edu.tr",
                 ),
-                version = "1.0"
-        )
+            version = "1.0",
+        ),
 )
 @SpringBootApplication
 @EnableMongoRepositories(basePackages = ["cankaya.insightio.infrastructure"])
 class InsightioApplication : SpringBootServletInitializer()
 
 fun main(args: Array<String>) {
-    // uygulama buradan ayağa kalkar
     runApplication<InsightioApplication>(*args)
 }
-
