@@ -14,10 +14,6 @@
 
   function handleLogin() {
     loggedIn = true
-    // Wait for the animation to finish before removing the Login component
-    // setTimeout(() => {
-    //   showLogin = false
-    // }, 300) // Should match the duration of the fade transition
   }
 
   // To get the active page component, you can use a derived store or a reactive statement

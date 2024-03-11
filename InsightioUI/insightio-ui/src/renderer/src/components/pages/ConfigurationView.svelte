@@ -42,6 +42,7 @@
   let isIpCam = false
   let zones = {}
   let resolution = ''
+  let newTags = []
   let newCameraConfiguration = {
     name: '',
     type: '',
@@ -232,13 +233,21 @@
     }
   })
 
-  $: isSettingsDisabled = !selectedConfiguration
+  $: isSettingsDisabled = Object.keys(selectedConfiguration).length == 0
 
   $: if (isEditMode) {
     // Perform any additional logic needed when edit mode is active
     cameraName = selectedConfiguration?.name || ''
     deviceUrl = selectedConfiguration?.ipAddress || ''
     deviceIndex = selectedConfiguration?.deviceIndex || 0
+
+    if (selectedConfiguration && selectedConfiguration.targets) {
+      let configTargets = []
+      for (let i of Object.keys(selectedConfiguration.targets)) {
+        configTargets.push(targets.labels[i])
+      }
+      newTags = [...configTargets]
+    }
   }
 
   $: tagifyDisabled = isEditMode && isSettingsDisabled
@@ -357,6 +366,7 @@
               title="Select Targets"
               helpText="Minimum 1, Maximum 5. Please draw target zones after targets are selected."
               bind:tags={selectedTags}
+              bind:newTags
               minTags={1}
               maxTags={5}
               bind:disabled={tagifyDisabled}

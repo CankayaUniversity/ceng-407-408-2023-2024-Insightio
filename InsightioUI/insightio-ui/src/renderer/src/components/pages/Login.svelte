@@ -4,14 +4,22 @@
   import Input from '../utility/Input.svelte'
   import Icon from '../utility/Icon.svelte'
   import { minimize, close } from '../../api/ipc'
+  import { userLogin } from '../../api/users'
 
   const dispatch = createEventDispatcher()
 
   let username = ''
   let password = ''
 
-  function submit() {
+  async function submit() {
     if (username.trim().length > 0 && password.trim().length > 0) {
+      // TODO: Update this part
+      try {
+        const res = await userLogin(username, password)
+        console.log(res)
+      } catch (e) {
+        console.error(e)
+      }
       dispatch('login')
     }
   }
@@ -67,7 +75,9 @@
         Forgot Password?
       </a>
     </div>
-    <p class="absolute bottom-5 right-5 mt-8 text-right text-white text-xs">© 2023 Insightio. All rights reserved.</p>
+    <p class="absolute bottom-5 right-5 mt-8 text-right text-white text-xs">
+      © 2023 Insightio. All rights reserved.
+    </p>
   </div>
 </div>
 

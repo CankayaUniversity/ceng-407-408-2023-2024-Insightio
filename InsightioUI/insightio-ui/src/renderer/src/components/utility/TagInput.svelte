@@ -13,6 +13,7 @@
   export let maxSuggestions = 10
   export let helpText = ''
   export let disabled = false
+  export let newTags = []
 
   let id = v4()
   let tagify
@@ -70,6 +71,14 @@
   })
 
   $: tagify && tagify.setDisabled(disabled)
+
+  $: {
+    if (newTags.length != 0) {
+      tags = [...newTags]
+      tagify.addTags(newTags)
+      newTags = []
+    }
+  }
   /* eslint-disable */
 </script>
 
