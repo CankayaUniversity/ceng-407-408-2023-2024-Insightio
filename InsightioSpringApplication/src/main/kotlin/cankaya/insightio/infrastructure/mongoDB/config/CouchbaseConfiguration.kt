@@ -63,13 +63,13 @@ data class Point(
 )
 
 enum class CameraType {
-    ConnectedCamera, IPCamera
+    CONNECTEDCAMERA, IPCAMERA
 }
 
 enum class ZoneType {
-    Line, Rectangle
+    LINE, RECTANGLE
 }
 
 enum class CameraStatus {
-    Disconnected, Connected
+    DISCONNECTED, CONNECTED
 }
