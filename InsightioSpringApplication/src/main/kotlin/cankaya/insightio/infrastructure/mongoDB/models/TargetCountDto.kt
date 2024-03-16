@@ -1,6 +1,6 @@
 package cankaya.insightio.infrastructure.mongoDB.models
 
-data class TargetCount(
+data class TargetCountDto(
     val target: Int,
     val zoneName: String,
     val currentCount: Int,

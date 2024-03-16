@@ -1,7 +1,7 @@
 package cankaya.insightio.infrastructure.mongoDB.models
 
-data class CountLog(
+data class CountLogDto(
     val id: String,
-    val countReports: List<CountReport>,
+    val countReports: List<CountReportDto>,
     val createdDate: String,
 )
