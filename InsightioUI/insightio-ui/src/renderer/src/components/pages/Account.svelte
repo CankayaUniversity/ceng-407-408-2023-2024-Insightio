@@ -3,6 +3,7 @@
   import Button from '../utility/Button.svelte'
   import profileImg from '../../assets/profile.png'
   import Icon from '../utility/Icon.svelte'
+  import patterns from '../../functions/regex'
 
   let name = ''
   let surname = ''
@@ -10,11 +11,20 @@
   let password = ''
   let selectedFile
   let previewUrl
-  let fileInput // reference for input element
+  let fileInput
+  let dataUri
 
-  function saveAccountSettings() {
-    console.log('Account settings saved')
-    console.log('File Uploading:', selectedFile)
+  async function saveAccountSettings() {
+    if (selectedFile) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        dataUri = e.target.result
+        console.log('Data URI:', dataUri)
+        // Save or process dataUri as needed here
+      }
+      reader.readAsDataURL(selectedFile)
+    }
+    console.log('Account settings saved:', { name, surname, email, password, dataUri })
   }
 
   function handleFileChange(event) {
@@ -29,8 +39,22 @@
     }
   }
 
+  function resetAccountSettings() {
+    name = ''
+    surname = ''
+    email = ''
+    password = ''
+    previewUrl = profileImg
+    selectedFile = null
+    dataUri = ''
+  }
+
   function triggerFileSelect() {
     fileInput.click()
+  }
+
+  $: {
+    if (dataUri) previewUrl = dataUri
   }
 </script>
 
@@ -118,6 +142,7 @@
               label="E-mail:"
               type="email"
               placeholder="Email"
+              pattern={patterns['email']}
               bind:value={email}
             />
             <Input
@@ -129,7 +154,11 @@
               bind:value={password}
             />
 
-            <div class="flex justify-end mt-4">
+            <div class="flex justify-end space-x-3 mt-4">
+              <Button
+                class="bg-red-500 px-4 p-2 hover:bg-red-700 text-white font-bold rounded focus:outline-none focus:shadow-outline"
+                on:click={resetAccountSettings}>Reset</Button
+              >
               <Button
                 class="bg-blue-500 px-4 p-2 hover:bg-blue-700 text-white font-bold rounded focus:outline-none focus:shadow-outline"
                 on:click={saveAccountSettings}>Save</Button

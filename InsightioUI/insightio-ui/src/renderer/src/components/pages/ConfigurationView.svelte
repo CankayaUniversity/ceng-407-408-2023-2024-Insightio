@@ -48,7 +48,7 @@
     type: '',
     ipAddress: '127.0.0.1',
     deviceIndex: 0,
-    status: 'Connected',
+    status: 'CONNECTED',
     targets: {},
     resolution: '',
     createdDate: '',
@@ -77,7 +77,7 @@
       type: '',
       ipAddress: '127.0.0.1',
       deviceIndex: 0,
-      status: 'Connected',
+      status: 'CONNECTED',
       targets: {},
       resolution: '',
       createdDate: '',
@@ -173,10 +173,10 @@
 
       newCameraConfiguration = {
         name: cameraName,
-        type: isCameraBuiltIn ? 'ConnectedCamera' : 'IPCamera',
+        type: isCameraBuiltIn ? 'CONNECTEDCAMERA' : 'IPCAMERA',
         ipAddress: isCameraBuiltIn ? '127.0.0.1' : deviceUrl,
         deviceIndex: isCameraBuiltIn ? deviceIndex : 0,
-        status: 'Connected',
+        status: 'CONNECTED',
         targets: zones,
         resolution: resolution,
         createdDate: d.toISOString(),
@@ -337,7 +337,7 @@
               />
             </div>
             <div class="mb-2">
-              {#if cameraType == 'built-in' || (selectedConfiguration && selectedConfiguration.type === 'ConnectedCamera')}
+              {#if cameraType == 'built-in' || (selectedConfiguration && selectedConfiguration.type === 'CONNECTEDCAMERA')}
                 <!-- svelte-ignore a11y-label-has-associated-control -->
                 <label class="block text-white text-sm font-bold mb-2">Select A Camera</label>
 
@@ -347,7 +347,7 @@
                   items={cameraOptions}
                   placeholder="Select camera"
                 />
-              {:else if cameraType == 'ip-camera' || (selectedConfiguration && selectedConfiguration.type === 'IPCamera')}
+              {:else if cameraType == 'ip-camera' || (selectedConfiguration && selectedConfiguration.type === 'IPCAMERA')}
                 <Input
                   class="w-full py-1 px-2"
                   showLabel

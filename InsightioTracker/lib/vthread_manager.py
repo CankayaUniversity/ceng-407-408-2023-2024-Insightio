@@ -22,7 +22,7 @@ class VideoThreadManager:
         # Filter out settings with duplicate device indices or IP addresses
         filtered_settings = {}
         for setting in new_settings_list:
-            key = setting['deviceIndex'] if setting['type'] == 'ConnectedCamera' else setting['ipAddress']
+            key = setting['deviceIndex'] if setting['type'] == 'CONNECTEDCAMERA' else setting['ipAddress']
             if key not in filtered_settings:
                 filtered_settings[key] = setting
             else:
@@ -105,10 +105,10 @@ class VideoThreadManager:
     def get_capture_device(self, camera_settings):
         cap = {}
 
-        if camera_settings["type"] == "ConnectedCamera":
+        if camera_settings["type"] == "CONNECTEDCAMERA":
             deviceIndex = camera_settings["deviceIndex"]
             cap = cv2.VideoCapture(deviceIndex)
-        elif camera_settings["type"] == "IPCamera":
+        elif camera_settings["type"] == "IPCAMERA":
             cap = cv2.VideoCapture(camera_settings["ipAddress"], cv2.CAP_FFMPEG)
         else:
             raise ValueError("Invalid Camera Type.")
@@ -162,7 +162,7 @@ class VideoThreadManager:
                 zone_end_point = sv.Point(zone['endPoint']['x'], zone['endPoint']['y'])
 
 
-                if zone['zoneType'] == 'Line':
+                if zone['zoneType'] == 'LINE':
                     # Create LineCounter instance to draw a line
                     line_counter = sv.LineZone(start=zone_start_point, end=zone_end_point, triggering_anchors=[sv.Position.CENTER])
 
@@ -172,7 +172,7 @@ class VideoThreadManager:
                         'counters': [line_counter]
                     })
                 
-                elif zone['zoneType'] == 'Rectangle':
+                elif zone['zoneType'] == 'RECTANGLE':
                     corner1, corner2, corner3, corner4 = self.find_rectangle_corners(zone_start_point, zone_end_point)
 
                     # Create LineCounter instances to draw a rectangle
