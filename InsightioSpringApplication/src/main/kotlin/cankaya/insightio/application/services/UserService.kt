@@ -10,15 +10,16 @@ import java.security.MessageDigest
 
 //typelara dikkat et database ve burdan gönderilenler için
 @Service
-class UserService(private val userRepository: UserRepository) {
+class UserService(private val userRepository: UserRepository, private val encryptionUtils: EncryptionUtils) {
 
-    fun validateUser(login: String, inputPassword: String): Boolean {
-        val user = userRepository.findByUsername(login) ?: userRepository.findByEmail(login)
-        if (user != null) {
-            val hashedInputPassword = hashPassword(inputPassword)
-            return hashedInputPassword.equals(user.password)
-        }
-        return false
+    fun validateAndDecryptUser(username: String, hashedInputPassword: String): Boolean {
+        val user = userRepository.findByUsername(username) ?: return false
+
+        // Veritabanında AES ile şifrelenmiş şifreyi çözüp, hashleyerek gelen hash ile karşılaştır
+        val decryptedPassword = encryptionUtils.decryptAES(user.encryptedPassword, "AES_KEY")
+        val decryptedPasswordHashed = hashPassword(decryptedPassword)
+        
+        return decryptedPasswordHashed == hashedInputPassword
     }
 
     private fun hashPassword(password: String): String {
@@ -27,6 +28,35 @@ class UserService(private val userRepository: UserRepository) {
         return DatatypeConverter.printHexBinary(hash).uppercase()
     }
 }
+
+// EncryptionUtils classı sonradan değiştirilmeli yeri şu anlık burda duruyor
+//dependencies eklenmeli eksik**
+
+@Component
+class EncryptionUtils {
+
+    fun sha256(input: String): String {
+        val md = MessageDigest.getInstance("SHA-256")
+        val hash = md.digest(input.toByteArray())
+        return DatatypeConverter.printHexBinary(hash)
+    }
+
+    fun encryptAES(input: String, secretKey: String): ByteArray {
+        val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
+        val key = SecretKeySpec(secretKey.toByteArray(), "AES")
+        cipher.init(Cipher.ENCRYPT_MODE, key)
+        return cipher.doFinal(input.toByteArray())
+    }
+
+    fun decryptAES(input: ByteArray, secretKey: String): String {
+        val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
+        val key = SecretKeySpec(secretKey.toByteArray(), "AES")
+        cipher.init(Cipher.DECRYPT_MODE, key)
+        val decrypted = cipher.doFinal(input)
+        return String(decrypted)
+    }
+}
+
 
 
 
