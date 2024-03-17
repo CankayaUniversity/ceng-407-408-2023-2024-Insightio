@@ -3,8 +3,12 @@ package cankaya.insightio.application.services
 
 import cankaya.insightio.infrastructure.mongodb.impls.*
 import jakarta.xml.bind.DatatypeConverter
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
+import javax.crypto.Cipher
+import javax.crypto.spec.SecretKeySpec
+import java.util.Base64
 
 //Login için service
 
@@ -16,7 +20,7 @@ class UserService(private val userRepository: UserRepository, private val encryp
         val user = userRepository.findByUsername(username) ?: return false
 
         // Veritabanında AES ile şifrelenmiş şifreyi çözüp, hashleyerek gelen hash ile karşılaştır
-        val decryptedPassword = encryptionUtils.decryptAES(user.encryptedPassword, "AES_KEY")
+        val decryptedPassword = encryptionUtils.decryptAES(user.password, "kBI01TQ9G9Z0Sk7uP15gAw==")
         val decryptedPasswordHashed = hashPassword(decryptedPassword)
         
         return decryptedPasswordHashed == hashedInputPassword
@@ -26,6 +30,9 @@ class UserService(private val userRepository: UserRepository, private val encryp
         val digest = MessageDigest.getInstance("SHA-256")
         val hash = digest.digest(password.toByteArray(Charsets.UTF_8))
         return DatatypeConverter.printHexBinary(hash).uppercase()
+    }
+    fun findByUsername(username: String): User? {
+        return userRepository.findByUsername(username)
     }
 }
 
@@ -48,12 +55,15 @@ class EncryptionUtils {
         return cipher.doFinal(input.toByteArray())
     }
 
-    fun decryptAES(input: ByteArray, secretKey: String): String {
+    fun decryptAES(inputBase64: String, secretKey: String): String {
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-        val key = SecretKeySpec(secretKey.toByteArray(), "AES")
+        val key = SecretKeySpec(secretKey.toByteArray(Charsets.UTF_8), "AES")
         cipher.init(Cipher.DECRYPT_MODE, key)
-        val decrypted = cipher.doFinal(input)
-        return String(decrypted)
+
+
+        val encryptedData = Base64.getDecoder().decode(inputBase64)
+        val decrypted = cipher.doFinal(encryptedData)
+        return String(decrypted, Charsets.UTF_8)
     }
 }
 

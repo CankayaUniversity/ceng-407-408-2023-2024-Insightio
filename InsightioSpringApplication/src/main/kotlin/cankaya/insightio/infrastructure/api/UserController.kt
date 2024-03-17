@@ -1,6 +1,7 @@
 package cankaya.insightio.infrastructure.api
 
 import cankaya.insightio.application.services.UserService
+import cankaya.insightio.application.services.models.ApiResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 //dependencies kontrol edilmeli**
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/users")
 class UserController(private val userService: UserService) {
 
-    @PostMapping("/{username}")
+    @PostMapping("/username")
     fun loginUser(@RequestBody loginDto: LoginDto): ResponseEntity<ApiResponse> {
         
 
