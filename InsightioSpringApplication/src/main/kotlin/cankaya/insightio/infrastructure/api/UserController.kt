@@ -3,19 +3,26 @@ package cankaya.insightio.infrastructure.api
 import cankaya.insightio.application.services.UserService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-
+//dependencies kontrol edilmeli**
 
 @RestController
-@RequestMapping("/username")
+@RequestMapping("/users")
 class UserController(private val userService: UserService) {
 
-    @GetMapping("/{username}")
-    fun getUserByLogin(@PathVariable username: String, @RequestParam password: String): ResponseEntity<String> {
+    @PostMapping("/{username}")
+    fun loginUser(@RequestBody loginDto: LoginDto): ResponseEntity<ApiResponse> {
+        
 
-        return if (userService.validateUser(username, password)) {
-            ResponseEntity.ok("Login successful")
+        // userın doğrulanması
+        val isUserValid = userService.validateAndDecryptUser(loginDto.username, loginDto.password)
+
+        return if (isUserValid) {
+            val user = userService.findByUsername(loginDto.username)
+            ResponseEntity.ok(ApiResponse.success(user))
         } else {
-            ResponseEntity.status(401).body("Unauthorized")
+            ResponseEntity.status(401).body(ApiResponse.error(statusCode = 401, errorMessage = "Unauthorized"))
         }
     }
 }
+// başka yere alınması lazım**
+data class LoginDto(val username: String, val password: String)
