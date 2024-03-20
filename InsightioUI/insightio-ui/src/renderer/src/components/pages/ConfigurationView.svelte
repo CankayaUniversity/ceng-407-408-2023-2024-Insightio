@@ -138,8 +138,8 @@
   async function fetchCameraSettings() {
     showLoading = true
     const res = await getAllCameraSettings()
-    if (res.data) {
-      cameraConfigurations = res.data
+    if (res) {
+      cameraConfigurations = res
       configurationDropdownOptions = cameraConfigurations.map((conf) => ({
         text: conf.name,
         value: conf.id

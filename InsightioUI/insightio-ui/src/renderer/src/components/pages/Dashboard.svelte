@@ -128,8 +128,8 @@
   async function fetchSettings() {
     showLoading = true
     const res = await getAllCameraSettings()
-    if (res.data) {
-      cameraSettings = res.data
+    if (res) {
+      cameraSettings = res
       let camerasExist = cameraSettings.length > 0 ? true : false
       maxCameraIndex = camerasExist ? cameraSettings.length - 1 : 0
       selectedCameraSetting = camerasExist ? cameraSettings[0] : null

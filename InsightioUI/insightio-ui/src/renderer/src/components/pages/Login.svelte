@@ -5,6 +5,8 @@
   import Icon from '../utility/Icon.svelte'
   import { minimize, close } from '../../api/ipc'
   import { userLogin } from '../../api/users'
+  import { failure } from '../../functions/toastifyWrapper'
+  import userStore from '../../stores/userStore'
 
   const dispatch = createEventDispatcher()
 
@@ -13,14 +15,19 @@
 
   async function submit() {
     if (username.trim().length > 0 && password.trim().length > 0) {
-      // TODO: Update this part
-      try {
-        const res = await userLogin(username, password)
-        console.log(res)
-      } catch (e) {
-        console.error(e)
+      const res = await userLogin(username, password)
+
+      if (res) {
+        const userData = {
+          ...res,
+          timestamp: new Date().getTime()
+        }
+        localStorage.setItem('user', JSON.stringify(userData))
+        userStore.set(res)
+        dispatch('login', res)
+      } else {
+        failure('Invalid credentials. Please try again')
       }
-      dispatch('login')
     }
   }
 

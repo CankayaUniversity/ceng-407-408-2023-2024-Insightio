@@ -7,7 +7,7 @@ export const success = (message) => {
         duration: 2000,
         gravity: "top", // `top` or `bottom`
         position: 'right', // `left`, `center` or `right`
-        backgroundColor: "#15CD72",
+        style: { background: "#15CD72" },
         className: "info",
     }).showToast();
 };
@@ -18,7 +18,7 @@ export const warn = (message) => {
         duration: 2000,
         gravity: "top",
         position: 'right',
-        backgroundColor: "#FFA500",
+        style: { background: "#FFA500" },
         className: "info",
     }).showToast();
 };
@@ -29,7 +29,7 @@ export const failure = (message) => {
         duration: 2000,
         gravity: "top",
         position: 'right',
-        backgroundColor: "#ED4F32",
+        style: { background: "#ED4F32" },
         className: "info",
     }).showToast();
 };
@@ -40,7 +40,7 @@ export const notify = (message) => {
         duration: 2000,
         gravity: "top",
         position: 'right',
-        backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+        style: { background: "linear-gradient(to right, #00b09b, #96c93d)" },
         className: "info",
     }).showToast();
 };
