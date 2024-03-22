@@ -7,18 +7,14 @@ const api = {
     // whitelist channels
     let validChannels = [
       "minimize-window",
-      "close-window",
-      "start-rtsp-stream",
-      "stop-rtsp-stream",
+      "close-window"
     ];
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data);
     }
   },
   receive: (channel, func) => {
-    let validChannels = [
-      "rtsp-feed-started"
-    ];
+    let validChannels = [];
     if (validChannels.includes(channel)) {
       // Deliberately strip event as it includes `sender` 
       ipcRenderer.on(channel, (event, ...args) => func(...args));

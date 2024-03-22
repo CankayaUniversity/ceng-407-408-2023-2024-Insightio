@@ -3,7 +3,6 @@
   import Dropdown from './Dropdown.svelte'
   import { baseURL } from '../../api/tracker'
   import { getTargetCurrentCount, getTargetTotalCount } from '../../api/target'
-  import { ffServerURL, startRtspStream } from '../../api/ipc'
 
   export let cameraId = ''
   export let previewMode = false
@@ -12,11 +11,10 @@
   export let deviceIndex = 0
   export let targetOptions = []
 
-  let rtspImgElement
+  let ipCamElement
   let builtInCamImgElement
   let videoElement
   let ready = false
-  let previousIpCamUrl = ''
   let dispatch = createEventDispatcher()
 
   let targets
@@ -24,16 +22,15 @@
   let currentCount = 0
   let totalCount = 0
 
+  async function waitRender() {
+    await tick()
+  }
+
   function handleLoad(e) {
     if (e.target == builtInCamImgElement) {
       dispatch('feedloaded', {
         width: builtInCamImgElement.naturalWidth,
         height: builtInCamImgElement.naturalHeight
-      })
-    } else if (e.target == rtspImgElement) {
-      dispatch('feedloaded', {
-        width: rtspImgElement.naturalWidth,
-        height: rtspImgElement.naturalHeight
       })
     } else {
       dispatch('feedloaded', { width: videoElement.videoWidth, height: videoElement.videoHeight })
@@ -48,10 +45,6 @@
     }
   }
 
-  window.api.receive('rtsp-feed-started', () => {
-    ready = true
-  })
-
   // Update video source when cameraId or targetClass changes
   $: if (!previewMode && cameraId && builtInCamImgElement) {
     if (target.value == 'all_annotated_frame') {
@@ -65,15 +58,9 @@
   }
 
   $: if (previewMode) {
-    ;(async () => {
-      await tick()
-    })()
+    waitRender()
     if (isIpCam && deviceUrl) {
-      if (previousIpCamUrl != deviceUrl) {
-        ready = false
-        startRtspStream(deviceUrl)
-        previousIpCamUrl = deviceUrl
-      }
+      ready = true
     } else {
       // Otherwise, access the camera by device index
       try {
@@ -160,13 +147,14 @@
       </div>
     {/if}
   {:else if isIpCam && ready}
-    <img
-      bind:this={rtspImgElement}
-      src={ffServerURL}
-      class="w-full bg-black"
-      alt="RTSP"
-      on:load={handleLoad}
-    />
+    <iframe
+      bind:this={ipCamElement}
+      title="IPCamFeed"
+      src={deviceUrl}
+      class="iframe-video"
+      sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+      frameborder="0"
+    ></iframe>
   {:else}
     <video
       bind:this={videoElement}
@@ -184,5 +172,14 @@
     /* Fixed size */
     height: 405px;
     width: 620px;
+  }
+
+  .iframe-video {
+    height: 405px;
+    width: 495px;
+    overflow: hidden;
+    display: block;
+    object-fit: contain;
+    border: none;
   }
 </style>

@@ -7,11 +7,3 @@ export function minimize() {
 export function close() {
     window.api.send('close-window')
 }
-
-export function startRtspStream(rtspUrl) {
-    window.api.send('start-rtsp-stream', rtspUrl)
-}
-
-export function stopRtspStream() {
-    window.api.send('stop-rtsp-stream')
-}
