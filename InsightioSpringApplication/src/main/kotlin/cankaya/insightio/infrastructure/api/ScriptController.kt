@@ -1,7 +1,7 @@
 package cankaya.insightio.infrastructure.api
 
 import cankaya.insightio.application.services.TrackingService
-import cankaya.insightio.application.services.models.ApiResponse
+import cankaya.insightio.infrastructure.api.models.ApiResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping

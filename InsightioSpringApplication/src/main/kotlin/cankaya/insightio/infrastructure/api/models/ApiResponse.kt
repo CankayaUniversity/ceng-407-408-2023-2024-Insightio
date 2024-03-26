@@ -1,4 +1,4 @@
-package cankaya.insightio.application.services.models
+package cankaya.insightio.infrastructure.api.models
 
 data class ApiResponse(
     val isSuccess: Boolean,
@@ -16,7 +16,7 @@ data class ApiResponse(
 
         fun error(
             responseBody: Any? = null,
-            statusCode: Int,
+            statusCode: Int = 500,
             errorMessage: String,
         ) = ApiResponse(
             false,

@@ -1,12 +1,12 @@
 package cankaya.insightio.infrastructure.api
 
 import cankaya.insightio.application.services.UserService
-import cankaya.insightio.application.services.models.ApiResponse
+import cankaya.insightio.infrastructure.api.models.ApiResponse
 import cankaya.insightio.application.utils.AESUtils
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-// dependencies kontrol edilmeli**
+// dependencies kontrol edilmeli** -> formatlarsan gider
 
 @RestController
 @RequestMapping("/users")
@@ -36,4 +36,5 @@ class UserController(
 }
 
 // başka yere alınması lazım**
+// istersen services -> models altına yazabilirsin LoginRequest ismiyle
 data class LoginDto(val username: String, val password: String)

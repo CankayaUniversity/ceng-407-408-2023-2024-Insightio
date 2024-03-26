@@ -48,8 +48,6 @@ data class Metadata(
     val value: String
 )
 
-// TODO bunlar domain objeleri lütfen domain paketinin altında hepsi ayrı dosya olacak şekilde taşıyabilir misiniz?
-
 data class Zone(
     val zoneName: String,
     val zoneType: ZoneType,

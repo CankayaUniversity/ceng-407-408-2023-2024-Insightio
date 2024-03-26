@@ -1,16 +1,21 @@
-package cankaya.insightio.infrastructure.mongoDB.models
+package cankaya.insightio.domain
 
 import jakarta.validation.constraints.NotBlank
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import java.time.OffsetDateTime
 
-// ben tabloyu oluşturmadım mongodb kurulu değil diye
 @Document(collection = "CountReport")
-data class CountReportDto(
+data class CountReport(
     @Id
     val id: String? = null,
     @NotBlank
     val cameraId: String,
     @NotBlank
-    val targetCounts: List<TargetCountDto>,
+    val targetId: Int,
+    @NotBlank
+    val timestamp: String,
+    val totalCounts: Map<String, Int>,
+    @NotBlank
+    val overallTotal: Int,
 )
