@@ -8,6 +8,9 @@
 
   export let isOpen
   export let targets
+  export let isIpCam
+  export let deviceUrl
+  export let deviceIndex = 0
 
   let ctx
   let cameraFeedElement
@@ -19,7 +22,6 @@
   let selectedTarget
   let videoLoaded = false
   let canvasLoaded = false
-  let deviceIndex = 0
   let disableInputs = false
   let targetZones = {}
   let actualVideoWidth
@@ -188,12 +190,14 @@
   }
 
   function onVideoMetadataLoaded() {
+    videoLoaded = true
+
     actualVideoWidth = cameraFeedElement.videoWidth
     actualVideoHeight = cameraFeedElement.videoHeight
 
-    // Calculate scale factors based on the video element's fixed size
-    scaleX = actualVideoWidth / 730 // Since the video element width is fixed at 730px
-    scaleY = actualVideoHeight / 620 // Since the video element height is fixed at 620px
+    // Calculate scale factors based on the video element's size
+    scaleX = actualVideoWidth / cameraFeedElement.clientWidth
+    scaleY = actualVideoHeight / cameraFeedElement.clientHeight
   }
 
   function saveZones() {
@@ -220,23 +224,26 @@
   }
 
   $: if (isOpen && !videoLoaded && cameraFeedElement) {
-    navigator.mediaDevices
-      .enumerateDevices()
-      .then((devices) => {
-        const videoDevices = devices.filter((device) => device.kind === 'videoinput')
-        if (videoDevices.length > deviceIndex) {
-          return navigator.mediaDevices.getUserMedia({
-            video: { deviceId: videoDevices[deviceIndex].deviceId }
-          })
-        } else {
-          console.error('No video devices found or invalid device index.')
-        }
-      })
-      .then((stream) => {
-        cameraFeedElement.srcObject = stream
-        videoLoaded = true
-      })
-      .catch((error) => console.error('Error accessing camera feed:', error))
+    if (isIpCam) {
+      cameraFeedElement.src = deviceUrl
+    } else {
+      navigator.mediaDevices
+        .enumerateDevices()
+        .then((devices) => {
+          const videoDevices = devices.filter((device) => device.kind === 'videoinput')
+          if (videoDevices.length > deviceIndex) {
+            return navigator.mediaDevices.getUserMedia({
+              video: { deviceId: videoDevices[deviceIndex].deviceId }
+            })
+          } else {
+            console.error('No video devices found or invalid device index.')
+          }
+        })
+        .then((stream) => {
+          cameraFeedElement.srcObject = stream
+        })
+        .catch((error) => console.error('Error accessing camera feed:', error))
+    }
   }
 
   // Updated to dynamically set canvas size based on video dimensions
@@ -264,10 +271,9 @@
   <div class="flex w-full h-full">
     <!-- Video and Canvas Container -->
     <div class="relative flex-grow">
-      <!-- svelte-ignore a11y-media-has-caption -->
       <video
         bind:this={cameraFeedElement}
-        class="w-full h-full"
+        muted
         autoplay
         on:resize={initCanvas}
         on:loadedmetadata={onVideoMetadataLoaded}
@@ -339,7 +345,7 @@
 
 <style>
   video {
-    width: 730;
-    height: 620;
+    width: 730px;
+    height: 560px;
   }
 </style>

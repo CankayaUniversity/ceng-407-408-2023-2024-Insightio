@@ -38,4 +38,3 @@ if __name__ == "__main__":
     while True:
         vtm.fetch_and_update_threads()
         time.sleep(5)
-        

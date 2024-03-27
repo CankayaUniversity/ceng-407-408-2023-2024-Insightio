@@ -73,8 +73,9 @@
   $: tagify && tagify.setDisabled(disabled)
 
   $: {
-    if (newTags.length != 0) {
+    if (newTags.length != 0 && tagify) {
       tags = [...newTags]
+      tagify.removeAllTags()
       tagify.addTags(newTags)
       newTags = []
     }

@@ -57,7 +57,7 @@
   }
 
   function initFields() {
-    selectedConfig = {}
+    selectedConfig = undefined
     selectedConfiguration = {}
     cameraType = typeOptions[0].value
     tagOptions = Object.values(targets.labels).map((label) => ({ value: label }))
@@ -72,6 +72,7 @@
     isIpCam = false
     zones = {}
     resolution = ''
+    newTags = []
     newCameraConfiguration = {
       name: '',
       type: '',
@@ -119,14 +120,14 @@
     if (cameraType === 'built-in') {
       // Check device index
       const sameIndexConfig = cameraConfigurations.find((o) => conf.deviceIndex === o.deviceIndex)
-      if (sameIndexConfig) {
+      if (sameIndexConfig && sameIndexConfig.type == 'CONNECTEDCAMERA') {
         warn('A configuration with the same device already exists.')
         return false
       }
     } else {
       // Check URL
       const sameIpConfig = cameraConfigurations.find((o) => conf.ipAddress === o.ipAddress)
-      if (sameIpConfig) {
+      if (sameIpConfig && sameIpConfig.type == 'IPCAMERA') {
         warn('A configuration with the same address already exists.')
         return false
       }
@@ -162,10 +163,16 @@
 
   async function saveSettings() {
     if (isEditMode) {
-      const res = await updateCameraSetting(selectedConfiguration)
-      console.log(res)
-      if (res.status == 200) {
-        success('Configuration changed successfully!')
+      if (Object.keys(selectedConfiguration).length == 0) {
+        warn('No configuration selected.')
+        return
+      } else {
+        const res = await updateCameraSetting(selectedConfiguration)
+        if (!('error' in res)) {
+          success('Configuration changed successfully!')
+          initFields()
+          fetchCameraSettings()
+        }
       }
     } else {
       const isCameraBuiltIn = cameraType === 'built-in'
@@ -184,30 +191,31 @@
         metadata: []
       }
 
-      console.log(newCameraConfiguration)
-
       if (validateConfigurationsObject(newCameraConfiguration)) {
         const res = await createCameraSetting(newCameraConfiguration)
-        console.log(res)
-        if (res.status == 200) {
+        if (!('error' in res)) {
           success('Configuration created successfully!')
           initFields()
+          fetchCameraSettings()
         }
       }
     }
   }
 
   async function deleteSettings() {
-    if (!selectedConfiguration) {
+    if (Object.keys(selectedConfiguration).length == 0) {
       warn('No configuration selected.')
       return
     }
 
-    const res = await deleteCameraSetting(selectedConfiguration.id)
+    try {
+      await deleteCameraSetting(selectedConfiguration.id)
 
-    if (res.status == 200) {
       success('Camera configuration deleted successfully')
       initFields()
+      fetchCameraSettings()
+    } catch (error) {
+      console.log(error)
     }
   }
 
@@ -248,6 +256,8 @@
       }
       newTags = [...configTargets]
     }
+
+    isIpCam = selectedConfiguration.type == 'IPCAMERA' ? true : false
   }
 
   $: tagifyDisabled = isEditMode && isSettingsDisabled
@@ -256,6 +266,9 @@
 <ZoneDraw
   bind:isOpen={openZoneDraw}
   bind:targets={selectedTargets}
+  bind:isIpCam
+  bind:deviceIndex
+  bind:deviceUrl
   on:save={(e) => (zones = e.detail)}
 />
 
@@ -284,7 +297,6 @@
           bind:isIpCam
           bind:deviceUrl
           bind:deviceIndex
-          bind:targetOptions={selectedTargets}
           on:feedloaded={handleFeedLoaded}
           on:error={(e) => warn(e.detail)}
         />
@@ -360,27 +372,27 @@
               {/if}
             </div>
           {/if}
-          <div>
-            <TagInput
-              {tagOptions}
-              title="Select Targets"
-              helpText="Minimum 1, Maximum 5. Please draw target zones after targets are selected."
-              bind:tags={selectedTags}
-              bind:newTags
-              minTags={1}
-              maxTags={5}
-              bind:disabled={tagifyDisabled}
-            />
-          </div>
-          <div class="flex justify-end mt-10 gap-4">
-            {#if isEditMode}
-              <Button class="py-2 px-4" on:click={deleteSettings} controlButton color="red"
-                >Delete</Button
-              >
-            {/if}
-            <Button class="py-2 px-4" on:click={saveSettings} controlButton>Save</Button>
-          </div>
         </fieldset>
+        <div>
+          <TagInput
+            {tagOptions}
+            title="Select Targets"
+            helpText="Minimum 1, Maximum 5. Please draw target zones after targets are selected."
+            bind:tags={selectedTags}
+            bind:newTags
+            minTags={1}
+            maxTags={5}
+            bind:disabled={tagifyDisabled}
+          />
+        </div>
+        <div class="flex justify-end mt-10 gap-4">
+          {#if isEditMode}
+            <Button class="py-2 px-4" on:click={deleteSettings} controlButton color="red"
+              >Delete</Button
+            >
+          {/if}
+          <Button class="py-2 px-4" on:click={saveSettings} controlButton>Save</Button>
+        </div>
       </div>
     </div>
   </div>

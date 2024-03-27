@@ -9,6 +9,7 @@
   import { getAllCameraSettings } from '../../api/cameras'
   import Spinner from '../utility/Spinner.svelte'
   import pageStore from '../../stores/pageStore'
+  import targets from '../../data/trackerTargets'
 
   // TODO: Replace with actual data
   const mockData = [
@@ -79,7 +80,7 @@
     }
   ]
 
-  const targets = mockData.map((o) => o.target)
+  const mockTargets = mockData.map((o) => o.target)
   const chartTypes = ['bar', 'line', 'pie', 'doughnut', 'radar']
 
   let selectedCameraSetting
@@ -92,6 +93,7 @@
   let currentChartType = chartTypes[currentChartTypeIndex]
   let maxCameraIndex
   let showLoading = false
+  let targetOptions
 
   function updateTimeFrame(timeframe) {
     currentTimeFrame = timeframe
@@ -134,6 +136,20 @@
       maxCameraIndex = camerasExist ? cameraSettings.length - 1 : 0
       selectedCameraSetting = camerasExist ? cameraSettings[0] : null
       showLoading = false
+    }
+  }
+
+  $: {
+    if (selectedCameraSetting) {
+      targetOptions = []
+      Object.keys(selectedCameraSetting.targets).forEach((targetId) => {
+        const option = {
+          text: targets.labels[parseInt(targetId)],
+          value: targetId
+        }
+        targetOptions = [...targetOptions, option]
+      })
+      console.log(targetOptions)
     }
   }
 
@@ -208,7 +224,7 @@
                 bind:currentChartData
                 bind:chartType={currentChartType}
                 visibilityCallback={filterLegendChosenTime}
-                {targets}
+                targets={mockTargets}
               />
             </div>
             <Button on:click={() => navigateChart('next')}>
@@ -226,7 +242,7 @@
             </div>
 
             {#if selectedCameraSetting}
-              <CameraView bind:cameraId={selectedCameraSetting.id} />
+              <CameraView bind:cameraId={selectedCameraSetting.id} {targetOptions} />
             {/if}
           </div>
         </div>

@@ -18,7 +18,10 @@
   let dispatch = createEventDispatcher()
 
   let targets
-  let target
+  let target = {
+    text: 'No Target',
+    value: ''
+  }
   let currentCount = 0
   let totalCount = 0
 
@@ -33,14 +36,14 @@
         height: builtInCamImgElement.naturalHeight
       })
     } else {
-      dispatch('feedloaded', { width: videoElement.videoWidth, height: videoElement.videoHeight })
+      let vElement = videoElement ? videoElement : ipCamElement
+      dispatch('feedloaded', { width: vElement.videoWidth, height: vElement.videoHeight })
     }
   }
 
   async function fetchData() {
     if (target.value != '' && target.value != 'all_annotated_frame') {
       currentCount = await getTargetCurrentCount(cameraId, target.value)
-      console.log(currentCount)
       totalCount = await getTargetTotalCount(cameraId, target.value)
     }
   }
@@ -98,7 +101,7 @@
           value: 'all_annotated_frame'
         }
       ]
-    } else {
+    } else if (targetOptions.length == 0) {
       targets = [
         {
           text: 'No Target',
@@ -110,8 +113,6 @@
         }
       ]
     }
-
-    target = targets[0]
   }
 
   onMount(() => {
@@ -147,14 +148,14 @@
       </div>
     {/if}
   {:else if isIpCam && ready}
-    <iframe
+    <video
       bind:this={ipCamElement}
-      title="IPCamFeed"
       src={deviceUrl}
-      class="iframe-video"
-      sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-      frameborder="0"
-    ></iframe>
+      class="w-full bg-black"
+      autoplay
+      muted
+      on:loadedmetadata={handleLoad}
+    />
   {:else}
     <video
       bind:this={videoElement}
@@ -172,14 +173,5 @@
     /* Fixed size */
     height: 405px;
     width: 620px;
-  }
-
-  .iframe-video {
-    height: 405px;
-    width: 495px;
-    overflow: hidden;
-    display: block;
-    object-fit: contain;
-    border: none;
   }
 </style>

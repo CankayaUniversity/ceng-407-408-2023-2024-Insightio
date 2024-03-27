@@ -2,7 +2,7 @@ import axios from "axios";
 import { failure } from "../functions/toastifyWrapper";
 
 // todo: change base url
-export const baseURL = "http://localhost:8090";
+export const baseURL = "http://localhost:8091";
 
 const instance = axios.create({
     baseURL: baseURL,

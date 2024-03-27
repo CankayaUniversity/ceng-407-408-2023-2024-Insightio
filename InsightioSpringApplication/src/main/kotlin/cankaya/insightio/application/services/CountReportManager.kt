@@ -10,5 +10,6 @@ class CountReportManager(
 ) {
     fun createAuditReports(): CountReportAudit {
         // TODO
+        return CountReportAudit("a", listOf(listOf(1)))
     }
 }

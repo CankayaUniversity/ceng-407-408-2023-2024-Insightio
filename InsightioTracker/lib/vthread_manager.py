@@ -19,31 +19,32 @@ class VideoThreadManager:
     def fetch_and_update_threads(self):
         new_settings_list = self.api.get_camera_settings()
 
-        # Filter out settings with duplicate device indices or IP addresses
-        filtered_settings = {}
-        for setting in new_settings_list:
-            key = setting['deviceIndex'] if setting['type'] == 'CONNECTEDCAMERA' else setting['ipAddress']
-            if key not in filtered_settings:
-                filtered_settings[key] = setting
-            else:
-                # Update the setting if it's more recent
-                existing_setting = filtered_settings[key]
-                if setting['createdDate'] > existing_setting['createdDate']:
+        if new_settings_list != None:
+            # Filter out settings with duplicate device indices or IP addresses
+            filtered_settings = {}
+            for setting in new_settings_list:
+                key = setting['deviceIndex'] if setting['type'] == 'CONNECTEDCAMERA' else setting['ipAddress']
+                if key not in filtered_settings:
                     filtered_settings[key] = setting
+                else:
+                    # Update the setting if it's more recent
+                    existing_setting = filtered_settings[key]
+                    if setting['createdDate'] > existing_setting['createdDate']:
+                        filtered_settings[key] = setting
 
-        for _, new_setting in filtered_settings.items():
-            camera_id = new_setting['id']
+            for _, new_setting in filtered_settings.items():
+                camera_id = new_setting['id']
 
-            if camera_id not in self.video_threads:
-                self.start_thread(new_setting)
-            elif self.video_threads[camera_id]['settings'] != new_setting:
-                self.update_thread(camera_id, new_setting)
+                if camera_id not in self.video_threads:
+                    self.start_thread(new_setting)
+                elif self.video_threads[camera_id]['settings'] != new_setting:
+                    self.update_thread(camera_id, new_setting)
 
-        # Stop threads for removed cameras
-        current_ids = [setting['id'] for setting in filtered_settings.values()]
-        for camera_id in list(self.video_threads.keys()):
-            if camera_id not in current_ids:
-                self.stop_thread(camera_id)
+            # Stop threads for removed cameras
+            current_ids = [setting['id'] for setting in filtered_settings.values()]
+            for camera_id in list(self.video_threads.keys()):
+                if camera_id not in current_ids:
+                    self.stop_thread(camera_id)
 
     def start_thread(self, camera_settings):
         self.stop_signals[camera_settings['id']] = False
@@ -125,17 +126,11 @@ class VideoThreadManager:
         return corner1, corner2, corner3, corner4
     
     def calculate_zone_counts(self, zone_type, counters):
-        in_count_sum = 0
-        out_count_sum = 0
-        for counter in counters:
-            in_count, out_count = counter.in_count, counter.out_count
-            
-            in_count_sum += in_count
-            out_count_sum += out_count
+        in_count_sum = sum(counter.in_count for counter in counters)
+        out_count_sum = sum(counter.out_count for counter in counters)
 
         if zone_type == 0:
             return 0, in_count_sum + out_count_sum
-        
         else:
             return in_count_sum - out_count_sum, out_count_sum
 
