@@ -1,10 +1,8 @@
 package cankaya.insightio.infrastructure.mongodb.impls
 
 import jakarta.validation.constraints.NotBlank
-import org.springframework.context.annotation.Configuration
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
-import java.util.Objects
 
 // mongodb user connection
 // TODO bunlar config değil, bu paketin içinde olmamalılar, DTO objeleri bunlar
@@ -18,14 +16,20 @@ data class User(
     @NotBlank
     val email: String,
     @NotBlank
-    val password: String
+    val password: String,
+    val organizationId: String? = null,
+    val isAdmin: Boolean = false,
+    val isCreate: Boolean = false,
+    val createDate: String? = null,
+    val createdBy: String? = null,
+    val metadata: List<Metadata>? = null,
 )
 
-//Mongodb Camera Conf Connection
+// Mongodb Camera Conf Connection
 @Document(collection = "CameraSettings")
 data class Camera(
     @Id
-    val id: String?=null,
+    val id: String? = null,
     @NotBlank
     val name: String,
     val type: CameraType,
@@ -40,34 +44,46 @@ data class Camera(
     val createdDate: String,
     @NotBlank
     val createdBy: String,
-    val metadata: List<Metadata>
+    val metadata: List<Metadata>,
 )
 
+@Document(collection = "MetaData")
 data class Metadata(
+    @Id
     val categoryId: String,
-    val value: String
+    val value: String,
+)
+
+@Document(collection = "MetadataCategory")
+data class MetadataCategory(
+    @Id
+    val id: String? = null,
+    val categoryName: String,
 )
 
 data class Zone(
     val zoneName: String,
     val zoneType: ZoneType,
     val startPoint: Point,
-    val endPoint: Point
+    val endPoint: Point,
 )
 
 data class Point(
     val x: Float,
-    val y: Float
+    val y: Float,
 )
 
 enum class CameraType {
-    CONNECTEDCAMERA, IPCAMERA
+    CONNECTEDCAMERA,
+    IPCAMERA,
 }
 
 enum class ZoneType {
-    LINE, RECTANGLE
+    LINE,
+    RECTANGLE,
 }
 
 enum class CameraStatus {
-    DISCONNECTED, CONNECTED
+    DISCONNECTED,
+    CONNECTED,
 }

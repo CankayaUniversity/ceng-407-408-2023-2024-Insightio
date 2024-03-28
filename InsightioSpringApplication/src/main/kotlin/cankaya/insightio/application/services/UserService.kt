@@ -24,26 +24,55 @@ class UserService(
     fun findByUsername(username: String): User? {
         return userRepository.findByUsername(username)
     }
-}
 
-// dependencies eklenmeli eksik**
+    fun createUser(user: User): User {
+        val encryptedPassword = utils.encryptAES(user.password)
+        val newUser = user.copy(password = encryptedPassword)
+        return userRepository.save(newUser)
+    }
 
-// Camera Conf Service -> TODO bunu CameraService gibi ayrı dosyaya çıkartır mısın
-@Service
-class CameraService(private val cameraRepository: CameraRepository) {
-    fun findAllCameras(): List<Camera> = cameraRepository.findAll()
+    fun updateUser(
+        id: String,
+        updatedUser: User,
+    ): User {
+        val user = findUserById(id) ?: throw Exception("User not found")
+        val encryptedPassword = utils.encryptAES(updatedUser.password)
 
-    fun findCameraById(id: String): Camera? = cameraRepository.findById(id).orElse(null)
+        // metadata update
+        val updatedMetadata =
+            updatedUser.metadata?.map { metaData ->
+                Metadata(
+                    categoryId = metaData.categoryId,
+                    value = metaData.value,
+                )
+            }
 
-    fun createCamera(camera: Camera): Camera = cameraRepository.save(camera)
+        // user info
+        val userToUpdate =
+            user.copy(
+                username = updatedUser.username,
+                password = encryptedPassword,
+                organizationId = updatedUser.organizationId,
+                email = updatedUser.email,
+                isAdmin = updatedUser.isAdmin,
+                isCreate = updatedUser.isCreate,
+                createDate = updatedUser.createDate,
+                createdBy = updatedUser.createdBy,
+                metadata = updatedMetadata,
+            )
+        return userRepository.save(userToUpdate)
+    }
 
-    fun updateCamera(camera: Camera): Camera = cameraRepository.save(camera)
+    fun deleteUser(id: String) {
+        val user = findUserById(id) ?: throw Exception("User not found")
+        userRepository.delete(user)
+    }
 
-    fun deleteCamera(id: String) = cameraRepository.deleteById(id)
+    fun findAllUsers(): List<User> {
+        return userRepository.findAll()
+    }
 
-    fun findByType(type: CameraType): List<Camera> = cameraRepository.findByType(type)
-
-    fun findByStatus(status: CameraStatus): List<Camera> = cameraRepository.findByStatus(status)
-
-    fun findByName(name: String): Camera? = cameraRepository.findByName(name)
+    fun findUserById(id: String): User? {
+        return userRepository.findById(id).orElse(null)
+    }
 }
