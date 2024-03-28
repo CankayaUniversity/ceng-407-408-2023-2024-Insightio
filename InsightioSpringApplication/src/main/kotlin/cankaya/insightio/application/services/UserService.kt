@@ -1,6 +1,8 @@
 package cankaya.insightio.application.services
 
 import cankaya.insightio.application.utils.AESUtils
+import cankaya.insightio.domain.Metadata
+import cankaya.insightio.domain.User
 import cankaya.insightio.infrastructure.mongodb.impls.*
 import org.springframework.stereotype.Service
 

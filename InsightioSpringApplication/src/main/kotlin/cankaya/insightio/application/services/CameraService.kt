@@ -1,7 +1,7 @@
 package cankaya.insightio.application.services
 
-import cankaya.insightio.infrastructure.mongoDB.impls.CameraRepository
-import cankaya.insightio.infrastructure.mongodb.impls.Camera
+import cankaya.insightio.application.persistance.CameraRepository
+import cankaya.insightio.domain.Camera
 import cankaya.insightio.infrastructure.mongodb.impls.CameraStatus
 import cankaya.insightio.infrastructure.mongodb.impls.CameraType
 import org.springframework.stereotype.Service

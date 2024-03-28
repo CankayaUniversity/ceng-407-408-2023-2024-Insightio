@@ -2,9 +2,9 @@ package cankaya.insightio.infrastructure.api
 
 import cankaya.insightio.application.services.UserService
 import cankaya.insightio.application.utils.AESUtils
+import cankaya.insightio.domain.User
 import cankaya.insightio.infrastructure.api.models.ApiResponse
 import cankaya.insightio.infrastructure.api.models.LoginRequest
-import cankaya.insightio.infrastructure.mongodb.impls.User
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 

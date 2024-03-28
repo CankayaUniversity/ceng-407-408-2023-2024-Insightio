@@ -1,6 +1,6 @@
-package cankaya.insightio.infrastructure.mongoDB.impls
+package cankaya.insightio.application.persistance
 
-import cankaya.insightio.infrastructure.mongodb.impls.Camera
+import cankaya.insightio.domain.Camera
 import cankaya.insightio.infrastructure.mongodb.impls.CameraStatus
 import cankaya.insightio.infrastructure.mongodb.impls.CameraType
 import org.springframework.data.mongodb.repository.MongoRepository
