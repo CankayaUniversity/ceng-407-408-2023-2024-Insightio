@@ -242,7 +242,13 @@
             </div>
 
             {#if selectedCameraSetting}
-              <CameraView bind:cameraId={selectedCameraSetting.id} {targetOptions} />
+              <CameraView
+                height="405px"
+                width="515px"
+                bind:cameraId={selectedCameraSetting.id}
+                {targetOptions}
+                showFullscreenButton
+              />
             {/if}
           </div>
         </div>

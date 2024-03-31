@@ -8,3 +8,15 @@ export async function userLogin(username, password) {
         return res.data.response;
     });
 }
+
+export async function createUser(user) {
+    return instance.post('/users', user).then((res) => {
+        return res.data;
+    })
+}
+
+export async function updateUser(user) {
+    return instance.post(`/users/${user._id}`, user).then((res) => {
+        return res.data;
+    })
+}

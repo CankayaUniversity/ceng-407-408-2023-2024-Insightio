@@ -3,16 +3,22 @@
   import Dropdown from './Dropdown.svelte'
   import { baseURL } from '../../api/tracker'
   import { getTargetCurrentCount, getTargetTotalCount } from '../../api/target'
+  import Icon from './Icon.svelte'
+  import clsx from 'clsx'
 
+  export let width = '600px'
+  export let height = '405px'
   export let cameraId = ''
   export let previewMode = false
   export let isIpCam = true
   export let deviceUrl = ''
   export let deviceIndex = 0
   export let targetOptions = []
+  export let showFullscreenButton = false
+  export let showBorders = false
 
   let ipCamElement
-  let builtInCamImgElement
+  let imgElement
   let videoElement
   let ready = false
   let dispatch = createEventDispatcher()
@@ -30,10 +36,10 @@
   }
 
   function handleLoad(e) {
-    if (e.target == builtInCamImgElement) {
+    if (e.target == imgElement) {
       dispatch('feedloaded', {
-        width: builtInCamImgElement.naturalWidth,
-        height: builtInCamImgElement.naturalHeight
+        width: imgElement.naturalWidth,
+        height: imgElement.naturalHeight
       })
     } else {
       let vElement = videoElement ? videoElement : ipCamElement
@@ -48,15 +54,30 @@
     }
   }
 
+  function toggleFullScreen() {
+    let element
+    if (!previewMode) element = imgElement
+    else if (isIpCam) element = ipCamElement
+    else element = videoElement
+
+    if (!document.fullscreenElement) {
+      element.requestFullscreen().catch((err) => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`)
+      })
+    } else {
+      document.exitFullscreen()
+    }
+  }
+
   // Update video source when cameraId or targetClass changes
-  $: if (!previewMode && cameraId && builtInCamImgElement) {
+  $: if (!previewMode && cameraId && imgElement) {
     if (target.value == 'all_annotated_frame') {
-      builtInCamImgElement.src = `${baseURL}/all_annotated_frame_${cameraId}`
+      imgElement.src = `${baseURL}/all_annotated_frame_${cameraId}`
     } else if (target.value != '') {
       let targetClassStr = `_${target.value}`
-      builtInCamImgElement.src = `${baseURL}/frame_${cameraId + targetClassStr}`
+      imgElement.src = `${baseURL}/frame_${cameraId + targetClassStr}`
     } else {
-      builtInCamImgElement.src = `${baseURL}/raw_frame_${cameraId}`
+      imgElement.src = `${baseURL}/raw_frame_${cameraId}`
     }
   }
 
@@ -122,14 +143,12 @@
   })
 </script>
 
-<div class="camera-view w-full max-w-md mx-auto">
+<div
+  class={clsx('camera-view', showBorders && 'border-2 rounded border-gray-700')}
+  style={`--camera-view-width: ${width}; --camera-view-height: ${height};`}
+>
   {#if !previewMode}
-    <img
-      bind:this={builtInCamImgElement}
-      class="w-full bg-black"
-      alt="Camera Stream"
-      on:load={handleLoad}
-    />
+    <img bind:this={imgElement} class="w-full bg-black" alt="Camera Stream" on:load={handleLoad} />
 
     <Dropdown
       items={targets}
@@ -165,13 +184,39 @@
       on:loadedmetadata={handleLoad}
     />
   {/if}
+  {#if showFullscreenButton}
+    <button
+      class="absolute bottom-2 right-2 bg-gray-800 text-white rounded-full focus:outline-none focus:ring"
+      on:click={toggleFullScreen}
+    >
+      <Icon icon="fullscreen" class="w-6 h-6" />
+    </button>
+  {/if}
 </div>
 
 <style>
-  img,
-  video {
-    /* Fixed size */
-    height: 405px;
-    width: 620px;
+  .camera-view {
+    position: relative;
+    width: var(--camera-view-width, 560px); /* default width */
+    height: var(--camera-view-height, 405px); /* default height */
+    overflow: visible; /* allow contents to overflow */
+  }
+
+  .camera-view img,
+  .camera-view video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .camera-view button {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 10px;
+    border-radius: 50%;
+    border: none;
   }
 </style>

@@ -24,7 +24,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
         ),
 )
 @SpringBootApplication
-@EnableMongoRepositories(basePackages = ["cankaya.insightio.infrastructure"])
+@EnableMongoRepositories(basePackages = ["cankaya.insightio"])
 class InsightioApplication() : SpringBootServletInitializer()
 
 fun main(args: Array<String>) {

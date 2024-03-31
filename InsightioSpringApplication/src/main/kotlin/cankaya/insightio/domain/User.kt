@@ -17,7 +17,7 @@ data class User(
     val organizationId: String? = null,
     val isAdmin: Boolean = false,
     val isCreate: Boolean = false,
-    val createDate: String? = null,
+    val createdDate: String? = null,
     val createdBy: String? = null,
     val metadata: List<Metadata>? = null,
 )

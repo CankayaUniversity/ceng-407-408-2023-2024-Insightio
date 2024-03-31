@@ -4,46 +4,118 @@
   import profileImg from '../../assets/profile.png'
   import Icon from '../utility/Icon.svelte'
   import patterns from '../../functions/regex'
+  import hash from '../../functions/hash'
+  import userStore from '../../stores/userStore'
+  import { failure, success, warn } from '../../functions/toastifyWrapper'
+  import { createUser, updateUser } from '../../api/users'
+  import SwitchButton from '../utility/SwitchButton.svelte'
+  import readWriteDataUri from '../../functions/dataUri'
 
-  let name = ''
-  let surname = ''
+  let username = ''
   let email = ''
   let password = ''
+  let passwordConfirm = ''
+  let usernameValidation = false
+  let emailValidation = false
+  let passwordValidation = false
   let selectedFile
   let previewUrl
   let fileInput
   let dataUri
+  let currentMode = 'edit'
+
+  function validate() {
+    if (usernameValidation) {
+      warn('Please enter a valid username containing at least 4 characters')
+      return false
+    }
+    if (emailValidation) {
+      warn('Please enter a valid username containing at least 4 characters')
+      return false
+    }
+    if (passwordValidation && password != passwordConfirm) {
+      warn('Please make sure password fields hold the same password')
+      return false
+    }
+    return true
+  }
 
   async function saveAccountSettings() {
-    if (selectedFile) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        dataUri = e.target.result
-        console.log('Data URI:', dataUri)
-        // Save or process dataUri as needed here
+    if (validate()) {
+      if (selectedFile) {
+        readWriteDataUri(selectedFile, (e) => {
+          dataUri = e.target.result
+          console.log('Data URI:', dataUri)
+        })
       }
-      reader.readAsDataURL(selectedFile)
+      const d = new Date()
+      const user = {
+        username: username,
+        email: email,
+        password: password != '' ? await hash(password) : $userStore.password,
+        organizationId: $userStore.organizationId,
+        isAdmin: isEditMode ? $userStore.isAdmin : false,
+        isCreate: isEditMode ? $userStore.isCreate : true,
+        createdDate: isEditMode ? $userStore.createdDate : d.toISOString(),
+        createdBy: isEditMode ? $userStore.createdBy : $userStore._id,
+        metadata: [
+          {
+            categoryId: '660977b2e0f48cd2a2ecd01a',
+            value: dataUri ? dataUri : ''
+          }
+        ]
+      }
+
+      if (isEditMode) {
+        const res = await updateUser(user)
+
+        if (!('error' in res)) {
+          success('User successfully updated!')
+        } else {
+          failure('Failed to update account')
+        }
+      } else {
+        const res = await createUser(user)
+
+        if (!('error' in res)) {
+          success('User successfully created!')
+          resetAccountSettings()
+        } else {
+          failure('Failed to create the new account')
+        }
+      }
     }
-    console.log('Account settings saved:', { name, surname, email, password, dataUri })
   }
 
   function handleFileChange(event) {
     const file = event.target.files[0]
     if (file) {
       selectedFile = file
-      const reader = new FileReader()
-      reader.onload = (e) => {
+      readWriteDataUri(selectedFile, (e) => {
         previewUrl = e.target.result
-      }
-      reader.readAsDataURL(file)
+      })
+    }
+  }
+
+  function handleModeChange() {
+    if (isEditMode) {
+      username = $userStore.username
+      email = $userStore.email
+      password = ''
+      passwordConfirm = ''
+      previewUrl = $userStore.metadata[0] ? $userStore.metadata[0].value : profileImg
+      selectedFile = null
+      dataUri = $userStore.metadata[0] ? $userStore.metadata[0].value : profileImg
+    } else {
+      resetAccountSettings()
     }
   }
 
   function resetAccountSettings() {
-    name = ''
-    surname = ''
+    username = ''
     email = ''
     password = ''
+    passwordConfirm = ''
     previewUrl = profileImg
     selectedFile = null
     dataUri = ''
@@ -56,6 +128,10 @@
   $: {
     if (dataUri) previewUrl = dataUri
   }
+
+  $: isEditMode = currentMode == 'edit'
+
+  $: isEditMode != undefined && handleModeChange()
 </script>
 
 <div class="flex flex-col h-full w-full bg-gray-800 text-white">
@@ -64,7 +140,20 @@
     <div></div>
   </div>
 
-  <div class="flex flex-wrap justify-center px-4 pt-4 mt-14">
+  {#if $userStore.isAdmin}
+    <div class="flex justify-center" style="margin-left: 41rem;">
+      <SwitchButton
+        checked={true}
+        labelOff="Add"
+        labelOn="Edit"
+        colorOff="bg-green-500"
+        colorOn="bg-blue-500"
+        on:change={(e) => (currentMode = e.detail ? 'edit' : 'add')}
+      />
+    </div>
+  {/if}
+
+  <div class="flex flex-wrap justify-center px-4 pt-4 mt-6">
     <div class="border-2 border-gray-700 p-4 rounded-lg" style="width: 65%;">
       <!-- Account Picture Section -->
       <div class="flex flex-wrap justify-center p-4">
@@ -74,7 +163,7 @@
               <h2 class="text-3xl font-bold mb-6">Account Picture</h2>
             </div>
 
-            <div class="w-60 h-60 mt-6 mb-4">
+            <div class="w-64 h-64 mt-10 mb-4">
               <img
                 src={previewUrl || profileImg}
                 alt="Profile preview"
@@ -119,41 +208,57 @@
 
               <h2 class="text-3xl font-bold flex items-center">Info</h2>
             </div>
-
-            <Input
-              class="mb-4 p-1.5"
-              showLabel
-              label="Name:"
-              type="text"
-              placeholder="Name"
-              bind:value={name}
-            />
-            <Input
-              class="mb-4 p-1.5"
-              showLabel
-              label="Surname:"
-              type="text"
-              placeholder="Surname"
-              bind:value={surname}
-            />
-            <Input
-              class="mb-4 p-1.5"
-              showLabel
-              label="E-mail:"
-              type="email"
-              placeholder="Email"
-              pattern={patterns['email']}
-              bind:value={email}
-            />
-            <Input
-              class="mb-4 p-1.5"
-              showLabel
-              label="Password:"
-              type="password"
-              placeholder="Password"
-              bind:value={password}
-            />
-
+            <div class="mb-6">
+              <Input
+                class="p-1.5"
+                showLabel
+                label="Username:"
+                type="text"
+                placeholder="Username"
+                pattern={patterns['username']}
+                errorMessage="Username is too short"
+                on:validation={(e) => (usernameValidation = !e.detail)}
+                bind:value={username}
+              />
+            </div>
+            <div class="mb-6">
+              <Input
+                class="p-1.5"
+                showLabel
+                label="E-mail:"
+                type="email"
+                placeholder="Email"
+                pattern={patterns['email']}
+                errorMessage="Invalid email format"
+                on:validation={(e) => (emailValidation = !e.detail)}
+                bind:value={email}
+              />
+            </div>
+            <div class="mb-6">
+              <Input
+                class="p-1.5"
+                showLabel
+                label="Password:"
+                type="password"
+                placeholder="Password"
+                pattern={patterns['password']}
+                errorMessage="Password must contain at least 8 characters"
+                on:validation={(e) => (passwordValidation = !e.detail)}
+                bind:value={password}
+              />
+            </div>
+            <div class="mb-6">
+              <Input
+                class="p-1.5"
+                showLabel
+                label="Confirm Password:"
+                type="password"
+                placeholder="Retype password"
+                pattern={`${password}`}
+                errorMessage="Passwords do not match"
+                bind:value={passwordConfirm}
+              />
+            </div>
             <div class="flex justify-end space-x-3 mt-4">
               <Button
                 class="bg-red-500 px-4 p-2 hover:bg-red-700 text-white font-bold rounded focus:outline-none focus:shadow-outline"

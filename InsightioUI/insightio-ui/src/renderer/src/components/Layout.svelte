@@ -7,9 +7,9 @@
   import { close, minimize } from '../api/ipc'
 
   export let activePage
+  export let logoutModalActive = false
 
   let dispatch = createEventDispatcher()
-  let logoutModalActive = false
 </script>
 
 <div class="flex h-screen text-white bg-gray-800">
@@ -34,7 +34,6 @@
       <Button
         class="flex items-center justify-center h-16 w-16"
         on:click={() => {
-          logoutModalActive = true
           dispatch('showLogoutModal')
         }}
         iconButton={true}

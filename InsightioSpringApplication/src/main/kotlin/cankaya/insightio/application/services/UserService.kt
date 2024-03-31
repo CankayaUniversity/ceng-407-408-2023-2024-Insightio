@@ -58,7 +58,7 @@ class UserService(
                 email = updatedUser.email,
                 isAdmin = updatedUser.isAdmin,
                 isCreate = updatedUser.isCreate,
-                createDate = updatedUser.createDate,
+                createdDate = updatedUser.createdDate,
                 createdBy = updatedUser.createdBy,
                 metadata = updatedMetadata,
             )

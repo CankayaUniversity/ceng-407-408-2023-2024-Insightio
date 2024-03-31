@@ -147,6 +147,7 @@
       }))
       showLoading = false
     }
+    initFields()
   }
 
   function handleOpenZoneDraw() {
@@ -280,7 +281,7 @@
       <h2 class="text-3xl ml-2 mb-4 font-bold">Camera View</h2>
     </div>
     <div class="mt-6 flex flex-col items-center justify-between">
-      <div class="translate-x-36 -translate-y-6">
+      <div class="translate-x-52 -translate-y-6">
         <!-- Open zone draw modal button -->
         <Button on:click={handleOpenZoneDraw}>
           <span
@@ -291,12 +292,14 @@
           </span>
         </Button>
       </div>
-      <div class="-translate-y-6 -translate-x-6 border-2 rounded border-gray-700">
+      <div class="-translate-y-6 -translate-x-6">
         <CameraView
           previewMode
           bind:isIpCam
           bind:deviceUrl
           bind:deviceIndex
+          showBorders
+          showFullscreenButton
           on:feedloaded={handleFeedLoaded}
           on:error={(e) => warn(e.detail)}
         />
