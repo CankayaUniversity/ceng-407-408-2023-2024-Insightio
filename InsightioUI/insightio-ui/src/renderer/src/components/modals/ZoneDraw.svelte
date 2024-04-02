@@ -203,14 +203,6 @@
     // Calculate scale factors based on the video element's size
     scaleX = actualVideoWidth / cameraFeedElement.clientWidth
     scaleY = actualVideoHeight / cameraFeedElement.clientHeight
-
-    console.log(
-      actualVideoHeight,
-      actualVideoWidth,
-      cameraFeedElement.clientWidth,
-      cameraFeedElement.clientHeight,
-      cameraFeedElement
-    )
   }
 
   function saveZones() {

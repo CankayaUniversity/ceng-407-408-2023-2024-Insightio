@@ -30,7 +30,6 @@
       if (showError && isPasteInput) {
         value = ''
         input.value = ''
-        console.log(input.value)
       } else if (isPasteInput) {
         dispatch('paste', value)
       }

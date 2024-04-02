@@ -45,7 +45,6 @@
       if (selectedFile) {
         readWriteDataUri(selectedFile, (e) => {
           dataUri = e.target.result
-          console.log('Data URI:', dataUri)
         })
       }
       const d = new Date()
