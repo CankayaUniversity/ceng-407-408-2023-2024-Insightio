@@ -1,11 +1,18 @@
 <script>
   import { createEventDispatcher, onMount, tick } from 'svelte'
+  import { getTargetCurrentCount, getTargetTotalCount } from '../../api/target'
+  import { startStream, stopStream, videoServerUrl } from '../../api/ipc'
+  import { warn } from '../../functions/toastifyWrapper'
   import Dropdown from './Dropdown.svelte'
   import { baseURL } from '../../api/tracker'
-  import { getTargetCurrentCount, getTargetTotalCount } from '../../api/target'
+  import { test } from '../../functions/regex'
+  import videojs from 'video.js'
+  import 'video.js/dist/video-js.css'
   import Icon from './Icon.svelte'
   import clsx from 'clsx'
+  import { v4 } from 'uuid'
 
+  export let id = v4()
   export let width = '600px'
   export let height = '405px'
   export let cameraId = ''
@@ -20,8 +27,10 @@
   let ipCamElement
   let imgElement
   let videoElement
+  let videoPlayer
   let ready = false
   let dispatch = createEventDispatcher()
+  let vidStreamId = ''
 
   let targets
   let target = {
@@ -35,6 +44,26 @@
     await tick()
   }
 
+  async function initVideoPlayer() {
+    await tick()
+    videoPlayer = videojs(ipCamElement, {
+      autoplay: true,
+      muted: true,
+      techOrder: ['html5']
+    })
+    videoPlayer.src({ src: `${videoServerUrl}${vidStreamId}`, type: 'video/mp4' })
+  }
+
+  function disposeVideoPlayer() {
+    if (videoPlayer) {
+      videoPlayer.dispose()
+      stopStream(vidStreamId)
+      videoPlayer = null
+      vidStreamId = '' // Reset the stream ID
+      ready = false
+    }
+  }
+
   function handleLoad(e) {
     if (e.target == imgElement) {
       dispatch('feedloaded', {
@@ -45,6 +74,8 @@
       let vElement = videoElement ? videoElement : ipCamElement
       dispatch('feedloaded', { width: vElement.videoWidth, height: vElement.videoHeight })
     }
+
+    dispatch('loadedmetadata')
   }
 
   async function fetchData() {
@@ -69,6 +100,69 @@
     }
   }
 
+  async function setupVideoStream() {
+    if (!ipCamElement || !isIpCam || !deviceUrl) return
+
+    if (videoPlayer) {
+      videoPlayer.dispose()
+      stopStream(vidStreamId, () => {
+        startStream(deviceUrl, (msg, success) => {
+          if (success) {
+            vidStreamId = msg
+            initVideoPlayer()
+            ready = true
+          } else {
+            warn(msg)
+          }
+        })
+      })
+    } else {
+      startStream(deviceUrl, (msg, success) => {
+        if (success) {
+          vidStreamId = msg
+          initVideoPlayer()
+          ready = true
+        } else {
+          warn(msg)
+        }
+      })
+    }
+  }
+
+  function resetTarget() {
+    if (targetOptions.length > 0) {
+      targets = [
+        {
+          text: 'No Target',
+          value: ''
+        },
+        ...targetOptions,
+        {
+          text: 'Fully Annotated',
+          value: 'all_annotated_frame'
+        }
+      ]
+      target = targets[0]
+    } else if (targetOptions.length == 0) {
+      targets = [
+        {
+          text: 'No Target',
+          value: ''
+        },
+        {
+          text: 'Fully Annotated',
+          value: 'all_annotated_frame'
+        }
+      ]
+      target = targets[0]
+    }
+    currentCount = 0
+    totalCount = 0
+    if (imgElement) {
+      imgElement.src = `${baseURL}/raw_frame_${cameraId}`
+    }
+  }
+
   // Update video source when cameraId or targetClass changes
   $: if (!previewMode && cameraId && imgElement) {
     if (target.value == 'all_annotated_frame') {
@@ -83,11 +177,17 @@
 
   $: if (previewMode) {
     waitRender()
-    if (isIpCam && deviceUrl) {
-      ready = true
-    } else {
+    if (!ready && ipCamElement && isIpCam && test(deviceUrl, 'url')) {
+      setupVideoStream()
+    } else if (ready && isIpCam && !test(deviceUrl, 'url')) {
+      disposeVideoPlayer()
+    } else if (!isIpCam) {
       // Otherwise, access the camera by device index
       try {
+        if (videoPlayer) {
+          videoPlayer.dispose()
+          videoPlayer = null
+        }
         ;(async () => {
           const devices = await navigator.mediaDevices.enumerateDevices()
           const videoDevices = devices.filter((device) => device.kind === 'videoinput')
@@ -136,6 +236,10 @@
     }
   }
 
+  $: if (cameraId) {
+    resetTarget()
+  }
+
   onMount(() => {
     if (!previewMode) {
       setInterval(fetchData, 850)
@@ -148,7 +252,13 @@
   style={`--camera-view-width: ${width}; --camera-view-height: ${height};`}
 >
   {#if !previewMode}
-    <img bind:this={imgElement} class="w-full bg-black" alt="Camera Stream" on:load={handleLoad} />
+    <img
+      {id}
+      bind:this={imgElement}
+      class="w-full bg-black"
+      alt="Camera Stream"
+      on:load={handleLoad}
+    />
 
     <Dropdown
       items={targets}
@@ -158,7 +268,7 @@
       maxHeight="5"
       showSearch={true}
     />
-    {#if target.value != 'all_annotated_frame'}
+    {#if target.value != 'all_annotated_frame' && target.value != ''}
       <div class="text-white mt-4 text-sm">
         Current count for Target {target.text}: {currentCount}
       </div>
@@ -166,21 +276,26 @@
         Total count for Target {target.text}: {totalCount}
       </div>
     {/if}
-  {:else if isIpCam && ready}
-    <video
-      bind:this={ipCamElement}
-      src={deviceUrl}
-      class="w-full bg-black"
-      autoplay
-      muted
-      on:loadedmetadata={handleLoad}
-    />
+  {:else if isIpCam}
+    {#key ready}
+      <video
+        {id}
+        bind:this={ipCamElement}
+        class="video-js vjs-fluid w-full bg-black"
+        autoplay
+        muted
+        on:resize
+        on:loadedmetadata={handleLoad}
+      />
+    {/key}
   {:else}
     <video
+      {id}
       bind:this={videoElement}
       class="w-full bg-black"
       autoplay
       muted
+      on:resize
       on:loadedmetadata={handleLoad}
     />
   {/if}
@@ -207,6 +322,11 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+  }
+
+  .camera-view .video-js {
+    width: 100% !important;
+    height: 100% !important;
   }
 
   .camera-view button {

@@ -5,6 +5,7 @@
   import Button from '../utility/Button.svelte'
   import Icon from '../utility/Icon.svelte'
   import { createEventDispatcher } from 'svelte'
+  import CameraView from '../utility/CameraView.svelte'
 
   export let isOpen
   export let targets
@@ -179,6 +180,8 @@
   }
 
   function initCanvas() {
+    cameraFeedElement = document.getElementById('zdvElement')
+
     drawingCanvas.width = cameraFeedElement.clientWidth
     drawingCanvas.height = cameraFeedElement.clientHeight
     drawingCanvas.style.width = `${cameraFeedElement.clientWidth}px`
@@ -190,6 +193,8 @@
   }
 
   function onVideoMetadataLoaded() {
+    cameraFeedElement = document.querySelector('#zdvElement video')
+
     videoLoaded = true
 
     actualVideoWidth = cameraFeedElement.videoWidth
@@ -198,9 +203,18 @@
     // Calculate scale factors based on the video element's size
     scaleX = actualVideoWidth / cameraFeedElement.clientWidth
     scaleY = actualVideoHeight / cameraFeedElement.clientHeight
+
+    console.log(
+      actualVideoHeight,
+      actualVideoWidth,
+      cameraFeedElement.clientWidth,
+      cameraFeedElement.clientHeight,
+      cameraFeedElement
+    )
   }
 
   function saveZones() {
+    console.log(targetZones)
     dispatch('save', targetZones)
     isOpen = false // Close the modal
   }
@@ -271,15 +285,21 @@
   <div class="flex w-full h-full">
     <!-- Video and Canvas Container -->
     <div class="relative flex-grow">
-      <video
-        bind:this={cameraFeedElement}
-        muted
-        autoplay
+      <CameraView
+        width="730px"
+        height="560px"
+        id="zdvElement"
+        previewMode
+        bind:isIpCam
+        bind:deviceUrl
+        bind:deviceIndex
+        showBorders
         on:resize={initCanvas}
         on:loadedmetadata={onVideoMetadataLoaded}
-      ></video>
+      />
       <canvas
         bind:this={drawingCanvas}
+        style="z-index: 1000;"
         class="absolute top-0 left-0 w-full h-full cursor-crosshair"
         on:mousedown={startDrawing}
         on:mousemove={draw}
@@ -344,8 +364,4 @@
 </Overlay>
 
 <style>
-  video {
-    width: 730px;
-    height: 560px;
-  }
 </style>

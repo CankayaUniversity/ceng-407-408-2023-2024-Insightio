@@ -149,7 +149,6 @@
         }
         targetOptions = [...targetOptions, option]
       })
-      console.log(targetOptions)
     }
   }
 

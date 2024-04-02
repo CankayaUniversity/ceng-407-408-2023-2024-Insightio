@@ -17,6 +17,7 @@
   import ZoneDraw from '../modals/ZoneDraw.svelte'
   import { success, warn } from '../../functions/toastifyWrapper'
   import Spinner from '../utility/Spinner.svelte'
+  import patterns from '../../functions/regex'
 
   export let isEditMode = false
 
@@ -38,6 +39,7 @@
   let cameraName = ''
   let deviceIndex = 0
   let deviceUrl = ''
+  let urlValidation = false
   let openZoneDraw = false
   let isIpCam = false
   let zones = {}
@@ -125,6 +127,11 @@
         return false
       }
     } else {
+      if (!urlValidation) {
+        warn('Invalid stream address.')
+        return false
+      }
+
       // Check URL
       const sameIpConfig = cameraConfigurations.find((o) => conf.ipAddress === o.ipAddress)
       if (sameIpConfig && sameIpConfig.type == 'IPCAMERA') {
@@ -365,11 +372,15 @@
               {:else if cameraType == 'ip-camera' || (selectedConfiguration && selectedConfiguration.type === 'IPCAMERA')}
                 <Input
                   class="w-full py-1 px-2"
+                  isPasteInput={true}
                   showLabel
                   label="Camera URL:"
                   type="text"
                   id="camip"
                   placeholder="https://path/to/cam.mjpg"
+                  pattern={patterns['url']}
+                  errorMessage="Invalid URL"
+                  on:validation={(e) => (urlValidation = e.detail)}
                   bind:value={deviceUrl}
                 />
               {/if}

@@ -110,7 +110,7 @@ class VideoThreadManager:
             deviceIndex = camera_settings["deviceIndex"]
             cap = cv2.VideoCapture(deviceIndex)
         elif camera_settings["type"] == "IPCAMERA":
-            cap = cv2.VideoCapture(camera_settings["ipAddress"], cv2.CAP_FFMPEG)
+            cap = cv2.VideoCapture(camera_settings["ipAddress"])
         else:
             raise ValueError("Invalid Camera Type.")
 
@@ -155,7 +155,6 @@ class VideoThreadManager:
             for zone in target_zones:
                 zone_start_point = sv.Point(zone['startPoint']['x'], zone['startPoint']['y'])
                 zone_end_point = sv.Point(zone['endPoint']['x'], zone['endPoint']['y'])
-
 
                 if zone['zoneType'] == 'LINE':
                     # Create LineCounter instance to draw a line

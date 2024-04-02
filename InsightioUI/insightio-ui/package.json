@@ -5,6 +5,17 @@
   "main": "./out/main/index.js",
   "author": "Utku Özbek",
   "homepage": "https://cankayauniversity.github.io/ceng-407-408-2023-2024-Insightio/#what-is-insightio",
+  "build": {
+    "extraResources": [
+      {
+        "from": "./bin/",
+        "to": "bin",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
+  },
   "scripts": {
     "format": "prettier --plugin prettier-plugin-svelte --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
@@ -26,7 +37,8 @@
     "electron-packager": "^17.1.2",
     "electron-updater": "^6.1.1",
     "toastify-js": "^1.12.0",
-    "uuidv4": "^6.2.13"
+    "uuidv4": "^6.2.13",
+    "video.js": "^8.10.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^1.0.1",

@@ -7,7 +7,10 @@ const api = {
     // whitelist channels
     let validChannels = [
       "minimize-window",
-      "close-window"
+      "close-window",
+      "start-stream",
+      "stop-stream",
+      "stop-all-streams"
     ];
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data);
@@ -18,6 +21,18 @@ const api = {
     if (validChannels.includes(channel)) {
       // Deliberately strip event as it includes `sender` 
       ipcRenderer.on(channel, (event, ...args) => func(...args));
+    }
+  },
+  once: (channel, func) => {
+    let validChannels = [
+      "stream-started",
+      "stream-stopped",
+      "all-streams-stopped",
+      "ffmpeg-error"
+    ];
+    if (validChannels.includes(channel)) {
+      // Deliberately strip event as it includes `sender`
+      ipcRenderer.once(channel, (event, ...args) => func(...args));
     }
   }
 }
