@@ -4,7 +4,7 @@
 
   export let currentChartData
   export let chartType = 'bar' // Default chart type
-  export let visibilityCallback
+  export let filters
   export let targets
 
   const colors = [
@@ -35,7 +35,11 @@
         type: chartType,
         label: countData.target,
         data: countData.data,
-        hidden: countData.hidden,
+        // Set hidden property based on filters object
+        // eslint-disable-next-line no-prototype-builtins
+        hidden: filters.hasOwnProperty(countData.target)
+          ? !filters[countData.target]
+          : countData.hidden,
         backgroundColor: getColor(countData.target, 0.5),
         borderColor: getColor(countData.target, 1.0),
         borderWidth: 1
@@ -58,43 +62,45 @@
             ticks: { color: 'white' }
           },
           x: {
-            ticks: { color: 'white' } // X-axis labels color
+            ticks: { color: 'white' }
           }
         },
         plugins: {
           legend: {
             labels: {
-              color: 'white' // Legend labels color
+              color: 'white',
+              generateLabels: (chart) => {
+                const original = Chart.defaults.plugins.legend.labels.generateLabels
+                const labelsOriginal = original.call(this, chart)
+                return labelsOriginal.map((label) => ({
+                  ...label,
+                  text: `${label.text}`
+                }))
+              }
             },
             onClick: (event, legendItem) => {
               const index = legendItem.datasetIndex
               const ci = chartInstance
-              const meta = ci.getDatasetMeta(index)
-              // Toggle visibility
-              if (ci.data.datasets[index]) {
-                meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null
+
+              // Use the filters dictionary if it's provided
+              if (filters && Object.keys(filters).includes(legendItem.text)) {
+                // Directly toggle the visibility state in filters dictionary
+                filters[legendItem.text] = !filters[legendItem.text]
+
+                // Update dataset's hidden property based on the new visibility state
+                ci.data.datasets[index].hidden = !filters[legendItem.text]
               } else {
-                let dataIndex = currentChartData[0].labels.indexOf(legendItem.text)
-                let isVisible = visibilityCallback(legendItem.text)
-                if (isVisible) {
-                  ci.data.datasets.forEach((d, i) => {
-                    ci.hide(i, dataIndex)
-                  })
-                  legendItem.hidden = true
-                } else {
-                  ci.data.datasets.forEach((d, i) => {
-                    ci.show(i, dataIndex)
-                  })
-                  legendItem.hidden = false
-                }
+                // Default toggle visibility behavior
+                const meta = ci.getDatasetMeta(index)
+                meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null
               }
 
               ci.update()
             }
           },
           tooltip: {
-            titleFontColor: 'white', // Tooltip title color
-            bodyFontColor: 'white' // Tooltip body color
+            titleFontColor: 'white',
+            bodyFontColor: 'white'
           }
         }
       }
@@ -102,7 +108,6 @@
   }
 
   function updateChart() {
-    // Ensure chartInstance and currentChartData are correctly referenced
     if (!chartInstance || !currentChartData) return
 
     if (prevChartType != chartType) {
@@ -110,7 +115,8 @@
       chartInstance = new Chart(canvas.getContext('2d'), getChartConfig())
       prevChartType = chartType
     } else {
-      chartInstance.data = createChartData()
+      const updatedChartData = createChartData()
+      chartInstance.data = updatedChartData
       chartInstance.update()
     }
   }

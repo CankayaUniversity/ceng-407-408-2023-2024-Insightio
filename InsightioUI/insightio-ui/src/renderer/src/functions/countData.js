@@ -20,8 +20,9 @@ const timeFrameToIndex = {
   year: 3
 }
 
-const initTimeVisibilityArray = (currentTimeFrame) => {
-  return Object.fromEntries(labels[currentTimeFrame].map((t) => [t, true]))
+const initTargetVisibilityArray = (data) => {
+  const targets = data.map((d) => d.target)
+  return Object.fromEntries(targets.map((t) => [t, true]))
 }
 
 const getFramedCountData = (countData, currentTimeFrame) => {
@@ -40,7 +41,7 @@ const CountHelper = {
   timeFrameToIndex: timeFrameToIndex,
   validTimeFrames: validTimeFrames,
   getFramedCountData: getFramedCountData,
-  initTimeVisibilityArray: initTimeVisibilityArray
+  initTargetVisibilityArray: initTargetVisibilityArray
 }
 
 export default CountHelper;

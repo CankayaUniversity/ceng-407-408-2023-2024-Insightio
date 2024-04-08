@@ -81,14 +81,14 @@
   ]
 
   const mockTargets = mockData.map((o) => o.target)
-  const chartTypes = ['bar', 'line', 'pie', 'doughnut', 'radar']
+  const chartTypes = ['bar', 'line', 'radar', 'pie', 'doughnut', 'polarArea']
 
   let selectedCameraSetting
   let cameraSettings = []
   let currentTimeFrame = 'day'
   let currentCameraIndex = 0
   let currentChartTypeIndex = 0
-  let timeVisibility = CountHelper.initTimeVisibilityArray(currentTimeFrame)
+  let targetVisibilities = CountHelper.initTargetVisibilityArray(mockData)
   let currentChartData = CountHelper.getFramedCountData(mockData, currentTimeFrame)
   let currentChartType = chartTypes[currentChartTypeIndex]
   let maxCameraIndex
@@ -97,7 +97,7 @@
 
   function updateTimeFrame(timeframe) {
     currentTimeFrame = timeframe
-    timeVisibility = CountHelper.initTimeVisibilityArray(currentTimeFrame)
+    targetVisibilities = CountHelper.initTimeVisibilityArray(currentTimeFrame)
     currentChartData = CountHelper.getFramedCountData(mockData, currentTimeFrame)
   }
 
@@ -117,14 +117,6 @@
       currentChartTypeIndex = (currentChartTypeIndex - 1 + chartTypes.length) % chartTypes.length
     }
     currentChartType = chartTypes[currentChartTypeIndex]
-  }
-
-  function filterLegendChosenTime(text) {
-    let isVisible = timeVisibility[text]
-
-    timeVisibility[text] = !timeVisibility[text]
-
-    return isVisible
   }
 
   async function fetchSettings() {
@@ -153,6 +145,8 @@
   }
 
   $: $pageStore.activePage === 'dashboard' && fetchSettings()
+
+  $: console.log(targetVisibilities)
 </script>
 
 {#if !showLoading}
@@ -222,7 +216,7 @@
               <Chart
                 bind:currentChartData
                 bind:chartType={currentChartType}
-                visibilityCallback={filterLegendChosenTime}
+                bind:filters={targetVisibilities}
                 targets={mockTargets}
               />
             </div>

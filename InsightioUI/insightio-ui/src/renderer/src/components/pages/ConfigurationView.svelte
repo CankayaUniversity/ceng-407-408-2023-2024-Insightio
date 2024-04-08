@@ -140,6 +140,14 @@
       }
     }
 
+    if (Object.keys(zones).length == 0) {
+      warn('No target zones specified for this configuration.')
+      return false
+    } else if (Object.keys(zones).length != selectedTags.length) {
+      warn('Missing zones for specified targets.')
+      return false
+    }
+
     return true
   }
 

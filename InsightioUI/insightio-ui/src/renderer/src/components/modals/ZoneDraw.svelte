@@ -6,6 +6,7 @@
   import Icon from '../utility/Icon.svelte'
   import { createEventDispatcher } from 'svelte'
   import CameraView from '../utility/CameraView.svelte'
+  import { warn } from '../../functions/toastifyWrapper'
 
   export let isOpen
   export let targets
@@ -206,9 +207,12 @@
   }
 
   function saveZones() {
-    console.log(targetZones)
-    dispatch('save', targetZones)
-    isOpen = false // Close the modal
+    if (Object.keys(targetZones).length == targets.length) {
+      dispatch('save', targetZones)
+      isOpen = false // Close the modal
+    } else {
+      warn('Please specify at least one zone for each target')
+    }
   }
 
   $: {
