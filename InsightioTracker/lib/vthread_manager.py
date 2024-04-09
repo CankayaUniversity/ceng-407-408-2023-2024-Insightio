@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from lib.api import TrackerAPI
+from threading import Lock
 import supervision as sv
 import numpy as np
 import threading
@@ -15,6 +16,9 @@ class VideoThreadManager:
         self.api = TrackerAPI()
         self.stop_signals = {}
         self.zone_counts = {}
+        self.line_counters = {}
+        self.lock = Lock()
+        self.FPS = 60
 
     def fetch_and_update_threads(self):
         new_settings_list = self.api.get_camera_settings()
@@ -47,15 +51,23 @@ class VideoThreadManager:
                     self.stop_thread(camera_id)
 
     def start_thread(self, camera_settings):
-        self.stop_signals[camera_settings['id']] = False
+        camera_id = camera_settings['id']
+        self.stop_signals[camera_id] = False
+
+        self.line_counters[camera_id] = []
+
         thread = threading.Thread(target=self.video_processing_thread, args=(camera_settings,))
         thread.daemon = True
         thread.start()
-        self.video_threads[camera_settings['id']] = {'thread': thread, 'settings': camera_settings}
+        self.video_threads[camera_id] = {'thread': thread, 'settings': camera_settings}
 
     def stop_thread(self, camera_id):
         self.stop_signals[camera_id] = True
         self.video_threads[camera_id]['thread'].join()
+        
+        if camera_id in self.line_counters:
+            del self.line_counters[camera_id]
+
         del self.video_threads[camera_id]
 
     def update_thread(self, camera_id, new_settings):
@@ -76,33 +88,37 @@ class VideoThreadManager:
 
             time.sleep(sleep_duration)
 
-            # Report at the start of the hour
-            report_time = datetime.now().isoformat()
-            count_reports = []  # Initialize a list to accumulate reports
+            with self.lock:
+                # Report at the start of the hour
+                report_time = datetime.now().isoformat()
+                count_reports = []  # Initialize a list to accumulate reports
 
-            for camera_id, targets in self.zone_counts.items():
-                for target_id, zones in targets.items():
-                    total_counts = {zone_name: zone_data['total'] for zone_name, zone_data in zones.items()}
-                    overall_total = sum(zone_data['total'] for zone_data in zones.values())
+                for camera_id, targets in self.zone_counts.items():
+                    for target_id, zones in targets.items():
+                        total_counts = {zone_name: zone_data['total'] for zone_name, zone_data in zones.items()}
+                        overall_total = sum(zone_data['total'] for zone_data in zones.values())
 
-                    count_report = {
-                        "cameraId": camera_id,
-                        "targetId": target_id,
-                        "timestamp": report_time,
-                        "totalCounts": total_counts,
-                        "overallTotal": overall_total
-                    }
-                    count_reports.append(count_report)
+                        count_report = {
+                            "cameraId": camera_id,
+                            "targetId": target_id,
+                            "timestamp": report_time,
+                            "totalCounts": total_counts,
+                            "overallTotal": overall_total
+                        }
+                        count_reports.append(count_report)
+
+                # Reset zone counts and line counters for the next hour
+                for camera_id in self.zone_counts.keys():
+                    for line_counter in self.line_counters.get(camera_id, []):
+                        line_counter.in_count = 0
+                        line_counter.out_count = 0
+
+                self.zone_counts = {}
 
             # POST the list of reports
             if count_reports:
-                print("Sending batch of count reports")
-                print(count_reports)
                 self.api.post_count_reports(count_reports)
-
-            # Reset zone counts for the next hour
-            self.zone_counts = {}
-
+        
     def get_capture_device(self, camera_settings):
         cap = {}
 
@@ -111,6 +127,7 @@ class VideoThreadManager:
             cap = cv2.VideoCapture(deviceIndex)
         elif camera_settings["type"] == "IPCAMERA":
             cap = cv2.VideoCapture(camera_settings["ipAddress"])
+            cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
         else:
             raise ValueError("Invalid Camera Type.")
 
@@ -126,19 +143,35 @@ class VideoThreadManager:
         return corner1, corner2, corner3, corner4
     
     def calculate_zone_counts(self, zone_type, counters):
-        in_count_sum = sum(counter.in_count for counter in counters)
-        out_count_sum = sum(counter.out_count for counter in counters)
+        with self.lock:
+            in_count_sum = sum(counter.in_count for counter in counters)
+            out_count_sum = sum(counter.out_count for counter in counters)
 
         if zone_type == 0:
             return 0, in_count_sum + out_count_sum
         else:
             return in_count_sum - out_count_sum, out_count_sum
+    
+    def update_zone_counts(self, camera_id, target_id, zone_name, current, total):
+        with self.lock:
+            if camera_id not in self.zone_counts:
+                self.zone_counts[camera_id] = {}
+            if target_id not in self.zone_counts[camera_id]:
+                self.zone_counts[camera_id][target_id] = {}
+            if zone_name not in self.zone_counts[camera_id][target_id]:
+                self.zone_counts[camera_id][target_id][zone_name] = {'current': 0, 'total': 0}
+
+            # Update zone counts
+            self.zone_counts[camera_id][target_id][zone_name]['current'] = current
+            self.zone_counts[camera_id][target_id][zone_name]['total'] = total
 
     def video_processing_thread(self, camera_settings):
         camera_id = camera_settings['id']
 
         # Ensure there's a stop signal entry for this thread
         self.stop_signals[camera_id] = False
+
+        self.line_counters[camera_id] = []
 
         camera_connected = False
         
@@ -159,6 +192,9 @@ class VideoThreadManager:
                 if zone['zoneType'] == 'LINE':
                     # Create LineCounter instance to draw a line
                     line_counter = sv.LineZone(start=zone_start_point, end=zone_end_point, triggering_anchors=[sv.Position.CENTER])
+                    
+                    with self.lock:
+                        self.line_counters[camera_id].append(line_counter)
 
                     counter_set['zones'].append({
                         'name': zone['zoneName'],
@@ -174,6 +210,11 @@ class VideoThreadManager:
                     line_counter2 = sv.LineZone(start=corner2, end=corner3, triggering_anchors=[sv.Position.CENTER])
                     line_counter3 = sv.LineZone(start=corner4, end=corner2, triggering_anchors=[sv.Position.CENTER])
                     line_counter4 = sv.LineZone(start=corner1, end=corner4, triggering_anchors=[sv.Position.CENTER])
+
+                    line_counters = [line_counter1, line_counter2, line_counter3, line_counter4]
+                    
+                    with self.lock:
+                        self.line_counters[camera_id].extend(line_counters)
 
                     counter_set['zones'].append({
                         'name': zone['zoneName'],
@@ -204,18 +245,25 @@ class VideoThreadManager:
 
             # If the camera is not connected, try to reconnect
             if not camera_connected:
+                if cap:
+                    cap.release()
+    
                 cap = self.get_capture_device(camera_settings)
 
                 if cap.isOpened():
                     camera_connected = True
             else:
-                # Capture a frame from the webcam
+                start_time = time.time()
+
                 ret, frame = cap.read()
                 if not ret:
                     print("Camera disconnected")
                     # If the camera is disconnected, set camera_connected to False
                     camera_connected = False
                     continue
+                
+                # Serve raw frame
+                self.server.update_stream(f"raw_frame_{camera_id}", frame, frame_key="raw_frame")
 
                 # Model prediction on single frame and conversion to supervision Detections
                 results = self.model(frame)[0]
@@ -226,9 +274,6 @@ class VideoThreadManager:
                 mask = np.array([tracker_id is not None for tracker_id in detections.tracker_id], dtype=bool)
                 detections = detections[mask]
                 
-                # Serve raw frame
-                self.server.update_stream(f"raw_frame_{camera_settings['id']}", frame, frame_key="raw_frame")
-
                 # Init fully annotated frame
                 all_annotated_frame = frame.copy()
 
@@ -246,30 +291,18 @@ class VideoThreadManager:
                         in target_detections
                     ]
 
-                    # Initialize target entry if not present
-                    if camera_id not in self.zone_counts:
-                        self.zone_counts[camera_id] = {}
-                    if target_id not in self.zone_counts[camera_id]:
-                        self.zone_counts[camera_id][target_id] = {}
-
                     target_current = 0
                     target_total = 0
                     for zone in counter_set['zones']:
                         zone_name = zone['name']
                         zone_type = zone['type']
 
-                        # Initialize zone entry if not present
-                        if zone_name not in self.zone_counts[camera_id][target_id]:
-                            self.zone_counts[camera_id][target_id][zone_name] = {'current': 0, 'total': 0}
-
                         for counter in zone['counters']:
                             counter.trigger(detections=target_detections)
 
                         current, total = self.calculate_zone_counts(zone_type, zone['counters'])
-
-                        # Update zone counts
-                        self.zone_counts[camera_id][target_id][zone_name]['current'] = current
-                        self.zone_counts[camera_id][target_id][zone_name]['total'] = total
+                        
+                        self.update_zone_counts(camera_id, target_id, zone_name, current, total)
 
                         target_current += current
                         target_total += total
@@ -291,21 +324,20 @@ class VideoThreadManager:
                             all_annotated_frame = line_annotator.annotate(frame=all_annotated_frame, line_counter=counter)
 
                     class_id = counter_set['target']
-                    annotated_stream_id = f"frame_{camera_settings['id']}_{class_id}"
-                    current_count_stream_id = f"current_count_{camera_settings['id']}_{class_id}"
-                    total_count_stream_id = f"total_count_{camera_settings['id']}_{class_id}"
+                    annotated_stream_id = f"frame_{camera_id}_{class_id}"
+                    current_count_stream_id = f"current_count_{camera_id}_{class_id}"
+                    total_count_stream_id = f"total_count_{camera_id}_{class_id}"
 
                     self.server.update_stream(annotated_stream_id, target_frame)
                     self.server.update_stream(current_count_stream_id, current_count=current_counts[class_id])
                     self.server.update_stream(total_count_stream_id, total_count=total_counts[class_id])
 
-                self.server.update_stream(f"all_annotated_frame_{camera_settings['id']}", all_annotated_frame, frame_key="all_annotated_frame")
-                
-                if cv2.waitKey(1) == ord('q'):
-                    break
+                self.server.update_stream(f"all_annotated_frame_{camera_id}", all_annotated_frame, frame_key="all_annotated_frame")
+
+                processing_time = time.time() - start_time
+                sleep_time = max(1/self.FPS - processing_time, 0)
+                time.sleep(sleep_time)
 
         cap.release()
-        cv2.destroyAllWindows()
-        
         # Ensure to clear the stop signal for next time
         del self.stop_signals[camera_id]
