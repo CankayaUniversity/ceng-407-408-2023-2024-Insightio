@@ -10,7 +10,7 @@ server = None
 def initialize_model():
     global model, CLASS_NAMES_DICT
 
-    MODEL = "yolov8x-oiv7.pt"
+    MODEL = "yolov8l-oiv7.pt"
     model = YOLO(MODEL)
     model.fuse()
 
