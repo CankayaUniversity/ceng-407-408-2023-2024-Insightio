@@ -18,7 +18,6 @@ class VideoThreadManager:
         self.zone_counts = {}
         self.line_counters = {}
         self.lock = Lock()
-        self.FPS = 60
 
     def fetch_and_update_threads(self):
         new_settings_list = self.api.get_camera_settings()
@@ -253,8 +252,6 @@ class VideoThreadManager:
                 if cap.isOpened():
                     camera_connected = True
             else:
-                start_time = time.time()
-
                 ret, frame = cap.read()
                 if not ret:
                     print("Camera disconnected")
@@ -333,10 +330,6 @@ class VideoThreadManager:
                     self.server.update_stream(total_count_stream_id, total_count=total_counts[class_id])
 
                 self.server.update_stream(f"all_annotated_frame_{camera_id}", all_annotated_frame, frame_key="all_annotated_frame")
-
-                processing_time = time.time() - start_time
-                sleep_time = max(1/self.FPS - processing_time, 0)
-                time.sleep(sleep_time)
 
         cap.release()
         # Ensure to clear the stop signal for next time

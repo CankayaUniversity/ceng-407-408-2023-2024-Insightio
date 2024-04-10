@@ -145,8 +145,6 @@
   }
 
   $: $pageStore.activePage === 'dashboard' && fetchSettings()
-
-  $: console.log(targetVisibilities)
 </script>
 
 {#if !showLoading}
