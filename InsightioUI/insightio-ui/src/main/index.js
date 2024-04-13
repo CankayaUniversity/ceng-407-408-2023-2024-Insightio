@@ -127,7 +127,8 @@ function createWindow() {
         '-tune', 'zerolatency',
         '-c:a', 'aac',
         '-f', 'mp4',
-        '-movflags', 'frag_keyframe+empty_moov', '-'
+        '-movflags', 'frag_keyframe+empty_moov',
+        '-'
       ]);
       const passThrough = new PassThrough();
       ffmpegProcess.stdout.pipe(passThrough);
