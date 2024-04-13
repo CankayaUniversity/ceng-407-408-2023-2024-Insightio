@@ -120,7 +120,15 @@ function createWindow() {
     let streamId = Object.keys(streams).find(id => streams[id].url === streamUrl);
     if (!streamId) {
       streamId = generateUniqueId();
-      const ffmpegProcess = spawn(ffmpegPath, ['-i', streamUrl, '-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'zerolatency', '-c:a', 'aac', '-f', 'mp4', '-movflags', 'frag_keyframe+empty_moov', '-']);
+      const ffmpegProcess = spawn(ffmpegPath, [
+        '-i', streamUrl,
+        '-c:v', 'libx264',
+        '-preset', 'veryfast',
+        '-tune', 'zerolatency',
+        '-c:a', 'aac',
+        '-f', 'mp4',
+        '-movflags', 'frag_keyframe+empty_moov', '-'
+      ]);
       const passThrough = new PassThrough();
       ffmpegProcess.stdout.pipe(passThrough);
 
