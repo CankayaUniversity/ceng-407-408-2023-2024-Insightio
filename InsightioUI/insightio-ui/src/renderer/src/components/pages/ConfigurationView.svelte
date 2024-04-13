@@ -18,6 +18,7 @@
   import { success, warn } from '../../functions/toastifyWrapper'
   import Spinner from '../utility/Spinner.svelte'
   import patterns from '../../functions/regex'
+  import getMetadata, { metadataCategories } from '../../functions/getMetadata'
 
   export let isEditMode = false
 
@@ -44,6 +45,7 @@
   let isIpCam = false
   let zones = {}
   let resolution = ''
+  let savedDrawings = {}
   let newTags = []
   let newCameraConfiguration = {
     name: '',
@@ -55,7 +57,12 @@
     resolution: '',
     createdDate: '',
     createdBy: '',
-    metadata: []
+    metadata: [
+      {
+        categoryId: metadataCategories['UnscaledZoneDrawings'],
+        value: null
+      }
+    ]
   }
 
   function initFields() {
@@ -85,7 +92,12 @@
       resolution: '',
       createdDate: '',
       createdBy: '',
-      metadata: []
+      metadata: [
+        {
+          categoryId: metadataCategories['UnscaledZoneDrawings'],
+          value: null
+        }
+      ]
     }
   }
 
@@ -109,6 +121,11 @@
   function validateConfigurationsObject(conf) {
     if (!cameraConfigurations || !conf) {
       console.error('No configuration list or configuration provided')
+      return false
+    }
+
+    if (cameraName.trim().length == 0) {
+      warn('Please provide a name for the configuration.')
       return false
     }
 
@@ -165,6 +182,11 @@
     initFields()
   }
 
+  function handleZoneSave(e) {
+    zones = e.detail.targetZones
+    savedDrawings = e.detail.drawings
+  }
+
   function handleOpenZoneDraw() {
     if (selectedTags.length == 0) {
       warn('Please select targets first.')
@@ -204,7 +226,12 @@
         resolution: resolution,
         createdDate: d.toISOString(),
         createdBy: '1e2f50c5-7dea-46ef-9a86-f4910d5d989f',
-        metadata: []
+        metadata: [
+          {
+            categoryId: metadataCategories['UnscaledZoneDrawings'],
+            value: Object.keys(savedDrawings).length != 0 ? JSON.stringify(savedDrawings) : null
+          }
+        ]
       }
 
       if (validateConfigurationsObject(newCameraConfiguration)) {
@@ -259,11 +286,18 @@
 
   $: isSettingsDisabled = Object.keys(selectedConfiguration).length == 0
 
-  $: if (isEditMode) {
+  $: if (isEditMode && selectedConfiguration) {
     // Perform any additional logic needed when edit mode is active
     cameraName = selectedConfiguration?.name || ''
     deviceUrl = selectedConfiguration?.ipAddress || ''
     deviceIndex = selectedConfiguration?.deviceIndex || 0
+
+    const drawings = getMetadata(selectedConfiguration, 'UnscaledZoneDrawings')
+    if (drawings) {
+      savedDrawings = JSON.parse(drawings)
+    } else {
+      savedDrawings = {}
+    }
 
     if (selectedConfiguration && selectedConfiguration.targets) {
       let configTargets = []
@@ -274,6 +308,8 @@
     }
 
     isIpCam = selectedConfiguration.type == 'IPCAMERA' ? true : false
+  } else {
+    savedDrawings = {}
   }
 
   $: tagifyDisabled = isEditMode && isSettingsDisabled
@@ -285,7 +321,9 @@
   bind:isIpCam
   bind:deviceIndex
   bind:deviceUrl
-  on:save={(e) => (zones = e.detail)}
+  bind:isEditMode
+  bind:savedDrawings
+  on:save={handleZoneSave}
 />
 
 {#if !showLoading}

@@ -12,6 +12,8 @@
   export let targets
   export let isIpCam
   export let deviceUrl
+  export let isEditMode
+  export let savedDrawings
   export let deviceIndex = 0
 
   let ctx
@@ -143,7 +145,7 @@
     targets.forEach((target) => {
       const targetId = target.value
       if (drawings[targetId]) {
-        targetZones[targetId] = drawings[targetId].map((drawing) => {
+        const zones = drawings[targetId].map((drawing) => {
           const adjustedStart = {
             x: drawing.start.x * scaleX,
             y: drawing.start.y * scaleY
@@ -160,6 +162,9 @@
             endPoint: adjustedEnd
           }
         })
+        if (zones.length != 0) {
+          targetZones[targetId] = zones
+        }
       }
     })
   }
@@ -189,6 +194,9 @@
     drawingCanvas.style.height = `${cameraFeedElement.clientHeight}px`
     ctx = drawingCanvas.getContext('2d')
     ctx.lineWidth = 2
+    if (isEditMode && Object.keys(savedDrawings).length != 0) {
+      drawings = savedDrawings
+    }
     redrawCanvas()
     canvasLoaded = true
   }
@@ -208,7 +216,7 @@
 
   function saveZones() {
     if (Object.keys(targetZones).length == targets.length) {
-      dispatch('save', targetZones)
+      dispatch('save', { targetZones: targetZones, drawings: drawings })
       isOpen = false // Close the modal
     } else {
       warn('Please specify at least one zone for each target')
@@ -267,6 +275,11 @@
   }
 
   $: if (canvasLoaded && selectedTarget) {
+    redrawCanvas()
+  }
+
+  $: if (canvasLoaded && savedDrawings) {
+    drawings = savedDrawings
     redrawCanvas()
   }
 

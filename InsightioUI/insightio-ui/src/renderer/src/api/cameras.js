@@ -19,7 +19,7 @@ export async function createCameraSetting(cameraSetting) {
 }
 
 export async function updateCameraSetting(cameraSetting) {
-    return instance.put("/cameras", cameraSetting).then((res) => {
+    return instance.put(`/cameras/${cameraSetting.id}`, cameraSetting).then((res) => {
         return res.data;
     })
 }

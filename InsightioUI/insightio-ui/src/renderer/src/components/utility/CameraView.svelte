@@ -29,6 +29,9 @@
   let videoElement
   let videoPlayer
   let ready = false
+  let renderVideo = true
+  let urlChanged = false
+  let oldUrl = ''
   let dispatch = createEventDispatcher()
   let vidStreamId = ''
 
@@ -45,7 +48,6 @@
   }
 
   async function initVideoPlayer() {
-    await tick()
     videoPlayer = videojs(ipCamElement, {
       autoplay: true,
       muted: true,
@@ -61,6 +63,7 @@
       videoPlayer = null
       vidStreamId = '' // Reset the stream ID
       ready = false
+      renderVideo = false
     }
   }
 
@@ -105,6 +108,11 @@
 
     if (videoPlayer) {
       videoPlayer.dispose()
+      videoPlayer = null
+      renderVideo = false // Disable video rendering
+      tick().then(() => {
+        renderVideo = true // Re-enable rendering asynchronously
+      })
       stopStream(vidStreamId, () => {
         startStream(deviceUrl, (msg, success) => {
           if (success) {
@@ -175,10 +183,20 @@
     }
   }
 
+  $: if (oldUrl != deviceUrl && test(deviceUrl, 'url')) {
+    oldUrl = deviceUrl
+    urlChanged = true
+  } else {
+    urlChanged = false
+  }
+
   $: if (previewMode) {
     waitRender()
     if (!ready && ipCamElement && isIpCam && test(deviceUrl, 'url')) {
       setupVideoStream()
+    } else if (urlChanged && ipCamElement && isIpCam && test(deviceUrl, 'url')) {
+      setupVideoStream()
+      urlChanged = false
     } else if (ready && isIpCam && !test(deviceUrl, 'url')) {
       disposeVideoPlayer()
     } else if (!isIpCam) {
@@ -276,18 +294,16 @@
         Total count for Target {target.text}: {totalCount}
       </div>
     {/if}
-  {:else if isIpCam}
-    {#key ready}
-      <video
-        {id}
-        bind:this={ipCamElement}
-        class="video-js vjs-fluid w-full bg-black"
-        autoplay
-        muted
-        on:resize
-        on:loadedmetadata={handleLoad}
-      />
-    {/key}
+  {:else if renderVideo && isIpCam}
+    <video
+      {id}
+      bind:this={ipCamElement}
+      class="video-js vjs-fluid w-full bg-black"
+      autoplay
+      muted
+      on:resize
+      on:loadedmetadata={handleLoad}
+    />
   {:else}
     <video
       {id}

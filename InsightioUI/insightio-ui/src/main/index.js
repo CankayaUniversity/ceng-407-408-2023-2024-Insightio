@@ -1,6 +1,7 @@
 import { app, shell, ipcMain, BrowserWindow } from 'electron'
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { PassThrough } from 'stream';
 import fs from 'fs';
 
 const http = require('http');
@@ -16,52 +17,55 @@ const ffmpegPath = process.env.NODE_ENV === 'development'
 // Check if ffmpeg.exe exists
 const ffmpegExists = fs.existsSync(ffmpegPath);
 
-function generateUniqueId() {
-  return Math.random().toString(36).substring(2, 12);
-}
-
-function handleStreamRequest(req, res, streamId) {
-  if (!streams[streamId] || !ffmpegExists) {
-    res.writeHead(404);
-    res.end();
-    return;
-  }
-
-  const streamUrl = streams[streamId].url;
-  const ffmpegProcess = spawn(ffmpegPath, [
-    '-i', streamUrl,
-    '-c:v', 'libx264',
-    '-preset', 'veryfast',
-    '-tune', 'zerolatency',
-    '-c:a', 'aac',
-    '-f', 'mp4',
-    '-movflags', 'frag_keyframe+empty_moov',
-    '-'
-  ]);
-
-  streams[streamId].process = ffmpegProcess;
-  ffmpegProcess.stdout.pipe(res);
-  ffmpegProcess.stderr.on('data', data => console.error(data.toString()));
-
-  req.on('close', () => {
-    ffmpegProcess.kill('SIGKILL');
-  });
-}
-
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
   res.setHeader('Access-Control-Allow-Credentials', true);
 
   const streamId = req.url.substring(1); // Assuming the URL is the stream path
-  if (streams[streamId].url) {
+  if (streams[streamId]) {
     handleStreamRequest(req, res, streamId);
   } else {
     res.writeHead(404);
     res.end();
   }
 });
+
+function generateUniqueId() {
+  return Math.random().toString(36).substring(2, 12);
+}
+
+function handleStreamRequest(req, res, streamId) {
+  const streamData = streams[streamId];
+  if (!streamData) {
+    res.writeHead(404);
+    res.end();
+    return;
+  }
+
+  // Ensure the response header is appropriate for video streaming
+  res.writeHead(200, {
+    'Content-Type': 'video/mp4',
+    'Connection': 'keep-alive',
+    'Accept-Ranges': 'bytes'
+  });
+
+  // Pipe the PassThrough stream to the response
+  // This allows each client to receive their own stream of video data
+  streamData.stream.pipe(res);
+
+  streamData.clients.push(res);
+  res.on('close', () => {
+    // Remove response from clients list
+    streamData.clients = streamData.clients.filter(client => client !== res);
+    if (streamData.clients.length === 0) {
+      // If no more clients, stop the ffmpeg process
+      streamData.process.kill('SIGKILL');
+      delete streams[streamId];
+    }
+  });
+}
 
 function createWindow() {
   // Create the browser window.
@@ -113,26 +117,51 @@ function createWindow() {
       return;
     }
 
-    const streamId = generateUniqueId();
-    streams[streamId] = { url: streamUrl, process: null };
+    let streamId = Object.keys(streams).find(id => streams[id].url === streamUrl);
+    if (!streamId) {
+      streamId = generateUniqueId();
+      const ffmpegProcess = spawn(ffmpegPath, ['-i', streamUrl, '-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'zerolatency', '-c:a', 'aac', '-f', 'mp4', '-movflags', 'frag_keyframe+empty_moov', '-']);
+      const passThrough = new PassThrough();
+      ffmpegProcess.stdout.pipe(passThrough);
+
+      streams[streamId] = {
+        url: streamUrl,
+        process: ffmpegProcess,
+        stream: passThrough,
+        clients: []
+      };
+
+      ffmpegProcess.on('exit', () => {
+        delete streams[streamId];
+      });
+
+      ffmpegProcess.on('close', () => {
+        delete streams[streamId];
+      });
+    }
+
     event.reply('stream-started', streamId);
   });
 
   ipcMain.on('stop-stream', (event, streamId) => {
-    if (streams[streamId] && streams[streamId].process) {
-      streams[streamId].process.kill('SIGKILL');
+    const streamData = streams[streamId];
+    if (streamData) {
+      streamData.process.kill('SIGKILL');
+      streamData.clients.forEach(client => client.end());
+      delete streams[streamId];
+      event.reply('stream-stopped', streamId);
     }
-    delete streams[streamId];
-    event.reply('stream-stopped', streamId);
   });
 
   ipcMain.on('stop-all-streams', (event) => {
     Object.keys(streams).forEach(streamId => {
-      if (streams[streamId].process) {
-        streams[streamId].process.kill('SIGKILL');
+      const streamData = streams[streamId];
+      if (streamData) {
+        streamData.process.kill('SIGKILL');
+        streamData.clients.forEach(client => client.end());
+        delete streams[streamId];
       }
     });
-    streams = {};
     event.reply('all-streams-stopped');
   });
 }

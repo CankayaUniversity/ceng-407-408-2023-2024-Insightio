@@ -8,6 +8,7 @@
   import { onMount } from 'svelte'
   import Overlay from './components/utility/Overlay.svelte'
   import Button from './components/utility/Button.svelte'
+  import { stopAllStreams } from './api/ipc'
 
   let loggedIn = false
   let showLogoutModal = false
@@ -25,6 +26,7 @@
   function handleLogoutConfirmation(answer) {
     if (answer) {
       localStorage.removeItem('user')
+      stopAllStreams()
       loggedIn = false
       showLogoutModal = false
     } else {
