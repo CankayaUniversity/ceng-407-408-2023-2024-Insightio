@@ -30,6 +30,7 @@
   let targetZones = {}
   let actualVideoWidth
   let actualVideoHeight
+  let oldSavedDrawings = {}
   let scaleX
   let scaleY
   let history = [{}] // Stack for undo
@@ -196,6 +197,7 @@
     ctx.lineWidth = 2
     if (isEditMode && Object.keys(savedDrawings).length != 0) {
       drawings = savedDrawings
+      oldSavedDrawings = savedDrawings
     }
     redrawCanvas()
     canvasLoaded = true
@@ -278,7 +280,11 @@
     redrawCanvas()
   }
 
-  $: if (canvasLoaded && savedDrawings) {
+  $: if (
+    canvasLoaded &&
+    savedDrawings &&
+    JSON.stringify(oldSavedDrawings) != JSON.stringify(savedDrawings)
+  ) {
     drawings = savedDrawings
     redrawCanvas()
   }

@@ -97,7 +97,7 @@
 
   function updateTimeFrame(timeframe) {
     currentTimeFrame = timeframe
-    targetVisibilities = CountHelper.initTimeVisibilityArray(currentTimeFrame)
+    targetVisibilities = CountHelper.initTargetVisibilityArray(mockData)
     currentChartData = CountHelper.getFramedCountData(mockData, currentTimeFrame)
   }
 

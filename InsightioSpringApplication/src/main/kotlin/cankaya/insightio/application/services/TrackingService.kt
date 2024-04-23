@@ -8,19 +8,19 @@ class TrackingService(
     private val processBuilder: ProcessBuilder,
 ) {
     companion object {
-        const val SCRIPT_LOCATION = "../InsightioTracker/ekin-dokunmayin.py"
-        const val SCRIPT_ROOT_DIRECTORY = "../InsightioTracker/"
-        const val SCRIPT_COMMAND = "python3"
-        const val TRACKING_SCRIPT_COMMAND = "python3 $SCRIPT_LOCATION"
+        const val SCRIPT_LOCATION = "..\\InsightioTracker\\main.py"
+        const val SCRIPT_ROOT_DIRECTORY = "..\\InsightioTracker\\"
+        const val VENV_PATH = "..\\InsightioTracker\\venv\\Scripts\\python.exe"  // Path to the Python executable in the virtual environment
     }
 
-    fun runPythonScriptWithExec(command: String = TRACKING_SCRIPT_COMMAND) {
+    fun runPythonScriptWithExec() {
+        val command = "\"$VENV_PATH\" \"$SCRIPT_LOCATION\""
         Runtime.getRuntime().exec(command)
     }
 
-    fun runPythonScriptAsProcess(scriptLocation: String = SCRIPT_LOCATION): Boolean {
+    fun runPythonScriptAsProcess(): Boolean {
         val scriptDirectory = File(SCRIPT_ROOT_DIRECTORY)
-        processBuilder.command(SCRIPT_COMMAND, scriptLocation)
+        processBuilder.command(VENV_PATH, SCRIPT_LOCATION)
         processBuilder.directory(scriptDirectory)
         processBuilder.inheritIO()
 
