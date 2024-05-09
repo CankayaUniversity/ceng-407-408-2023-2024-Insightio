@@ -23,6 +23,7 @@ services:
 
   ui:
     image: ui_v2
+    command: ["electron", "--no-sandbox"]  # Add the --no-sandbox flag here
     depends_on:
       - spring  # Ensure the UI service starts after the Spring service
     networks:
