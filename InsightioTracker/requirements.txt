@@ -1,0 +1,5 @@
+numpy==1.26.3
+PyYAML==6.0.1
+supervision==0.18.0
+torch==2.1.2
+ultralytics==8.1.5

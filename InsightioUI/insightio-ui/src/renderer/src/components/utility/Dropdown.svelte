@@ -1,0 +1,98 @@
+<script>
+  import clsx from 'clsx'
+  import { slide } from 'svelte/transition'
+  import { createEventDispatcher } from 'svelte'
+
+  export let items
+  export let selectedItem = undefined
+  export let value = undefined
+  export let placeholder = 'Select...'
+  export let showSearch = false
+  export let maxHeight = undefined
+  export let disabled = false
+
+  let dispatch = createEventDispatcher()
+
+  let searchTerm = ''
+  let isOpen = false
+
+  function selectItem(index) {
+    if (selectedItem != items[index]) {
+      dispatch('change', items[index])
+    }
+    selectedItem = items[index]
+    value = selectedItem.value
+    isOpen = false
+  }
+
+  function toggleDropdown() {
+    if (disabled) return
+    isOpen = !isOpen
+  }
+
+  $: filteredItems = items.filter((item) =>
+    item.text.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+</script>
+
+<div class="relative max-w-xs">
+  <button
+    on:click={toggleDropdown}
+    {disabled}
+    class={clsx(
+      'bg-gray-700 text-white py-2 px-4 rounded leading-tight focus:outline-none focus:ring focus:border-blue-300',
+      disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600',
+      $$props.class
+    )}
+  >
+    <div class="flex justify-between items-center">
+      <span>
+        {#if selectedItem}
+          {selectedItem.text}
+        {:else}
+          {placeholder}
+        {/if}
+      </span>
+      <svg
+        class={`fill-current h-4 w-4 transition-transform duration-200 transform ${
+          isOpen ? 'rotate-180' : 'rotate-0'
+        }`}
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+      >
+        <path d="M5.5 7L10 11.5L14.5 7H5.5Z" />
+      </svg>
+    </div>
+  </button>
+  {#if isOpen}
+    <div
+      transition:slide={{ duration: 200 }}
+      class="absolute z-10 bg-slate-500 shadow-lg mt-1 rounded w-full"
+    >
+      {#if showSearch}
+        <input
+          type="text"
+          class="w-full px-4 py-2 bg-gray-600 text-white focus:outline-none focus:ring focus:border-blue-300 rounded-t"
+          placeholder="Type to search..."
+          bind:value={searchTerm}
+        />
+      {/if}
+      <ul
+        class="custom-scroll max-h-60 overflow-auto text-white bg-gray-700 rounded-b"
+        style={clsx(maxHeight != undefined && `max-height: ${maxHeight}rem;`)}
+      >
+        {#each filteredItems as item, index}
+          <button
+            on:click={() => selectItem(index)}
+            class={clsx(
+              'w-full text-left px-4 py-2 hover:bg-blue-400 cursor-pointer focus:outline-none',
+              selectedItem && selectedItem == item && 'bg-blue-400'
+            )}
+          >
+            {item.text}
+          </button>
+        {/each}
+      </ul>
+    </div>
+  {/if}
+</div>

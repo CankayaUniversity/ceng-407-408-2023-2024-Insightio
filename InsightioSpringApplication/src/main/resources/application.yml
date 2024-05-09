@@ -1,0 +1,16 @@
+server:
+  port: 8091
+  compression:
+    enabled: true
+  http2:
+    enabled: true
+  shutdown: graceful
+
+springdoc:
+  api-docs:
+    path: /insightio
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost/user-insightio
+
