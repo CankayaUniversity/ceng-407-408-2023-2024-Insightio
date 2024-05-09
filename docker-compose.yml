@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  spring:
+    image: springv2
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - tracker-spring:/shared
+    networks:
+      - my_network
+
+  tracker:
+    image: tracker_v2
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - tracker-spring:/shared
+    networks:
+      - my_network
+
+  ui:
+    image: ui_v2
+    depends_on:
+      - spring  # Ensure the UI service starts after the Spring service
+    networks:
+      - my_network
+
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - my_network
+
+volumes:
+  tracker-spring:
+  mongodb_data:
+
+networks:
+  my_network:
+    driver: bridge
