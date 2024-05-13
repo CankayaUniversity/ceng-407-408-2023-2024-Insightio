@@ -48,7 +48,7 @@
         })
       }
       const d = new Date()
-      const user = {
+      let user = {
         username: username,
         email: email,
         password: password != '' ? await hash(password) : $userStore.password,
@@ -56,7 +56,7 @@
         isAdmin: isEditMode ? $userStore.isAdmin : false,
         isCreate: isEditMode ? $userStore.isCreate : true,
         createdDate: isEditMode ? $userStore.createdDate : d.toISOString(),
-        createdBy: isEditMode ? $userStore.createdBy : $userStore._id,
+        createdBy: isEditMode ? $userStore.createdBy : $userStore.id,
         metadata: [
           {
             categoryId: '660977b2e0f48cd2a2ecd01a',
@@ -66,10 +66,12 @@
       }
 
       if (isEditMode) {
+        user['id'] = $userStore.id
         const res = await updateUser(user)
 
         if (!('error' in res)) {
           success('User successfully updated!')
+          resetAccountSettings()
         } else {
           failure('Failed to update account')
         }

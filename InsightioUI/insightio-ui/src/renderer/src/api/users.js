@@ -16,7 +16,7 @@ export async function createUser(user) {
 }
 
 export async function updateUser(user) {
-    return instance.post(`/users/${user._id}`, user).then((res) => {
+    return instance.put(`/users/${user.id}`, user).then((res) => {
         return res.data;
     })
 }
