@@ -36,7 +36,7 @@
   let selectedTags = []
   let selectedTargets = []
   let cameraOptions = []
-  let selectedCamera
+  let selectedCamera = {}
   let cameraName = ''
   let deviceIndex = 0
   let deviceUrl = ''
@@ -73,9 +73,9 @@
     selectedTags = []
     selectedTargets = []
     cameraOptions = []
-    selectedCamera
+    selectedCamera = {}
     cameraName = ''
-    deviceIndex = 0
+    deviceIndex = -1
     deviceUrl = ''
     openZoneDraw = false
     isIpCam = false
@@ -290,7 +290,7 @@
     // Perform any additional logic needed when edit mode is active
     cameraName = selectedConfiguration?.name || ''
     deviceUrl = selectedConfiguration?.ipAddress || ''
-    deviceIndex = selectedConfiguration?.deviceIndex || 0
+    deviceIndex = selectedConfiguration?.deviceIndex || -1
 
     const drawings = getMetadata(selectedConfiguration, 'UnscaledZoneDrawings')
     if (drawings) {
@@ -310,6 +310,12 @@
     isIpCam = selectedConfiguration.type == 'IPCAMERA' ? true : false
   } else {
     savedDrawings = {}
+  }
+
+  $: {
+    if (Object.keys(selectedCamera) > 0) {
+      deviceIndex = selectedCamera.value
+    }
   }
 
   $: tagifyDisabled = isEditMode && isSettingsDisabled

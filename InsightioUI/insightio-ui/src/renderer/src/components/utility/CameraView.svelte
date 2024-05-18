@@ -19,7 +19,7 @@
   export let previewMode = false
   export let isIpCam = true
   export let deviceUrl = ''
-  export let deviceIndex = 0
+  export let deviceIndex = -1
   export let targetOptions = []
   export let showFullscreenButton = false
   export let showBorders = false
@@ -206,20 +206,22 @@
           videoPlayer.dispose()
           videoPlayer = null
         }
-        ;(async () => {
-          const devices = await navigator.mediaDevices.enumerateDevices()
-          const videoDevices = devices.filter((device) => device.kind === 'videoinput')
+        if (deviceIndex > -1) {
+          ;(async () => {
+            const devices = await navigator.mediaDevices.enumerateDevices()
+            const videoDevices = devices.filter((device) => device.kind === 'videoinput')
 
-          if (videoDevices.length > deviceIndex) {
-            const stream = await navigator.mediaDevices.getUserMedia({
-              video: { deviceId: { exact: videoDevices[deviceIndex].deviceId } }
-            })
-            videoElement.srcObject = stream
-          } else {
-            console.error('Device index out of range')
-            dispatch('error', 'Media device not found')
-          }
-        })()
+            if (videoDevices.length > deviceIndex) {
+              const stream = await navigator.mediaDevices.getUserMedia({
+                video: { deviceId: { exact: videoDevices[deviceIndex].deviceId } }
+              })
+              videoElement.srcObject = stream
+            } else {
+              console.error('Device index out of range')
+              dispatch('error', 'Media device not found')
+            }
+          })()
+        }
       } catch (error) {
         console.error('Error accessing media devices:', error)
         dispatch('error', 'Error accessing media device')
