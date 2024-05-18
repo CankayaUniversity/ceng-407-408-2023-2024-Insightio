@@ -2,26 +2,23 @@ package cankaya.insightio.application.services
 
 import org.springframework.stereotype.Service
 import java.io.File
+import java.nio.file.Paths
 
 @Service
 class TrackingService(
     private val processBuilder: ProcessBuilder,
 ) {
-    companion object {
-        const val SCRIPT_LOCATION = "..\\InsightioTracker\\main.py"
-        const val SCRIPT_ROOT_DIRECTORY = "..\\InsightioTracker\\"
-        const val VENV_PATH = "..\\InsightioTracker\\venv\\Scripts\\python.exe"  // Path to the Python executable in the virtual environment
-    }
-
-    fun runPythonScriptWithExec() {
-        val command = "\"$VENV_PATH\" \"$SCRIPT_LOCATION\""
-        Runtime.getRuntime().exec(command)
+    fun getBasePath(): String {
+        return Paths.get("").toAbsolutePath().toString()
     }
 
     fun runPythonScriptAsProcess(): Boolean {
-        val scriptDirectory = File(SCRIPT_ROOT_DIRECTORY)
+        val SCRIPT_ROOT_DIRECTORY = getBasePath()
+        val VENV_PATH = "$SCRIPT_ROOT_DIRECTORY\\InsightioTracker\\venv\\Scripts\\python.exe"
+        val SCRIPT_LOCATION = "$SCRIPT_ROOT_DIRECTORY\\InsightioTracker\\main.py"
+
         processBuilder.command(VENV_PATH, SCRIPT_LOCATION)
-        processBuilder.directory(scriptDirectory)
+        processBuilder.directory(File(SCRIPT_ROOT_DIRECTORY))
         processBuilder.inheritIO()
 
         try {

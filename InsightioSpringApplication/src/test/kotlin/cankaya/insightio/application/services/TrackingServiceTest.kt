@@ -1,8 +1,4 @@
 package cankaya.insightio.application.services
-
-import cankaya.insightio.application.services.TrackingService.Companion.SCRIPT_COMMAND
-import cankaya.insightio.application.services.TrackingService.Companion.SCRIPT_LOCATION
-import cankaya.insightio.application.services.TrackingService.Companion.SCRIPT_ROOT_DIRECTORY
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -27,7 +23,10 @@ class TrackingServiceTest {
     @Test
     fun `when runPythonScriptAsProcess function is called, python script should be executed`() {
         // Given
-        `when`(mockProcessBuilder.command(SCRIPT_COMMAND, SCRIPT_LOCATION)).thenReturn(mockProcessBuilder)
+        val SCRIPT_ROOT_DIRECTORY = sut.getBasePath()
+        val VENV_PATH = "$SCRIPT_ROOT_DIRECTORY\\InsightioTracker\\venv\\Scripts\\python.exe"
+        val SCRIPT_LOCATION = "$SCRIPT_ROOT_DIRECTORY\\InsightioTracker\\main.py"
+        `when`(mockProcessBuilder.command(VENV_PATH, SCRIPT_LOCATION)).thenReturn(mockProcessBuilder)
         `when`(mockProcessBuilder.directory(File(SCRIPT_ROOT_DIRECTORY))).thenReturn(mockProcessBuilder)
         `when`(mockProcessBuilder.inheritIO()).thenReturn(mockProcessBuilder)
         `when`(mockProcessBuilder.start()).thenReturn(mockProcess)
