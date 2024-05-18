@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Paths
 
+// Service for running our python tracking script
 @Service
 class TrackingService(
     private val processBuilder: ProcessBuilder,
@@ -13,6 +14,12 @@ class TrackingService(
     }
 
     fun runPythonScriptAsProcess(): Boolean {
+        // ZEYNEP var isimlerini değiştirebilir misin, const variable'lar screaming snake case ile yazılır
+        // fakat const olmayanlar upper camelcase şeklinde
+
+        // val rootDirectory = getBasePath()
+        // val venvPath = "$rootDirectory\\InsightioTracker\\venv\\Scripts\\python.exe"
+        // val scriptLocation = "$rootDirectory\\InsightioTracker\\main.py"
         val SCRIPT_ROOT_DIRECTORY = getBasePath()
         val VENV_PATH = "$SCRIPT_ROOT_DIRECTORY\\InsightioTracker\\venv\\Scripts\\python.exe"
         val SCRIPT_LOCATION = "$SCRIPT_ROOT_DIRECTORY\\InsightioTracker\\main.py"

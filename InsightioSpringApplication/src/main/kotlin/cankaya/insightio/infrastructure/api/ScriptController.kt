@@ -2,17 +2,19 @@ package cankaya.insightio.infrastructure.api
 
 import cankaya.insightio.application.services.TrackingService
 import cankaya.insightio.infrastructure.api.models.ApiResponse
+import io.swagger.v3.oas.annotations.Operation
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+
 
 @RestController
 @RequestMapping("/script")
 class ScriptController(
     val trackingService: TrackingService,
 ) {
+    @Operation(description = "Run python tracking script")
     @PostMapping("/run")
     suspend fun runPythonScript(): ResponseEntity<ApiResponse> {
         try {
@@ -33,10 +35,5 @@ class ScriptController(
                 ),
             )
         }
-    }
-
-    @GetMapping("/deneme")
-    suspend fun deneme(): Int {
-        return 6
     }
 }

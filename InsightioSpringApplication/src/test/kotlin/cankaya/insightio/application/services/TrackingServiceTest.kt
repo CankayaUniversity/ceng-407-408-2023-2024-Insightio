@@ -22,6 +22,12 @@ class TrackingServiceTest {
 
     @Test
     fun `when runPythonScriptAsProcess function is called, python script should be executed`() {
+        // ZEYNEP var isimlerini değiştirebilir misin, const variable'lar screaming snake case ile yazılır
+        // fakat const olmayanlar upper camelcase şeklinde
+
+        // sut demek system under test in kısaltması, her unit test bu sut un bir fonskiyonunu test eder
+        // bundan dolayı aynı test içerisinde
+
         // Given
         val SCRIPT_ROOT_DIRECTORY = sut.getBasePath()
         val VENV_PATH = "$SCRIPT_ROOT_DIRECTORY\\InsightioTracker\\venv\\Scripts\\python.exe"

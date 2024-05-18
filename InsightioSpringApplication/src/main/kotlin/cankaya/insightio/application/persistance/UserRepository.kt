@@ -1,4 +1,4 @@
-package cankaya.insightio.infrastructure.mongodb.impls
+package cankaya.insightio.application.persistance
 
 import cankaya.insightio.domain.User
 import org.springframework.data.mongodb.repository.MongoRepository

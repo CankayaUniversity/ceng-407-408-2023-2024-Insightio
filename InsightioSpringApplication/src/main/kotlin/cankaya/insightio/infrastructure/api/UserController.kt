@@ -28,8 +28,8 @@ class UserController(
         }
     }
 
-    @GetMapping("/sadeceDeneme/encyrpt")
-    fun encryp(
+    @GetMapping("/encyrpt")
+    fun encrypt(
         @RequestParam password: String,
     ): String {
         return utils.encryptAES(password)

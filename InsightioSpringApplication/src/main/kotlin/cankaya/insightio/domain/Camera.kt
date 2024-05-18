@@ -27,3 +27,6 @@ data class Camera(
     val createdBy: String,
     val metadata: List<Metadata>,
 )
+
+
+//EDA CameraStatus ve CameraType'ı buraya declare edebilir misin
