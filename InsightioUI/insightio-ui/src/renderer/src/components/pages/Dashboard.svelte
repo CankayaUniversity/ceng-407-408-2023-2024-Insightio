@@ -12,75 +12,9 @@
   import targets from '../../data/trackerTargets'
 
   // TODO: Replace with actual data
-  const mockData = [
-    {
-      target: 'Human',
-      counts: [
-        // Hours
-        Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-        // Days
-        Array.from({ length: 7 }, () => Math.floor(Math.random() * 100)),
-        // Weeks
-        Array.from({ length: 4 }, () => Math.floor(Math.random() * 100)),
-        // Months
-        Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
-      ]
-    },
-    {
-      target: 'Car',
-      counts: [
-        // Hours
-        Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-        // Days
-        Array.from({ length: 7 }, () => Math.floor(Math.random() * 100)),
-        // Weeks
-        Array.from({ length: 4 }, () => Math.floor(Math.random() * 100)),
-        // Months
-        Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
-      ]
-    },
-    {
-      target: 'Cat',
-      counts: [
-        // Hours
-        Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-        // Days
-        Array.from({ length: 7 }, () => Math.floor(Math.random() * 100)),
-        // Weeks
-        Array.from({ length: 4 }, () => Math.floor(Math.random() * 100)),
-        // Months
-        Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
-      ]
-    },
-    {
-      target: 'Dog',
-      counts: [
-        // Hours
-        Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-        // Days
-        Array.from({ length: 7 }, () => Math.floor(Math.random() * 100)),
-        // Weeks
-        Array.from({ length: 4 }, () => Math.floor(Math.random() * 100)),
-        // Months
-        Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
-      ]
-    },
-    {
-      target: 'Bicycle',
-      counts: [
-        // Hours
-        Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-        // Days
-        Array.from({ length: 7 }, () => Math.floor(Math.random() * 100)),
-        // Weeks
-        Array.from({ length: 4 }, () => Math.floor(Math.random() * 100)),
-        // Months
-        Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
-      ]
-    }
-  ]
-
-  const mockTargets = mockData.map((o) => o.target)
+  let mockDatas = {}
+  let mockData = []
+  let mockTargets
   const chartTypes = ['bar', 'line', 'radar', 'pie', 'doughnut', 'polarArea']
 
   let selectedCameraSetting
@@ -88,8 +22,8 @@
   let currentTimeFrame = 'day'
   let currentCameraIndex = 0
   let currentChartTypeIndex = 0
-  let targetVisibilities = CountHelper.initTargetVisibilityArray(mockData)
-  let currentChartData = CountHelper.getFramedCountData(mockData, currentTimeFrame)
+  let targetVisibilities
+  let currentChartData
   let currentChartType = chartTypes[currentChartTypeIndex]
   let maxCameraIndex
   let showLoading = false
@@ -134,6 +68,29 @@
   $: {
     if (selectedCameraSetting) {
       targetOptions = []
+      if (!Object.keys(mockDatas).includes(selectedCameraSetting.id)) {
+        mockDatas[selectedCameraSetting.id] = []
+        Object.keys(selectedCameraSetting.targets).forEach((t) => {
+          mockDatas[selectedCameraSetting.id].push({
+            target: targets.labels[`${t}`],
+            counts: [
+              // Hours
+              Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
+              // Days
+              Array.from({ length: 7 }, () => Math.floor(Math.random() * 100)),
+              // Weeks
+              Array.from({ length: 4 }, () => Math.floor(Math.random() * 100)),
+              // Months
+              Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
+            ]
+          })
+        })
+      }
+      mockData = mockDatas[selectedCameraSetting.id]
+      mockTargets = mockData.map((o) => o.target)
+      targetVisibilities = CountHelper.initTargetVisibilityArray(mockData)
+      currentChartData = CountHelper.getFramedCountData(mockData, currentTimeFrame)
+
       Object.keys(selectedCameraSetting.targets).forEach((targetId) => {
         const option = {
           text: targets.labels[parseInt(targetId)],

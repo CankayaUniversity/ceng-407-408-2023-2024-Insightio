@@ -133,6 +133,13 @@
   })
 
   $: if (chartInstance && currentChartData && chartType) {
+    targetColors = (() => {
+      let a = {}
+      colors.forEach((c, i) => {
+        a[targets[i]] = colors[i]
+      })
+      return a
+    })()
     updateChart()
   }
 </script>

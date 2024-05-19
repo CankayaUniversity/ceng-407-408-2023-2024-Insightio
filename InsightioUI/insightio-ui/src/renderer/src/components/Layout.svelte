@@ -60,7 +60,9 @@
       <slot />
     </div>
 
-    <footer class="p-4 text-right text-xs">© 2023 Insightio. All rights reserved.</footer>
+    <footer class="p-4 text-right text-xs">
+      © 2024 Insightio, Cankaya University. All rights reserved.
+    </footer>
   </div>
 </div>
 

@@ -47,10 +47,10 @@
   >
     <div class="flex justify-between items-center">
       <span>
-        {#if selectedItem}
-          {selectedItem.text}
-        {:else}
+        {#if !selectedItem || Object.keys(selectedItem) == 0}
           {placeholder}
+        {:else}
+          {selectedItem.text}
         {/if}
       </span>
       <svg
