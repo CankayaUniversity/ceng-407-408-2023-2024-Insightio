@@ -9,6 +9,13 @@ import java.nio.file.Paths
 class TrackingService(
     private val processBuilder: ProcessBuilder,
 ) {
+    // ZEYNEP bunu companion object e çıkartabilir misin
+//    companion object {
+//        fun getBasePath(): String {
+//            return Paths.get("").toAbsolutePath().toString()
+//        }
+//    }
+
     fun getBasePath(): String {
         return Paths.get("").toAbsolutePath().toString()
     }

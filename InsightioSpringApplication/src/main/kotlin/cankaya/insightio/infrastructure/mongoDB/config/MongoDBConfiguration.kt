@@ -15,5 +15,4 @@ enum class CameraStatus {
     CONNECTED,
 }
 
-
-//EDA gerekli taşımaları yaptıktan sonra bu config dosyasını silebilir misin
+// EDA gerekli taşımaları yaptıktan sonra bu config dosyasını silebilir misin

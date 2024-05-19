@@ -25,8 +25,12 @@ class TrackingServiceTest {
         // ZEYNEP var isimlerini değiştirebilir misin, const variable'lar screaming snake case ile yazılır
         // fakat const olmayanlar upper camelcase şeklinde
 
-        // sut demek system under test in kısaltması, her unit test bu sut un bir fonskiyonunu test eder
-        // bundan dolayı aynı test içerisinde
+        // sut demek system under test in kısaltması, her unit test bu sut un bir fonksiyonunu test eder
+        // bundan dolayı aynı test içerisinde sut ten iki farklı şeyi çağıramazsın
+        // sut.getBasePath() ve sut.runPythonScriptAsProcess() olmamalı
+
+        // bu fonk companion object e çekersen (TrackingService de yazdım)
+        // val SCRIPT_ROOT_DIRECTORY = getBasePath() şeklinde çağırabilirz
 
         // Given
         val SCRIPT_ROOT_DIRECTORY = sut.getBasePath()

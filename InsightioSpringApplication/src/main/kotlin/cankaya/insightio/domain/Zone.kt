@@ -9,5 +9,4 @@ data class Zone(
     val endPoint: Point,
 )
 
-
-//EDA ZoneType ı buraya declare edebilir misin
+// EDA ZoneType ı buraya declare edebilir misin

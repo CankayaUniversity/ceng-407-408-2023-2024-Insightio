@@ -28,5 +28,4 @@ data class Camera(
     val metadata: List<Metadata>,
 )
 
-
-//EDA CameraStatus ve CameraType'ı buraya declare edebilir misin
+// EDA CameraStatus ve CameraType'ı buraya declare edebilir misin
