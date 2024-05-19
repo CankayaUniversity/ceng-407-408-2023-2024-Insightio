@@ -30,5 +30,5 @@ class InsightioApplication() : SpringBootServletInitializer()
 fun main(args: Array<String>) {
     val context = runApplication<InsightioApplication>(*args)
     val trackingService = context.getBean(TrackingService::class.java)
-    // trackingService.runPythonScriptAsProcess()
+    trackingService.runPythonScriptAsProcess()
 }
