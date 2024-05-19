@@ -1,4 +1,4 @@
-package cankaya.insightio.infrastructure.config.mongoDB
+package cankaya.insightio.infrastructure.config
 
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients

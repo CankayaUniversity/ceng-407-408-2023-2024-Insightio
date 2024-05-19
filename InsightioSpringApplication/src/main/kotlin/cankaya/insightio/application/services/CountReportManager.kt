@@ -14,6 +14,13 @@ import java.time.temporal.ChronoField
 class CountReportManager(
     private val countReportRepository: CountReportRepository,
 ) {
+    companion object {
+        const val HOURS = 24
+        const val DAYS = 7
+        const val WEEKS = 4
+        const val MONTHS = 12
+    }
+
     private val converter = InstantToLocalDateConverter()
 
     suspend fun createAuditReportByTarget(
@@ -22,7 +29,6 @@ class CountReportManager(
     ): CountReportAudit {
         return coroutineScope {
             val instant = Instant.now()
-            // val localDate = instant.atOffset(ZoneOffset.UTC).toLocalDate()
             val localDate = converter.convert(instant)
 
             val hourlyCountsTask =
@@ -65,7 +71,7 @@ class CountReportManager(
         now: Instant,
         localDate: LocalDate,
     ): List<Int> {
-        val counts = MutableList(size = 24) { 0 }
+        val counts = MutableList(size = HOURS) { 0 }
         val startOfDay = localDate.atStartOfDay()
         val records =
             countReportRepository.getReportsByCameraIdAndTargetIdAndDate(
@@ -88,7 +94,7 @@ class CountReportManager(
         now: Instant,
         localDate: LocalDate,
     ): List<Int> {
-        val counts = MutableList(7) { 0 }
+        val counts = MutableList(DAYS) { 0 }
         val startDate = localDate.atStartOfDay().with(DayOfWeek.MONDAY).toInstant(ZoneOffset.UTC)
 
         val records =
@@ -107,13 +113,13 @@ class CountReportManager(
         return counts
     }
 
-    private fun calculateWeeklyCounts(
+    fun calculateWeeklyCounts(
         cameraId: String,
         targetId: Int,
         now: Instant,
         localDate: LocalDate,
     ): List<Int> {
-        val counts = MutableList(4) { 0 }
+        val counts = MutableList(WEEKS) { 0 }
         val startDate =
             LocalDate.of(
                 localDate.year,
@@ -145,7 +151,7 @@ class CountReportManager(
         now: Instant,
         localDate: LocalDate,
     ): List<Int> {
-        val counts = MutableList(12) { 0 }
+        val counts = MutableList(MONTHS) { 0 }
         val startDate = LocalDate.of(localDate.year, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
 
         val records =

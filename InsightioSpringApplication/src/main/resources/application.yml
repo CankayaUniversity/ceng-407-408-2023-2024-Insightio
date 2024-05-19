@@ -13,4 +13,3 @@ spring:
   data:
     mongodb:
       uri: mongodb://localhost/user-insightio
-
