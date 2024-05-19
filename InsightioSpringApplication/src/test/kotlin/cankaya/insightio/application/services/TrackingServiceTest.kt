@@ -36,8 +36,12 @@ class TrackingServiceTest {
         val SCRIPT_ROOT_DIRECTORY = sut.getBasePath()
         val VENV_PATH = "$SCRIPT_ROOT_DIRECTORY\\InsightioTracker\\venv\\Scripts\\python.exe"
         val SCRIPT_LOCATION = "$SCRIPT_ROOT_DIRECTORY\\InsightioTracker\\main.py"
-        `when`(mockProcessBuilder.command(VENV_PATH, SCRIPT_LOCATION)).thenReturn(mockProcessBuilder)
-        `when`(mockProcessBuilder.directory(File(SCRIPT_ROOT_DIRECTORY))).thenReturn(mockProcessBuilder)
+        `when`(
+            mockProcessBuilder.command(VENV_PATH, SCRIPT_LOCATION),
+        ).thenReturn(mockProcessBuilder)
+        `when`(
+            mockProcessBuilder.directory(File(SCRIPT_ROOT_DIRECTORY)),
+        ).thenReturn(mockProcessBuilder)
         `when`(mockProcessBuilder.inheritIO()).thenReturn(mockProcessBuilder)
         `when`(mockProcessBuilder.start()).thenReturn(mockProcess)
         `when`(mockProcess.waitFor()).thenReturn(0)

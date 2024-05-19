@@ -15,7 +15,9 @@ class SwaggerConfiguration {
             .components(
                 Components().addSecuritySchemes(
                     AUTHORIZATION,
-                    SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT"),
+                    SecurityScheme().type(
+                        SecurityScheme.Type.HTTP,
+                    ).scheme("bearer").bearerFormat("JWT"),
                 ),
             )
     }

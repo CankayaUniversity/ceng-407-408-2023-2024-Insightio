@@ -22,14 +22,16 @@ class CountReportRepositoryImpl(private val mongoTemplate: MongoTemplate) : Coun
 
     override fun getDistinctTargetIds(): List<Int> {
         return mongoTemplate.getCollection(COUNT_REPORT_COLLECTION)
-            .distinct("targetId", Int::class.java)
+            .distinct("targetId", Integer::class.java)
+            .map { it.toInt() }
             .toList()
     }
 
     override fun getDistinctTargetIdsByCameraId(cameraId: String): List<Int> {
         val filter = Filters.eq("cameraId", cameraId)
         return mongoTemplate.getCollection(COUNT_REPORT_COLLECTION)
-            .distinct("targetId", filter, Int::class.java)
+            .distinct("targetId", filter, Integer::class.java)
+            .map { it.toInt() }
             .toList()
     }
 
@@ -39,7 +41,9 @@ class CountReportRepositoryImpl(private val mongoTemplate: MongoTemplate) : Coun
     ): List<CountReport> {
         val query =
             Query()
-                .addCriteria(Criteria.where("cameraId").`is`(cameraId).and("targetId").`is`(targetId))
+                .addCriteria(
+                    Criteria.where("cameraId").`is`(cameraId).and("targetId").`is`(targetId),
+                )
         return mongoTemplate.find(query, CountReport::class.java)
     }
 

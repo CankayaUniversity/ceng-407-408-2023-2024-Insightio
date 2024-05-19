@@ -20,7 +20,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
                     url = "https://cankayauniversity.github.io/ceng-407-408-2023-2024-Insightio/",
                     email = "c2011030@student.cankaya.edu.tr",
                 ),
-            version = "1.1",
+            version = "2.0",
         ),
 )
 @SpringBootApplication
@@ -30,5 +30,5 @@ class InsightioApplication() : SpringBootServletInitializer()
 fun main(args: Array<String>) {
     val context = runApplication<InsightioApplication>(*args)
     val trackingService = context.getBean(TrackingService::class.java)
-    trackingService.runPythonScriptAsProcess()
+    // trackingService.runPythonScriptAsProcess()
 }

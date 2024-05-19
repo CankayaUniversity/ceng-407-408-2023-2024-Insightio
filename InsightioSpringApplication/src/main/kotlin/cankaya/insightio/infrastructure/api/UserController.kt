@@ -24,7 +24,9 @@ class UserController(
             val user = userService.findByUsername(loginRequest.username)
             ResponseEntity.ok(ApiResponse.success(user))
         } else {
-            ResponseEntity.status(401).body(ApiResponse.error(statusCode = 401, errorMessage = "Unauthorized"))
+            ResponseEntity.status(
+                401,
+            ).body(ApiResponse.error(statusCode = 401, errorMessage = "Unauthorized"))
         }
     }
 
@@ -43,7 +45,9 @@ class UserController(
             val newUser = userService.createUser(user)
             ResponseEntity.ok(ApiResponse.success(newUser))
         } catch (e: Exception) {
-            ResponseEntity.status(500).body(ApiResponse.error(errorMessage = "User not created: ${e.message}"))
+            ResponseEntity.status(
+                500,
+            ).body(ApiResponse.error(errorMessage = "User not created: ${e.message}"))
         }
     }
 
@@ -57,7 +61,9 @@ class UserController(
             val user = userService.updateUser(id, updatedUser)
             ResponseEntity.ok(ApiResponse.success(user))
         } catch (e: Exception) {
-            ResponseEntity.status(500).body(ApiResponse.error(errorMessage = "User not updated: ${e.message}"))
+            ResponseEntity.status(
+                500,
+            ).body(ApiResponse.error(errorMessage = "User not updated: ${e.message}"))
         }
     }
 
@@ -70,7 +76,9 @@ class UserController(
             userService.deleteUser(id)
             ResponseEntity.ok(ApiResponse.success())
         } catch (e: Exception) {
-            ResponseEntity.status(500).body(ApiResponse.error(errorMessage = "User not deleted: ${e.message}"))
+            ResponseEntity.status(
+                500,
+            ).body(ApiResponse.error(errorMessage = "User not deleted: ${e.message}"))
         }
     }
 
@@ -81,7 +89,9 @@ class UserController(
             val users = userService.findAllUsers()
             ResponseEntity.ok(ApiResponse.success(users))
         } catch (e: Exception) {
-            ResponseEntity.status(500).body(ApiResponse.error(errorMessage = "User not be listed: ${e.message}"))
+            ResponseEntity.status(
+                500,
+            ).body(ApiResponse.error(errorMessage = "User not be listed: ${e.message}"))
         }
     }
 
@@ -94,7 +104,9 @@ class UserController(
             val user = userService.findUserById(id)
             ResponseEntity.ok(ApiResponse.success(user))
         } catch (e: Exception) {
-            ResponseEntity.status(500).body(ApiResponse.error(errorMessage = "User not found: ${e.message}"))
+            ResponseEntity.status(
+                500,
+            ).body(ApiResponse.error(errorMessage = "User not found: ${e.message}"))
         }
     }
 }
