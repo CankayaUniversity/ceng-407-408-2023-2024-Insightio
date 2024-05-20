@@ -264,7 +264,7 @@ class VideoThreadManager:
                 self.server.update_stream(f"raw_frame_{camera_id}", frame, frame_key="raw_frame")
 
                 # Model prediction on single frame and conversion to supervision Detections
-                results = self.model(frame)[0]
+                results = next(self.model(frame, stream=True, verbose=False))
                 detections = sv.Detections.from_ultralytics(results)
                 detections = tracker.update_with_detections(detections)
 

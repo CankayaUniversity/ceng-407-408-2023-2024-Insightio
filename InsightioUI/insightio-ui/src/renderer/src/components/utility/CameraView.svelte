@@ -83,8 +83,10 @@
 
   async function fetchData() {
     if (target.value != '' && target.value != 'all_annotated_frame') {
-      currentCount = await getTargetCurrentCount(cameraId, target.value)
-      totalCount = await getTargetTotalCount(cameraId, target.value)
+      const currentCountData = await getTargetCurrentCount(cameraId, target.value)
+      currentCount = currentCountData.data
+      const totalCountData = await getTargetTotalCount(cameraId, target.value)
+      totalCount = totalCountData.data
     }
   }
 

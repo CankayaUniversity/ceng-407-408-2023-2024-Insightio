@@ -1,9 +1,9 @@
 import logging
 import threading
-import time
 import asyncio
 import cv2
 from aiohttp import web
+import aiohttp_cors
 from lib import config
 
 # Configure logging
@@ -20,7 +20,15 @@ class StreamServer:
         self.loop = None
 
     def setup_routes(self):
-        self.app.router.add_get('/{stream_id}', self.handle_get_request)
+        cors = aiohttp_cors.setup(self.app, defaults={
+            "http://localhost:5173": aiohttp_cors.ResourceOptions(
+                allow_credentials=True,
+                expose_headers="*",
+                allow_headers="*",
+            )
+        })
+        route = self.app.router.add_get('/{stream_id}', self.handle_get_request)
+        cors.add(route)
 
     async def handle_get_request(self, request):
         stream_id = request.match_info['stream_id']
