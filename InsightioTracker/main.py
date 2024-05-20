@@ -1,8 +1,10 @@
 from lib.server import StreamServer
 from lib.vthread_manager import VideoThreadManager
 from ultralytics import YOLO
+import signal
 import torch
 import time
+import sys
 
 api = None
 server = None
@@ -26,6 +28,12 @@ def initialize_model():
 
     return model, CLASS_NAMES_DICT
 
+def signal_handler(sig, frame):
+    print('Shutting down gracefully...')
+    vtm.shutdown()
+    server.stop_server()
+    sys.exit(0)
+
 if __name__ == "__main__":    
     model, CLASS_NAMES_DICT = initialize_model()
 
@@ -34,6 +42,9 @@ if __name__ == "__main__":
 
     vtm = VideoThreadManager(model, CLASS_NAMES_DICT, server)
     vtm.start_count_reporter()
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
 
     while True:
         vtm.fetch_and_update_threads()

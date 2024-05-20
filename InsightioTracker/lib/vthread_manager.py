@@ -18,6 +18,7 @@ class VideoThreadManager:
         self.zone_counts = {}
         self.line_counters = {}
         self.lock = Lock()
+        self.shutdown_flag = False
 
     def fetch_and_update_threads(self):
         new_settings_list = self.api.get_camera_settings()
@@ -79,7 +80,7 @@ class VideoThreadManager:
         self.reporting_thread.start()
 
     def report_counts(self):
-        while True:
+        while not self.shutdown_flag:
             # Calculate the time remaining until the start of the next hour
             current_time = datetime.now()
             next_hour = (current_time + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
@@ -334,3 +335,12 @@ class VideoThreadManager:
         cap.release()
         # Ensure to clear the stop signal for next time
         del self.stop_signals[camera_id]
+    
+    def shutdown(self):
+        self.shutdown_flag = True
+        # Stop all video threads
+        for camera_id in list(self.video_threads.keys()):
+            self.stop_thread(camera_id)
+        # Stop the reporting thread
+        if hasattr(self, 'reporting_thread'):
+            self.reporting_thread.join()    

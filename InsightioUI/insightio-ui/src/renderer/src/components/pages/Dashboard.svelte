@@ -74,7 +74,6 @@
           countArray.forEach((a) => {
             a.target = targets.labels[`${a.target}`]
           })
-          console.log(countArray)
           dataArray[selectedCameraSetting.id] = countArray
         }
         data = dataArray[selectedCameraSetting.id]

@@ -17,7 +17,7 @@ class TrackingService(
 //    }
 
     fun getBasePath(): String {
-        return Paths.get("").toAbsolutePath().toString()
+        return Paths.get("").toAbsolutePath().parent.toString()
     }
 
     fun runPythonScriptAsProcess(): Boolean {
@@ -27,12 +27,13 @@ class TrackingService(
         // val rootDirectory = getBasePath()
         // val venvPath = "$rootDirectory\\InsightioTracker\\venv\\Scripts\\python.exe"
         // val scriptLocation = "$rootDirectory\\InsightioTracker\\main.py"
-        val SCRIPT_ROOT_DIRECTORY = getBasePath()
-        val VENV_PATH = "$SCRIPT_ROOT_DIRECTORY\\InsightioTracker\\venv\\Scripts\\python.exe"
-        val SCRIPT_LOCATION = "$SCRIPT_ROOT_DIRECTORY\\InsightioTracker\\main.py"
+        val SERVER_PARENT_DIR = getBasePath()
+        val TRACKER_DIR = "$SERVER_PARENT_DIR\\InsightioTracker"
+        val VENV_PATH = "$TRACKER_DIR\\venv\\Scripts\\python.exe"
+        val SCRIPT_LOCATION = "$TRACKER_DIR\\main.py"
 
         processBuilder.command(VENV_PATH, SCRIPT_LOCATION)
-        processBuilder.directory(File(SCRIPT_ROOT_DIRECTORY))
+        processBuilder.directory(File(TRACKER_DIR))
         processBuilder.inheritIO()
 
         try {
