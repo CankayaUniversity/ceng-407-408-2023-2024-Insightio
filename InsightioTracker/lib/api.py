@@ -19,7 +19,7 @@ class TrackerAPI:
             return None
     
     def post_count_reports(self, report):
-        url = f"{self.URL_BASE}/countReport"  # Replace with actual endpoint
+        url = f"{self.URL_BASE}/count-reports/add"
         try:
             response = requests.post(url, json=report)
             if response.status_code == 200:

@@ -1,5 +1,11 @@
 import instance from "./instance";
 
+export async function getTargetCountData(id) {
+    return instance.get(`/count-reports/audit?cameraId=${id}`).then((res) => {
+        return res.data;
+    })
+}
+
 export async function getSingleCameraSetting(id) {
     return instance.get(`/cameras/${id}`).then((res) => {
         return res.data;

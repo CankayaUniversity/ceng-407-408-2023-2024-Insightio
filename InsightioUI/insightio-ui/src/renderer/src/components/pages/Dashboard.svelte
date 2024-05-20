@@ -6,15 +6,14 @@
   import clsx from 'clsx'
   import Button from '../utility/Button.svelte'
   import CountHelper from '../../functions/countData'
-  import { getAllCameraSettings } from '../../api/cameras'
+  import { getAllCameraSettings, getTargetCountData } from '../../api/cameras'
   import Spinner from '../utility/Spinner.svelte'
   import pageStore from '../../stores/pageStore'
   import targets from '../../data/trackerTargets'
 
-  // TODO: Replace with actual data
-  let mockDatas = {}
-  let mockData = []
-  let mockTargets
+  let dataArray = {}
+  let data = []
+  let chartTargets
   const chartTypes = ['bar', 'line', 'radar', 'pie', 'doughnut', 'polarArea']
 
   let selectedCameraSetting
@@ -31,8 +30,8 @@
 
   function updateTimeFrame(timeframe) {
     currentTimeFrame = timeframe
-    targetVisibilities = CountHelper.initTargetVisibilityArray(mockData)
-    currentChartData = CountHelper.getFramedCountData(mockData, currentTimeFrame)
+    targetVisibilities = CountHelper.initTargetVisibilityArray(data)
+    currentChartData = CountHelper.getFramedCountData(data, currentTimeFrame)
   }
 
   function navigateCamera(direction) {
@@ -67,37 +66,30 @@
 
   $: {
     if (selectedCameraSetting) {
-      targetOptions = []
-      if (!Object.keys(mockDatas).includes(selectedCameraSetting.id)) {
-        mockDatas[selectedCameraSetting.id] = []
-        Object.keys(selectedCameraSetting.targets).forEach((t) => {
-          mockDatas[selectedCameraSetting.id].push({
-            target: targets.labels[`${t}`],
-            counts: [
-              // Hours
-              Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-              // Days
-              Array.from({ length: 7 }, () => Math.floor(Math.random() * 100)),
-              // Weeks
-              Array.from({ length: 4 }, () => Math.floor(Math.random() * 100)),
-              // Months
-              Array.from({ length: 12 }, () => Math.floor(Math.random() * 100))
-            ]
+      ;(async () => {
+        targetOptions = []
+        if (!Object.keys(dataArray).includes(selectedCameraSetting.id)) {
+          const res = await getTargetCountData(selectedCameraSetting.id)
+          let countArray = res.response
+          countArray.forEach((a) => {
+            a.target = targets.labels[`${a.target}`]
           })
-        })
-      }
-      mockData = mockDatas[selectedCameraSetting.id]
-      mockTargets = mockData.map((o) => o.target)
-      targetVisibilities = CountHelper.initTargetVisibilityArray(mockData)
-      currentChartData = CountHelper.getFramedCountData(mockData, currentTimeFrame)
-
-      Object.keys(selectedCameraSetting.targets).forEach((targetId) => {
-        const option = {
-          text: targets.labels[parseInt(targetId)],
-          value: targetId
+          console.log(countArray)
+          dataArray[selectedCameraSetting.id] = countArray
         }
-        targetOptions = [...targetOptions, option]
-      })
+        data = dataArray[selectedCameraSetting.id]
+        chartTargets = data.map((o) => o.target)
+        targetVisibilities = CountHelper.initTargetVisibilityArray(data)
+        currentChartData = CountHelper.getFramedCountData(data, currentTimeFrame)
+
+        Object.keys(selectedCameraSetting.targets).forEach((targetId) => {
+          const option = {
+            text: targets.labels[parseInt(targetId)],
+            value: targetId
+          }
+          targetOptions = [...targetOptions, option]
+        })
+      })()
     }
   }
 
@@ -168,12 +160,14 @@
                 />
               </div>
               <!-- Chart Component -->
-              <Chart
-                bind:currentChartData
-                bind:chartType={currentChartType}
-                bind:filters={targetVisibilities}
-                targets={mockTargets}
-              />
+              {#if chartTargets}
+                <Chart
+                  bind:currentChartData
+                  bind:chartType={currentChartType}
+                  bind:filters={targetVisibilities}
+                  targets={chartTargets}
+                />
+              {/if}
             </div>
             <Button on:click={() => navigateChart('next')}>
               <Icon icon="arrowRight" highlightOnHover class="h-7 w-7" />
