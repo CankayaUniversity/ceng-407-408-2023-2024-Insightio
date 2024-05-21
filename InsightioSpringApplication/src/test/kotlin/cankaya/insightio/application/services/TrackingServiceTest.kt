@@ -1,4 +1,5 @@
 package cankaya.insightio.application.services
+import cankaya.insightio.application.services.TrackingService.Companion.getBasePath
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -22,25 +23,16 @@ class TrackingServiceTest {
 
     @Test
     fun `when runPythonScriptAsProcess function is called, python script should be executed`() {
-        // ZEYNEP var isimlerini değiştirebilir misin, const variable'lar screaming snake case ile yazılır
-        // fakat const olmayanlar upper camelcase şeklinde
-
-        // sut demek system under test in kısaltması, her unit test bu sut un bir fonksiyonunu test eder
-        // bundan dolayı aynı test içerisinde sut ten iki farklı şeyi çağıramazsın
-        // sut.getBasePath() ve sut.runPythonScriptAsProcess() olmamalı
-
-        // bu fonk companion object e çekersen (TrackingService de yazdım)
-        // val SCRIPT_ROOT_DIRECTORY = getBasePath() şeklinde çağırabilirz
 
         // Given
-        val SCRIPT_ROOT_DIRECTORY = sut.getBasePath()
-        val VENV_PATH = "$SCRIPT_ROOT_DIRECTORY\\InsightioTracker\\venv\\Scripts\\python.exe"
-        val SCRIPT_LOCATION = "$SCRIPT_ROOT_DIRECTORY\\InsightioTracker\\main.py"
+        val serverParentDirectory = getBasePath()
+        val venvPath = "$serverParentDirectory\\InsightioTracker\\venv\\Scripts\\python.exe"
+        val scriptLocation = "$serverParentDirectory\\InsightioTracker\\main.py"
         `when`(
-            mockProcessBuilder.command(VENV_PATH, SCRIPT_LOCATION),
+            mockProcessBuilder.command(venvPath, scriptLocation),
         ).thenReturn(mockProcessBuilder)
         `when`(
-            mockProcessBuilder.directory(File(SCRIPT_ROOT_DIRECTORY)),
+            mockProcessBuilder.directory(File(serverParentDirectory)),
         ).thenReturn(mockProcessBuilder)
         `when`(mockProcessBuilder.inheritIO()).thenReturn(mockProcessBuilder)
         `when`(mockProcessBuilder.start()).thenReturn(mockProcess)
