@@ -199,12 +199,25 @@
     isIpCam = cameraType == 'ip-camera' ? true : false
   }
 
+  function handleTagRemoved(e) {
+    const val = e.detail
+    let id = Object.keys(targets.labels).find((k) => targets.labels[k] == val)
+    delete selectedConfiguration.targets[id]
+  }
+
   async function saveSettings() {
     if (isEditMode) {
       if (Object.keys(selectedConfiguration).length == 0) {
         warn('No configuration selected.')
         return
       } else {
+        selectedConfiguration.targets = zones
+        selectedConfiguration.metadata = [
+          {
+            categoryId: metadataCategories['UnscaledZoneDrawings'],
+            value: Object.keys(savedDrawings).length != 0 ? JSON.stringify(savedDrawings) : null
+          }
+        ]
         const res = await updateCameraSetting(selectedConfiguration)
         if (!('error' in res)) {
           success('Configuration changed successfully!')
@@ -291,7 +304,7 @@
     cameraName = selectedConfiguration?.name || ''
     deviceUrl = selectedConfiguration?.ipAddress || ''
     deviceIndex = selectedConfiguration?.deviceIndex || -1
-
+    zones = selectedConfiguration?.targets || {}
     const drawings = getMetadata(selectedConfiguration, 'UnscaledZoneDrawings')
     if (drawings) {
       savedDrawings = JSON.parse(drawings)
@@ -449,6 +462,7 @@
             minTags={1}
             maxTags={5}
             bind:disabled={tagifyDisabled}
+            on:tagRemoved={handleTagRemoved}
           />
         </div>
         <div class="flex justify-end mt-10 gap-4">

@@ -10,6 +10,7 @@
   import Spinner from '../utility/Spinner.svelte'
   import pageStore from '../../stores/pageStore'
   import targets from '../../data/trackerTargets'
+  import { onMount } from 'svelte'
 
   let dataArray = {}
   let data = []
@@ -52,6 +53,40 @@
     currentChartType = chartTypes[currentChartTypeIndex]
   }
 
+  async function fetchCountData() {
+    if (!Object.keys(dataArray).includes(selectedCameraSetting.id)) {
+      const res = await getTargetCountData(selectedCameraSetting.id)
+      let countArray = res.response
+      if (countArray.length > 0) {
+        countArray.forEach((a) => {
+          a.target = targets.labels[`${a.target}`]
+        })
+        dataArray[selectedCameraSetting.id] = countArray
+      } else {
+        dataArray[selectedCameraSetting.id] = []
+        Object.keys(selectedCameraSetting.targets).forEach((t) => {
+          dataArray[selectedCameraSetting.id].push({
+            target: targets.labels[`${t}`],
+            counts: [
+              // Hours
+              Array.from({ length: 24 }, () => 0),
+              // Days
+              Array.from({ length: 7 }, () => 0),
+              // Weeks
+              Array.from({ length: 4 }, () => 0),
+              // Months
+              Array.from({ length: 12 }, () => 0)
+            ]
+          })
+        })
+      }
+    }
+    data = dataArray[selectedCameraSetting.id]
+    chartTargets = data.map((o) => o.target)
+    targetVisibilities = CountHelper.initTargetVisibilityArray(data)
+    currentChartData = CountHelper.getFramedCountData(data, currentTimeFrame)
+  }
+
   async function fetchSettings() {
     showLoading = true
     const res = await getAllCameraSettings()
@@ -64,31 +99,21 @@
     }
   }
 
+  onMount(() => {
+    setInterval(fetchCountData, 60 * 60 * 1000)
+  })
+
   $: {
     if (selectedCameraSetting) {
-      ;(async () => {
-        targetOptions = []
-        if (!Object.keys(dataArray).includes(selectedCameraSetting.id)) {
-          const res = await getTargetCountData(selectedCameraSetting.id)
-          let countArray = res.response
-          countArray.forEach((a) => {
-            a.target = targets.labels[`${a.target}`]
-          })
-          dataArray[selectedCameraSetting.id] = countArray
+      targetOptions = []
+      fetchCountData()
+      Object.keys(selectedCameraSetting.targets).forEach((targetId) => {
+        const option = {
+          text: targets.labels[parseInt(targetId)],
+          value: targetId
         }
-        data = dataArray[selectedCameraSetting.id]
-        chartTargets = data.map((o) => o.target)
-        targetVisibilities = CountHelper.initTargetVisibilityArray(data)
-        currentChartData = CountHelper.getFramedCountData(data, currentTimeFrame)
-
-        Object.keys(selectedCameraSetting.targets).forEach((targetId) => {
-          const option = {
-            text: targets.labels[parseInt(targetId)],
-            value: targetId
-          }
-          targetOptions = [...targetOptions, option]
-        })
-      })()
+        targetOptions = [...targetOptions, option]
+      })
     }
   }
 

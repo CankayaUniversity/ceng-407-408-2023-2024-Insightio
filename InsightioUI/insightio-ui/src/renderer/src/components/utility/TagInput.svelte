@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte'
+  import { createEventDispatcher, onMount } from 'svelte'
   import Tagify from '@yaireo/tagify'
   import '@yaireo/tagify/dist/tagify.css'
   import { v4 } from 'uuid'
@@ -19,6 +19,8 @@
   let tagify
   let tagInput
 
+  const dispatch = createEventDispatcher()
+
   function addTag() {
     let temp = []
     tagify.value.forEach((t) => {
@@ -27,7 +29,7 @@
     tags = [...temp]
   }
 
-  function onTagAddedOrRemoved() {
+  function onTagAddedOrRemoved(e) {
     // Check the number of tags after each add/remove operation
     const tagsCount = tagify.value.length
     const removeButtons = tagInput.previousSibling.querySelectorAll('.tagify__tag__removeBtn')
@@ -38,6 +40,11 @@
     } else {
       // If there are multiple tags, show the remove buttons
       removeButtons.forEach((btn) => (btn.style.display = ''))
+    }
+
+    if (e.type === 'remove') {
+      const removedTag = e.detail.data.value
+      dispatch('tagRemoved', removedTag)
     }
   }
 
