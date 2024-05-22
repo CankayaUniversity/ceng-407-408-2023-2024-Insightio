@@ -7,9 +7,6 @@ import cankaya.insightio.domain.User
 import org.springframework.stereotype.Service
 
 // Login için service
-
-// EDA kanka istersen bu yorum satırını silebiliriz
-// typelara dikkat et database ve burdan gönderilenler için
 @Service
 class UserService(
     private val userRepository: UserRepository,

@@ -1,7 +1,5 @@
 package cankaya.insightio.domain
 
-import cankaya.insightio.infrastructure.mongodb.impls.CameraStatus
-import cankaya.insightio.infrastructure.mongodb.impls.CameraType
 import jakarta.validation.constraints.NotBlank
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
@@ -28,4 +26,12 @@ data class Camera(
     val metadata: List<Metadata>,
 )
 
-// EDA CameraStatus ve CameraType'ı buraya declare edebilir misin
+enum class CameraType {
+    CONNECTEDCAMERA,
+    IPCAMERA,
+}
+
+enum class CameraStatus {
+    DISCONNECTED,
+    CONNECTED,
+}

@@ -1,7 +1,5 @@
 package cankaya.insightio.domain
 
-import cankaya.insightio.infrastructure.mongodb.impls.ZoneType
-
 data class Zone(
     val zoneName: String,
     val zoneType: ZoneType,
@@ -9,4 +7,7 @@ data class Zone(
     val endPoint: Point,
 )
 
-// EDA ZoneType ı buraya declare edebilir misin
+enum class ZoneType {
+    LINE,
+    RECTANGLE,
+}
