@@ -1,5 +1,6 @@
 package cankaya.insightio.domain
 
+import cankaya.insightio.infrastructure.mongoDB.config.ZoneType
 data class Zone(
     val zoneName: String,
     val zoneType: ZoneType,
@@ -7,7 +8,3 @@ data class Zone(
     val endPoint: Point,
 )
 
-enum class ZoneType {
-    LINE,
-    RECTANGLE,
-}

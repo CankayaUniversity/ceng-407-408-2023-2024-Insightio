@@ -3,7 +3,8 @@ package cankaya.insightio.domain
 import jakarta.validation.constraints.NotBlank
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
-
+import cankaya.insightio.infrastructure.mongoDB.config.CameraStatus
+import cankaya.insightio.infrastructure.mongoDB.config.CameraType
 // Mongodb Camera Conf Connection
 @Document(collection = "CameraSettings")
 data class Camera(
@@ -25,13 +26,3 @@ data class Camera(
     val createdBy: String,
     val metadata: List<Metadata>,
 )
-
-enum class CameraType {
-    CONNECTEDCAMERA,
-    IPCAMERA,
-}
-
-enum class CameraStatus {
-    DISCONNECTED,
-    CONNECTED,
-}
