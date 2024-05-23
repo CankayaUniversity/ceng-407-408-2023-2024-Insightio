@@ -2,8 +2,8 @@ package cankaya.insightio.infrastructure.api
 
 import cankaya.insightio.application.services.CameraService
 import cankaya.insightio.domain.Camera
-import cankaya.insightio.infrastructure.mongodb.impls.CameraStatus
-import cankaya.insightio.infrastructure.mongodb.impls.CameraType
+import cankaya.insightio.domain.CameraStatus
+import cankaya.insightio.domain.CameraType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
