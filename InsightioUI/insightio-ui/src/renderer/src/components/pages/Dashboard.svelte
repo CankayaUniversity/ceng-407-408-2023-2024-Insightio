@@ -1,0 +1,230 @@
+<script>
+  import Chart from '../utility/Chart.svelte'
+  import CameraView from '../utility/CameraView.svelte'
+  import Dropdown from '../utility/Dropdown.svelte'
+  import Icon from '../utility/Icon.svelte'
+  import clsx from 'clsx'
+  import Button from '../utility/Button.svelte'
+  import CountHelper from '../../functions/countData'
+  import { getAllCameraSettings, getTargetCountData } from '../../api/cameras'
+  import Spinner from '../utility/Spinner.svelte'
+  import pageStore from '../../stores/pageStore'
+  import targets from '../../data/trackerTargets'
+  import { onMount } from 'svelte'
+
+  let dataArray = {}
+  let data = []
+  let chartTargets
+  const chartTypes = ['bar', 'line', 'radar', 'pie', 'doughnut', 'polarArea']
+
+  let selectedCameraSetting
+  let cameraSettings = []
+  let currentTimeFrame = 'day'
+  let currentCameraIndex = 0
+  let currentChartTypeIndex = 0
+  let targetVisibilities
+  let currentChartData
+  let currentChartType = chartTypes[currentChartTypeIndex]
+  let maxCameraIndex
+  let showLoading = false
+  let targetOptions
+
+  function updateTimeFrame(timeframe) {
+    currentTimeFrame = timeframe
+    targetVisibilities = CountHelper.initTargetVisibilityArray(data)
+    currentChartData = CountHelper.getFramedCountData(data, currentTimeFrame)
+  }
+
+  function navigateCamera(direction) {
+    if (direction === 'next' && currentCameraIndex != maxCameraIndex) {
+      currentCameraIndex += 1
+    } else if (direction === 'prev' && currentCameraIndex != 0) {
+      currentCameraIndex -= 1
+    }
+    selectedCameraSetting = cameraSettings[currentCameraIndex]
+  }
+
+  function navigateChart(direction) {
+    if (direction === 'next') {
+      currentChartTypeIndex = (currentChartTypeIndex + 1) % chartTypes.length
+    } else {
+      currentChartTypeIndex = (currentChartTypeIndex - 1 + chartTypes.length) % chartTypes.length
+    }
+    currentChartType = chartTypes[currentChartTypeIndex]
+  }
+
+  async function fetchCountData() {
+    if (!Object.keys(dataArray).includes(selectedCameraSetting.id)) {
+      const res = await getTargetCountData(selectedCameraSetting.id)
+      let countArray = res.response
+      if (countArray.length > 0) {
+        countArray.forEach((a) => {
+          a.target = targets.labels[`${a.target}`]
+        })
+        dataArray[selectedCameraSetting.id] = countArray
+      } else {
+        dataArray[selectedCameraSetting.id] = []
+        Object.keys(selectedCameraSetting.targets).forEach((t) => {
+          dataArray[selectedCameraSetting.id].push({
+            target: targets.labels[`${t}`],
+            counts: [
+              // Hours
+              Array.from({ length: 24 }, () => 0),
+              // Days
+              Array.from({ length: 7 }, () => 0),
+              // Weeks
+              Array.from({ length: 4 }, () => 0),
+              // Months
+              Array.from({ length: 12 }, () => 0)
+            ]
+          })
+        })
+      }
+    }
+    data = dataArray[selectedCameraSetting.id]
+    chartTargets = data.map((o) => o.target)
+    targetVisibilities = CountHelper.initTargetVisibilityArray(data)
+    currentChartData = CountHelper.getFramedCountData(data, currentTimeFrame)
+  }
+
+  async function fetchSettings() {
+    showLoading = true
+    const res = await getAllCameraSettings()
+    if (res) {
+      cameraSettings = res
+      let camerasExist = cameraSettings.length > 0 ? true : false
+      maxCameraIndex = camerasExist ? cameraSettings.length - 1 : 0
+      selectedCameraSetting = camerasExist ? cameraSettings[0] : null
+      showLoading = false
+    }
+  }
+
+  onMount(() => {
+    setInterval(fetchCountData, 60 * 60 * 1000)
+  })
+
+  $: {
+    if (selectedCameraSetting) {
+      targetOptions = []
+      fetchCountData()
+      Object.keys(selectedCameraSetting.targets).forEach((targetId) => {
+        const option = {
+          text: targets.labels[parseInt(targetId)],
+          value: targetId
+        }
+        targetOptions = [...targetOptions, option]
+      })
+    }
+  }
+
+  $: $pageStore.activePage === 'dashboard' && fetchSettings()
+</script>
+
+{#if !showLoading}
+  <div class="flex flex-col h-full w-full bg-gray-800 text-white">
+    <!-- Dashboard Header -->
+    <div class="px-4 pt-4 flex justify-between items-center">
+      <h1 class="text-5xl font-bold">Dashboard</h1>
+      <div></div>
+    </div>
+
+    {#if cameraSettings.length > 0}
+      <!-- Camera Navigation -->
+      <div class="flex justify-center py-2">
+        <Button on:click={() => navigateCamera('prev')}>
+          <Icon icon="arrowLeft" highlightOnHover class="h-5 w-5" />
+        </Button>
+        <div class="flex items-center justify-center">
+          <!-- eslint-disable-next-line no-unused-vars -->
+          {#each Array(maxCameraIndex + 1) as _, i (i)}
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <span
+              class="inline-block mx-1"
+              on:click={() => {
+                currentCameraIndex = i
+                selectedCameraSetting = cameraSettings[i]
+              }}
+            >
+              <Icon
+                icon="circleFull"
+                highlightOnHover
+                class="h-4 w-4"
+                style={clsx(currentCameraIndex === i && 'opacity: 1.0 !important;')}
+              />
+            </span>
+          {/each}
+        </div>
+        <Button on:click={() => navigateCamera('next')}>
+          <Icon icon="arrowRight" highlightOnHover class="h-5 w-5" />
+        </Button>
+      </div>
+    {/if}
+
+    <!-- Dashboard Content -->
+    <div class="flex flex-grow">
+      {#if cameraSettings.length > 0}
+        <!-- Chart Section -->
+        <div class="flex flex-col w-1/2 p-4 ml-8">
+          <div class="flex flex-row pl-3">
+            <Icon icon="chart" class="w-10 h-10" />
+            <h2 class="text-3xl pl-3 font-bold">Charts</h2>
+          </div>
+          <div class="mt-6 flex items-center justify-between">
+            <Button on:click={() => navigateChart('prev')}>
+              <Icon icon="arrowLeft" highlightOnHover class="h-7 w-7" />
+            </Button>
+            <div class="flex-grow">
+              <div class="flex flex-row">
+                <p class="text-base mt-1 mr-3">Time Frame:</p>
+                <Dropdown
+                  items={CountHelper.validTimeFrames}
+                  selectedItem={CountHelper.validTimeFrames[0]}
+                  on:change={(e) => updateTimeFrame(e.detail.value)}
+                />
+              </div>
+              <!-- Chart Component -->
+              {#if chartTargets}
+                <Chart
+                  bind:currentChartData
+                  bind:chartType={currentChartType}
+                  bind:filters={targetVisibilities}
+                  targets={chartTargets}
+                />
+              {/if}
+            </div>
+            <Button on:click={() => navigateChart('next')}>
+              <Icon icon="arrowRight" highlightOnHover class="h-7 w-7" />
+            </Button>
+          </div>
+        </div>
+
+        <!-- Camera View Section with fixed size -->
+        <div class="w-1/2 flex justify-center p-4 mr-8">
+          <div class="w-full max-w-lg">
+            <div class="flex flex-row gap-3">
+              <Icon icon="camera" class="w-10 h-10" />
+              <h2 class="text-3xl mb-6 font-bold">Camera View</h2>
+            </div>
+
+            {#if selectedCameraSetting}
+              <CameraView
+                height="405px"
+                width="515px"
+                bind:cameraId={selectedCameraSetting.id}
+                {targetOptions}
+                showFullscreenButton
+              />
+            {/if}
+          </div>
+        </div>
+      {:else}
+        <div class="flex flex-grow items-center justify-center">
+          <h1 class="text-3xl font-bold">No cameras to show</h1>
+        </div>
+      {/if}
+    </div>
+  </div>
+{:else}
+  <Spinner />
+{/if}
