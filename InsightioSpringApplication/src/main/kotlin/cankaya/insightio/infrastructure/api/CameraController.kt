@@ -7,7 +7,6 @@ import cankaya.insightio.infrastructure.mongodb.impls.CameraType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-// EDA bu dosyaya format atar mısın knkkkk <333
 @RestController
 @RequestMapping("/cameras")
 class CameraController(private val cameraService: CameraService) {
@@ -17,7 +16,10 @@ class CameraController(private val cameraService: CameraService) {
     @GetMapping("/{id}")
     fun getCameraById(
         @PathVariable id: String,
-    ): ResponseEntity<Camera> = cameraService.findCameraById(id)?.let { ResponseEntity.ok(it) } ?: ResponseEntity.notFound().build()
+    ): ResponseEntity<Camera> =
+        cameraService.findCameraById(id)?.let {
+            ResponseEntity.ok(it)
+        } ?: ResponseEntity.notFound().build()
 
     @PostMapping
     fun createCamera(
