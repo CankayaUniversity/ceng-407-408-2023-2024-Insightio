@@ -17,7 +17,7 @@
     <img src="../assets/technologyPage/kotlin.png" alt="kotlin" style="width: 260px; height: 80px; margin-right: 1.5%;">
     <img src="../assets/technologyPage/maven.png" alt="maven" style="width: 230px; height: 100px; margin-right: 1.5%;">
     <img src="../assets/technologyPage/springBoot.png" alt="springBoot" style="width: 270px; height: 100px; margin-right: 1.5%;">
-    <img src="../assets/technologyPage/couchbase.png" alt="couchbase" style="width: 200px; height: 100px;">
+    <img src="../assets/technologyPage/mongodb.png" alt="mongodb" style="width: 170px; height: 170px;">
 </div>
 
 ## Image Processing Technologies

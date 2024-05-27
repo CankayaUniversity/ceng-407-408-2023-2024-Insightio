@@ -2,7 +2,7 @@
 
 
 ## What is Insightio?
-Insightio is a platform that provides crowd/object counting and tracking solutions for businesses. Users have the capability to establish an account, acquire a commercial license, set up cameras, and define the classes of tracked objects.
+Insightio is a platform that provides crowd/object counting and tracking solutions for businesses such as schools, concert halls, shops, cafeterias. Users have the capability to establish an account, set up cameras, select zones and define which objects to track. Start using Insightio to count every step and track every move! For a preview, check our [demo](https://youtu.be/QLY67rLorq0?si=5fpSaN8VQ2YNpSAg).
 
 <div style="text-align: center;">
     <img src="assets/tracking.gif" alt="Tracking gif" width="600" height="400">
@@ -23,7 +23,6 @@ With the flexible platform Insightio, which provides state-of-the-art solutions 
 * Customizable Zones
 * Statistical Visualization
 * User-Friendly Interface
-* License Procurement
 * Flexible Camera Configuration
 * Security and Error Handling
 
